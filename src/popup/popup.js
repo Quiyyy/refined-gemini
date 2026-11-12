@@ -10,11 +10,14 @@
     themeMode: 'auto',
     chatWidth: '800px',
     fontSize: '16px',
+    indentScale: '1',
     hideAvatar: true,
     compactSidebar: true,
     cleanView: true,
     ctrlEnterSend: false
   };
+
+  const VALID_INDENT_SCALES = new Set(['0', '0.65', '1', '1.25']);
 
   const els = {
     toggleEnabled: document.getElementById('toggleEnabled'),
@@ -41,6 +44,9 @@
     if (state.chatWidth === '768px') {
       state.chatWidth = '800px';
     }
+    state.indentScale = VALID_INDENT_SCALES.has(String(state.indentScale))
+      ? String(state.indentScale)
+      : '1';
 
     els.toggleEnabled.checked = Boolean(state.enabled);
     els.settingsBody.classList.toggle('is-disabled', !state.enabled);

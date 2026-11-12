@@ -16,16 +16,24 @@
     themeMode: 'auto',
     chatWidth: '800px',
     fontSize: '16px',
+    indentScale: '1',
     hideAvatar: true,
     compactSidebar: true,
     cleanView: true,
     ctrlEnterSend: false
   };
 
+  const VALID_INDENT_SCALES = new Set(['0', '0.65', '1', '1.25']);
+
   function normalizeSettings(rawSettings) {
     const merged = { ...DEFAULTS, ...rawSettings };
     if (merged.chatWidth === '768px') {
       merged.chatWidth = '800px';
+    }
+    if (!VALID_INDENT_SCALES.has(String(merged.indentScale))) {
+      merged.indentScale = '1';
+    } else {
+      merged.indentScale = String(merged.indentScale);
     }
     return merged;
   }
@@ -41,7 +49,7 @@
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === 'object') {
-          currentSettings = { ...DEFAULTS, ...parsed };
+          currentSettings = normalizeSettings(parsed);
         }
       }
     } catch (_) {
@@ -105,15 +113,19 @@
 
     if (!currentSettings.enabled) {
       root.setAttribute('data-rg-enabled', 'false');
+      root.removeAttribute('data-rg-indent');
       root.style.removeProperty('--rg-chat-max-width');
       root.style.removeProperty('--rg-font-size');
+      root.style.removeProperty('--rg-indent-scale');
       return;
     }
 
     const effectiveTheme = resolveEffectiveTheme(currentSettings.themeMode);
+    const indentScale = currentSettings.indentScale || DEFAULTS.indentScale;
 
     root.setAttribute('data-rg-enabled', 'true');
     root.setAttribute('data-rg-theme', effectiveTheme);
+    root.setAttribute('data-rg-indent', indentScale === '0' ? 'none' : 'scaled');
     root.setAttribute('data-rg-hide-avatar', String(Boolean(currentSettings.hideAvatar)));
     root.setAttribute('data-rg-compact-sidebar', String(Boolean(currentSettings.compactSidebar)));
     root.setAttribute('data-rg-clean-view', String(Boolean(currentSettings.cleanView)));
@@ -121,6 +133,7 @@
 
     root.style.setProperty('--rg-chat-max-width', currentSettings.chatWidth || DEFAULTS.chatWidth);
     root.style.setProperty('--rg-font-size', currentSettings.fontSize || DEFAULTS.fontSize);
+    root.style.setProperty('--rg-indent-scale', indentScale);
   }
 
   /**

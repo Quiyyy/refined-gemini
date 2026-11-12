@@ -17,8 +17,8 @@ fs.mkdirSync(outDir, { recursive: true });
 const userScript = `// ==UserScript==
 // @name         Refined Gemini (1:1 ChatGPT Web UI Alignment)
 // @namespace    https://github.com/Quiyyy/refined-gemini
-// @version      1.2.0
-// @description  1:1 对齐 ChatGPT 网页端视觉与排版基准：纯白/深灰画布、浅蓝用户气泡与 #0285FF 强调色、零缩进顶格正文、紧凑代码块与无竖框表格。
+// @version      1.3.0
+// @description  1:1 对齐 ChatGPT 网页端视觉与排版基准：纯白/深灰画布、浅蓝用户气泡与 #0285FF 强调色、可配置缩进比例（默认对齐 GPT）、紧凑代码块与无竖框表格。
 // @author       Quiyyy
 // @license      MIT
 // @match        https://gemini.google.com/*
@@ -37,17 +37,24 @@ const userScript = `// ==UserScript==
     themeMode: 'auto',      // 'auto' | 'light' | 'dark'
     chatWidth: '800px',     // '800px' (768px prose) | '920px' | '1120px' | '90%'
     fontSize: '16px',       // '15px' | '16px' | '17px'
+    indentScale: '1',       // '0' | '0.65' | '1' (GPT default) | '1.25'
     hideAvatar: true,
     compactSidebar: true,
     cleanView: true,
     ctrlEnterSend: false
   };
 
+  const VALID_INDENT_SCALES = new Set(['0', '0.65', '1', '1.25']);
   const CSS = ${JSON.stringify(cssContent)};
 
   function normalize(obj) {
     const merged = { ...DEFAULTS, ...(obj || {}) };
     if (merged.chatWidth === '768px') merged.chatWidth = '800px';
+    if (!VALID_INDENT_SCALES.has(String(merged.indentScale))) {
+      merged.indentScale = '1';
+    } else {
+      merged.indentScale = String(merged.indentScale);
+    }
     return merged;
   }
 
@@ -97,19 +104,24 @@ const userScript = `// ==UserScript==
     if (!root) return;
     if (!settings.enabled) {
       root.setAttribute('data-rg-enabled', 'false');
+      root.removeAttribute('data-rg-indent');
       root.style.removeProperty('--rg-chat-max-width');
       root.style.removeProperty('--rg-font-size');
+      root.style.removeProperty('--rg-indent-scale');
       return;
     }
     const theme = settings.themeMode === 'auto' ? (detectNativeDark() ? 'dark' : 'light') : settings.themeMode;
+    const indentScale = settings.indentScale || DEFAULTS.indentScale;
     root.setAttribute('data-rg-enabled', 'true');
     root.setAttribute('data-rg-theme', theme);
+    root.setAttribute('data-rg-indent', indentScale === '0' ? 'none' : 'scaled');
     root.setAttribute('data-rg-hide-avatar', String(Boolean(settings.hideAvatar)));
     root.setAttribute('data-rg-compact-sidebar', String(Boolean(settings.compactSidebar)));
     root.setAttribute('data-rg-clean-view', String(Boolean(settings.cleanView)));
     root.setAttribute('data-rg-ctrl-enter', String(Boolean(settings.ctrlEnterSend)));
     root.style.setProperty('--rg-chat-max-width', settings.chatWidth);
     root.style.setProperty('--rg-font-size', settings.fontSize);
+    root.style.setProperty('--rg-indent-scale', indentScale);
   }
 
   function isPromptEditorElement(target) {
@@ -223,6 +235,13 @@ const userScript = `// ==UserScript==
     GM_registerMenuCommand('切换对话列宽 (标准768 / 920px / 1120px / 90%)', () => {
       const widths = ['800px', '920px', '1120px', '90%'];
       settings.chatWidth = widths[(widths.indexOf(settings.chatWidth) + 1) % widths.length];
+      saveSettings(settings);
+      apply();
+    });
+    GM_registerMenuCommand('切换缩进比例 (标准GPT / 紧凑65% / 无0% / 宽松125%)', () => {
+      const scales = ['1', '0.65', '0', '1.25'];
+      const curIdx = scales.indexOf(String(settings.indentScale));
+      settings.indentScale = scales[(curIdx === -1 ? 0 : curIdx + 1) % scales.length];
       saveSettings(settings);
       apply();
     });

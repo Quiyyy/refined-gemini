@@ -8,6 +8,7 @@
     themeMode: 'auto',      // 'auto' (follow Gemini/system) | 'light' | 'dark'
     chatWidth: '800px',     // '800px' (768px prose + 32px padding = 1:1 ChatGPT 48rem) | '920px' | '1120px' | '90%'
     fontSize: '16px',       // '15px' (compact) | '16px' (default) | '17px' (comfortable)
+    indentScale: '1',       // '0' (flush-left) | '0.65' (compact) | '1' (1:1 ChatGPT default) | '1.25' (relaxed)
     hideAvatar: true,       // Hide Gemini star avatar for flush-left baseline alignment
     compactSidebar: true,   // Converge sidebar to 260px width & 8px rounded items
     cleanView: true,        // Hide bottom disclaimer, IP footer, upsell badges & follow-up chips

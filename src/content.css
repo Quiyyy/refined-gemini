@@ -21,6 +21,7 @@ html[data-rg-enabled="true"] {
   --rg-chat-max-width: 800px;
   --rg-font-size: 16px;
   --rg-line-height: 1.68;
+  --rg-indent-scale: 1;
 
   /* ChatGPT Light Surface Hierarchy + Official OpenAI Blue Accent Palette */
   --rg-bg-canvas: #ffffff;
@@ -961,8 +962,7 @@ html[data-rg-enabled="true"] message-content {
   text-indent: 0 !important;
 }
 
-/* Enforce strict 0px horizontal offset & zero leading indentation on ALL prose blocks & lists
-   so headings, paragraphs, multi-level lists, tables, and code cards share one crisp left axis! */
+/* Enforce strict 0px horizontal offset on ALL top-level prose blocks, headings, tables, & code cards */
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :is(
   p,
   h1,
@@ -971,12 +971,8 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :
   h4,
   h5,
   h6,
-  ul,
-  ol,
-  li,
   dl,
   dt,
-  dd,
   code-block,
   table-block,
   .table-block,
@@ -991,6 +987,17 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :
   padding-inline-start: 0 !important;
   padding-inline-end: 0 !important;
   text-indent: 0 !important;
+}
+
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :is(ul, ol, li, dd) {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0 !important;
+  padding-right: 0 !important;
+  padding-inline-end: 0 !important;
+  text-indent: 0 !important;
+  overflow: visible !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) p {
@@ -1069,40 +1076,33 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) >
   margin-top: 0 !important;
 }
 
-/* Zero-Indent Flush-Left Lists (eliminates wide staircase whitespace blocks while keeping
-   crisp inline markers on the exact same line as Gemini's <p>-wrapped list content!) */
+/* Configurable List Indentation System
+   - Default (`--rg-indent-scale: 1`): 1:1 OpenAI `Markdown.module.css` (`1.625em` list + `0.375em` li)
+   - Also supports `0.65` (Compact 65%), `1.25` (Relaxed 125%), and `0` (`data-rg-indent="none"` flush-left) */
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :is(ul, ol) {
-  margin-top: 0.35rem !important;
-  margin-bottom: 0.75rem !important;
-  padding-left: 0 !important;
-  padding-inline-start: 0 !important;
+  margin-top: 0.45rem !important;
+  margin-bottom: 0.85rem !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) li > :is(ul, ol) {
-  margin-top: 0.2rem !important;
-  margin-bottom: 0.22rem !important;
-  padding-left: 0 !important;
-  padding-inline-start: 0 !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :is(ul, ul > li) {
   list-style-type: disc !important;
-  list-style-position: inside !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :is(ul ul, ul ul > li) {
   list-style-type: circle !important;
-  list-style-position: inside !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :is(ul ul ul, ul ul ul > li) {
   list-style-type: square !important;
-  list-style-position: inside !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :is(ol, ol > li) {
   list-style-type: decimal !important;
-  list-style-position: inside !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) li {
@@ -1111,10 +1111,8 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) l
   line-height: var(--rg-line-height, 1.68) !important;
   letter-spacing: normal !important;
   color: var(--rg-text-primary) !important;
-  margin-top: 0.22rem !important;
-  margin-bottom: 0.22rem !important;
-  padding-left: 0 !important;
-  padding-inline-start: 0 !important;
+  margin-top: 0.28rem !important;
+  margin-bottom: 0.28rem !important;
   text-indent: 0 !important;
 }
 
@@ -1126,23 +1124,71 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) l
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) li::marker {
   content: normal !important;
   color: var(--rg-text-secondary) !important;
+  font-weight: 500 !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) ol > li::marker {
   content: normal !important;
-  color: var(--rg-text-primary) !important;
+  color: var(--rg-text-secondary) !important;
   font-weight: 500 !important;
   font-variant-numeric: tabular-nums !important;
 }
 
-/* Gemini wraps every <li>'s text inside <p>; keep the first <p> inline so `list-style-position: inside`
-   never pushes list text onto a new line below `•` or `1.`! */
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) li > p:first-child {
+/* Scaled Outside-Marker Indentation (`0.65` Compact / `1` Standard ChatGPT / `1.25` Relaxed) */
+html[data-rg-enabled="true"]:not([data-rg-indent="none"]) :is(.markdown, .markdown-main-panel, .md-content) ul {
+  padding-left: calc(1.625em * var(--rg-indent-scale, 1)) !important;
+  padding-inline-start: calc(1.625em * var(--rg-indent-scale, 1)) !important;
+}
+
+html[data-rg-enabled="true"]:not([data-rg-indent="none"]) :is(.markdown, .markdown-main-panel, .md-content) ol {
+  padding-left: max(1.25em, calc(1.625em * var(--rg-indent-scale, 1))) !important;
+  padding-inline-start: max(1.25em, calc(1.625em * var(--rg-indent-scale, 1))) !important;
+}
+
+html[data-rg-enabled="true"]:not([data-rg-indent="none"]) :is(.markdown, .markdown-main-panel, .md-content) li > ul {
+  padding-left: calc(1.5em * var(--rg-indent-scale, 1)) !important;
+  padding-inline-start: calc(1.5em * var(--rg-indent-scale, 1)) !important;
+}
+
+html[data-rg-enabled="true"]:not([data-rg-indent="none"]) :is(.markdown, .markdown-main-panel, .md-content) li > ol {
+  padding-left: max(1.25em, calc(1.5em * var(--rg-indent-scale, 1))) !important;
+  padding-inline-start: max(1.25em, calc(1.5em * var(--rg-indent-scale, 1))) !important;
+}
+
+html[data-rg-enabled="true"]:not([data-rg-indent="none"]) :is(.markdown, .markdown-main-panel, .md-content) :is(ul, ol, li) {
+  list-style-position: outside !important;
+}
+
+html[data-rg-enabled="true"]:not([data-rg-indent="none"]) :is(.markdown, .markdown-main-panel, .md-content) li {
+  padding-left: calc(0.375em * var(--rg-indent-scale, 1)) !important;
+  padding-inline-start: calc(0.375em * var(--rg-indent-scale, 1)) !important;
+}
+
+html[data-rg-enabled="true"]:not([data-rg-indent="none"]) :is(.markdown, .markdown-main-panel, .md-content) li > p:first-child {
+  display: block !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+html[data-rg-enabled="true"]:not([data-rg-indent="none"]) :is(.markdown, .markdown-main-panel, .md-content) li > p:not(:first-child) {
+  display: block !important;
+  margin-top: 0.35rem !important;
+  margin-bottom: 0 !important;
+}
+
+/* Zero-Indentation Mode (`indentScale = "0"`, 0px flush-left inline markers) */
+html[data-rg-enabled="true"][data-rg-indent="none"] :is(.markdown, .markdown-main-panel, .md-content) :is(ul, ol, li) {
+  padding-left: 0 !important;
+  padding-inline-start: 0 !important;
+  list-style-position: inside !important;
+}
+
+html[data-rg-enabled="true"][data-rg-indent="none"] :is(.markdown, .markdown-main-panel, .md-content) li > p:first-child {
   display: inline !important;
   margin: 0 !important;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) li > p:not(:first-child) {
+html[data-rg-enabled="true"][data-rg-indent="none"] :is(.markdown, .markdown-main-panel, .md-content) li > p:not(:first-child) {
   display: block !important;
   margin: 0.3rem 0 0 0 !important;
 }
@@ -1152,8 +1198,8 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :
   position: relative !important;
   margin: 0.75rem 0 0.9rem 0 !important;
   margin-inline: 0 !important;
-  padding: 0.1rem 0 0.1rem 0.95rem !important;
-  padding-inline-start: 0.95rem !important;
+  padding: 0.1rem 0 0.1rem max(0.75rem, calc(1.15rem * var(--rg-indent-scale, 1))) !important;
+  padding-inline-start: max(0.75rem, calc(1.15rem * var(--rg-indent-scale, 1))) !important;
   padding-inline-end: 0 !important;
   border: none !important;
   border-left: 3px solid var(--rg-blockquote-border) !important;

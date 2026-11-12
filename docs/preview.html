@@ -254,6 +254,16 @@
           </select>
         </div>
 
+        <div class="ctrl-item">
+          <span class="ctrl-label">缩进:</span>
+          <select id="selIndent">
+            <option value="0">无 0% (顶格内联)</option>
+            <option value="0.65">紧凑 65%</option>
+            <option value="1" selected>标准 GPT (默认)</option>
+            <option value="1.25">宽松 125%</option>
+          </select>
+        </div>
+
         <label class="chk-item">
           <input type="checkbox" id="chkHideAvatar" checked />
           <span>隐藏 AI 头像 (左基准线直排)</span>
@@ -336,7 +346,15 @@
                 </table>
               </div>
 
-              <p>通常 HTTP/1.1、HTTP/2 使用 TCP；<strong>HTTP/3 使用基于 UDP 的 QUIC</strong>。例如：</p>
+              <ul id="mdListTop" style="margin: 2px 0; list-style-type: disc;">
+                <li class="md-li">
+                  <span>传输层协议演进对比：</span>
+                  <ul id="mdListNested" style="margin-top: 4px; list-style-type: circle;">
+                    <li class="md-li"><span>HTTP/1.1 与 HTTP/2 基于可靠的 <strong>TCP 字节流</strong>传输。</span></li>
+                    <li class="md-li"><span>HTTP/3 改用基于 UDP 的 <strong>QUIC 多路复用</strong>，彻底消除队头阻塞。</span></li>
+                  </ul>
+                </li>
+              </ul>
 
               <!-- Code Block Card -->
               <div id="codeCard" style="overflow: hidden;">
@@ -376,6 +394,7 @@
       scheme: 'light',
       width: '640px',
       fontSize: '15px',
+      indentScale: '1',
       hideAvatar: true,
       clean: true
     };
@@ -387,6 +406,7 @@
       selScheme: document.getElementById('selScheme'),
       selWidth: document.getElementById('selWidth'),
       selFont: document.getElementById('selFont'),
+      selIndent: document.getElementById('selIndent'),
       chkHideAvatar: document.getElementById('chkHideAvatar'),
       chkClean: document.getElementById('chkClean'),
       viewport: document.getElementById('viewport'),
@@ -404,6 +424,8 @@
       mdTable: document.getElementById('mdTable'),
       trHead: document.getElementById('trHead'),
       tBody: document.getElementById('tBody'),
+      mdListTop: document.getElementById('mdListTop'),
+      mdListNested: document.getElementById('mdListNested'),
       codeCard: document.getElementById('codeCard'),
       codeHeader: document.getElementById('codeHeader'),
       inlineCode: document.getElementById('inlineCode'),
@@ -418,6 +440,35 @@
       document.querySelectorAll('.syn-str').forEach((el) => { el.style.color = str; });
       document.querySelectorAll('.syn-num').forEach((el) => { el.style.color = num; });
       document.querySelectorAll('.syn-cm').forEach((el) => { el.style.color = cm; });
+    }
+
+    function applyListIndent(scaleStr) {
+      const items = document.querySelectorAll('.md-li');
+      if (scaleStr === 'native') {
+        els.mdListTop.style.paddingLeft = '2.4em';
+        els.mdListNested.style.paddingLeft = '2.4em';
+        els.mdListTop.style.listStylePosition = 'outside';
+        els.mdListNested.style.listStylePosition = 'outside';
+        items.forEach((li) => { li.style.paddingLeft = '0.5em'; li.style.margin = '6px 0'; });
+        return;
+      }
+      if (scaleStr === '0') {
+        els.mdListTop.style.paddingLeft = '0px';
+        els.mdListNested.style.paddingLeft = '0px';
+        els.mdListTop.style.listStylePosition = 'inside';
+        els.mdListNested.style.listStylePosition = 'inside';
+        items.forEach((li) => { li.style.paddingLeft = '0px'; li.style.margin = '4px 0'; });
+        return;
+      }
+      const k = parseFloat(scaleStr) || 1;
+      els.mdListTop.style.paddingLeft = `${(1.625 * k).toFixed(4)}em`;
+      els.mdListNested.style.paddingLeft = `${(1.5 * k).toFixed(4)}em`;
+      els.mdListTop.style.listStylePosition = 'outside';
+      els.mdListNested.style.listStylePosition = 'outside';
+      items.forEach((li) => {
+        li.style.paddingLeft = `${(0.375 * k).toFixed(4)}em`;
+        li.style.margin = '4px 0';
+      });
     }
 
     function render() {
@@ -444,6 +495,7 @@
         els.composerWrap.style.maxWidth = '540px';
         els.prose.style.fontSize = '15px';
         els.prose.style.lineHeight = '1.65';
+        applyListIndent('native');
 
         els.userBubble.style.background = '#f0f4f9';
         els.userBubble.style.color = '#1f1f1f';
@@ -529,6 +581,7 @@
       els.composerWrap.style.maxWidth = state.width;
       els.prose.style.fontSize = state.fontSize;
       els.prose.style.lineHeight = '1.68';
+      applyListIndent(state.indentScale);
 
       els.userBubble.style.background = p.bubble;
       els.userBubble.style.border = `1px solid ${p.bubbleBorder}`;
@@ -584,6 +637,7 @@
     els.selScheme.onchange = (e) => { state.scheme = e.target.value; render(); };
     els.selWidth.onchange = (e) => { state.width = e.target.value; render(); };
     els.selFont.onchange = (e) => { state.fontSize = e.target.value; render(); };
+    els.selIndent.onchange = (e) => { state.indentScale = e.target.value; render(); };
     els.chkHideAvatar.onchange = (e) => { state.hideAvatar = e.target.checked; render(); };
     els.chkClean.onchange = (e) => { state.clean = e.target.checked; render(); };
 
