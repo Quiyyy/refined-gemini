@@ -1,0 +1,683 @@
+/**
+ * Refined Gemini — 1:1 ChatGPT Web Visual & Typography Alignment Stylesheet
+ *
+ * Core Principle:
+ *   Single Source of Truth = ChatGPT Web UI neutral surface hierarchy & editorial typography.
+ *   All rules are scoped under html[data-rg-enabled="true"] so the Master Toggle can switch
+ *   between Refined Gemini and native Google Gemini instantaneously with zero reload.
+ */
+
+/* ==========================================================================
+   1. Design Tokens (ChatGPT Light & Dark Palettes)
+   ========================================================================== */
+
+html[data-rg-enabled="true"] {
+  --rg-font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC",
+    system-ui, sans-serif;
+  --rg-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --rg-chat-max-width: 768px;
+  --rg-font-size: 16px;
+  --rg-line-height: 1.72;
+
+  /* Default: ChatGPT Light Surface Hierarchy */
+  --rg-bg-canvas: #ffffff;
+  --rg-bg-sidebar: #f9f9f9;
+  --rg-bg-active: #ececec;
+  --rg-bg-hover: rgba(0, 0, 0, 0.045);
+  --rg-bg-user-bubble: #f4f4f4;
+  --rg-bg-code-card: #f9f9f9;
+  --rg-bg-inline-code: #ececec;
+  --rg-bg-composer: #ffffff;
+  --rg-bg-elevated: #ffffff;
+
+  --rg-text-primary: #0d0d0d;
+  --rg-text-strong: #0d0d0d;
+  --rg-text-secondary: #5d5d5d;
+  --rg-text-muted: #8e8ea0;
+
+  --rg-border-subtle: rgba(0, 0, 0, 0.06);
+  --rg-border-default: rgba(0, 0, 0, 0.10);
+  --rg-border-focus: rgba(0, 0, 0, 0.20);
+  --rg-table-head-border: rgba(0, 0, 0, 0.15);
+  --rg-table-row-border: rgba(0, 0, 0, 0.07);
+
+  --rg-composer-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  --rg-scrollbar-thumb: rgba(0, 0, 0, 0.16);
+  --rg-scrollbar-thumb-hover: rgba(0, 0, 0, 0.28);
+}
+
+html[data-rg-enabled="true"][data-rg-theme="dark"] {
+  /* ChatGPT Dark Surface Hierarchy */
+  --rg-bg-canvas: #212121;
+  --rg-bg-sidebar: #171717;
+  --rg-bg-active: #2f2f2f;
+  --rg-bg-hover: rgba(255, 255, 255, 0.06);
+  --rg-bg-user-bubble: #2f2f2f;
+  --rg-bg-code-card: #171717;
+  --rg-bg-inline-code: #2f2f2f;
+  --rg-bg-composer: #2f2f2f;
+  --rg-bg-elevated: #2f2f2f;
+
+  --rg-text-primary: #ececec;
+  --rg-text-strong: #ffffff;
+  --rg-text-secondary: #b4b4b4;
+  --rg-text-muted: #8e8ea0;
+
+  --rg-border-subtle: rgba(255, 255, 255, 0.06);
+  --rg-border-default: rgba(255, 255, 255, 0.12);
+  --rg-border-focus: rgba(255, 255, 255, 0.24);
+  --rg-table-head-border: rgba(255, 255, 255, 0.18);
+  --rg-table-row-border: rgba(255, 255, 255, 0.08);
+
+  --rg-composer-shadow: 0 4px 20px rgba(0, 0, 0, 0.28);
+  --rg-scrollbar-thumb: rgba(255, 255, 255, 0.18);
+  --rg-scrollbar-thumb-hover: rgba(255, 255, 255, 0.30);
+}
+
+/* ==========================================================================
+   2. Material 3 Surface Overrides & Gradient Mask Removal
+   ========================================================================== */
+
+html[data-rg-enabled="true"],
+html[data-rg-enabled="true"] body {
+  background-color: var(--rg-bg-canvas) !important;
+  color: var(--rg-text-primary) !important;
+  font-family: var(--rg-font-sans) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Override Gemini / Angular Material M3 surface tokens */
+  --gem-sys-color--surface: var(--rg-bg-canvas) !important;
+  --gem-sys-color--surface-dim: var(--rg-bg-sidebar) !important;
+  --gem-sys-color--surface-bright: var(--rg-bg-canvas) !important;
+  --gem-sys-color--surface-container-lowest: var(--rg-bg-canvas) !important;
+  --gem-sys-color--surface-container-low: var(--rg-bg-sidebar) !important;
+  --gem-sys-color--surface-container: var(--rg-bg-sidebar) !important;
+  --gem-sys-color--surface-container-high: var(--rg-bg-active) !important;
+  --gem-sys-color--surface-container-highest: var(--rg-bg-active) !important;
+  --gem-sys-color--on-surface: var(--rg-text-primary) !important;
+  --gem-sys-color--on-surface-variant: var(--rg-text-secondary) !important;
+  --mat-sidenav-content-background-color: var(--rg-bg-canvas) !important;
+  --mat-sidenav-container-background-color: var(--rg-bg-sidebar) !important;
+  --mat-app-background-color: var(--rg-bg-canvas) !important;
+}
+
+html[data-rg-enabled="true"] chat-app,
+html[data-rg-enabled="true"] bard-sidenav-container,
+html[data-rg-enabled="true"] bard-sidenav-content,
+html[data-rg-enabled="true"] .bard-sidenav-container,
+html[data-rg-enabled="true"] .bard-sidenav-content,
+html[data-rg-enabled="true"] mat-sidenav-container,
+html[data-rg-enabled="true"] mat-sidenav-content,
+html[data-rg-enabled="true"] chat-window,
+html[data-rg-enabled="true"] chat-window-content,
+html[data-rg-enabled="true"] main,
+html[data-rg-enabled="true"] .chat-history,
+html[data-rg-enabled="true"] infinite-scroller {
+  background-color: var(--rg-bg-canvas) !important;
+  color: var(--rg-text-primary) !important;
+}
+
+/* Remove Gemini's hazy top/bottom blue-gray gradient scrims */
+html[data-rg-enabled="true"] .input-gradient,
+html[data-rg-enabled="true"] .bottom-gradient,
+html[data-rg-enabled="true"] .gradient-container,
+html[data-rg-enabled="true"] .scroll-gradient,
+html[data-rg-enabled="true"] .header-gradient,
+html[data-rg-enabled="true"] [class*="gradient-overlay"],
+html[data-rg-enabled="true"] input-container::before,
+html[data-rg-enabled="true"] .input-area-container::before,
+html[data-rg-enabled="true"] .input-area-container::after {
+  background: transparent !important;
+  background-image: none !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+  box-shadow: none !important;
+}
+
+/* Top header bar clean integration */
+html[data-rg-enabled="true"] top-bar-actions,
+html[data-rg-enabled="true"] .top-bar-actions,
+html[data-rg-enabled="true"] bard-mode-switcher,
+html[data-rg-enabled="true"] header {
+  background-color: transparent !important;
+}
+
+/* ==========================================================================
+   3. Sidebar Refinement & Compact 260px Mode
+   ========================================================================== */
+
+html[data-rg-enabled="true"] bard-sidenav,
+html[data-rg-enabled="true"] side-navigation-v2,
+html[data-rg-enabled="true"] side-navigation-content,
+html[data-rg-enabled="true"] .side-navigation-content,
+html[data-rg-enabled="true"] mat-sidenav {
+  background-color: var(--rg-bg-sidebar) !important;
+  color: var(--rg-text-primary) !important;
+  border-right: 1px solid var(--rg-border-subtle) !important;
+  box-shadow: none !important;
+}
+
+/* Compact Sidebar: 260px width when expanded (preserves collapsed mini-rail) */
+html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] {
+  --bard-sidenav-open-width: 260px !important;
+  --mat-sidenav-container-width: 260px !important;
+}
+
+html[data-rg-enabled="true"][data-rg-compact-sidebar="true"]
+  bard-sidenav:not(.collapsed):not([class*="collapsed"]):not([class*="closed"]),
+html[data-rg-enabled="true"][data-rg-compact-sidebar="true"]
+  mat-sidenav.mat-drawer-opened:not(.collapsed):not([class*="collapsed"]) {
+  width: 260px !important;
+  max-width: 260px !important;
+}
+
+/* Sidebar conversation items & action buttons -> 8px rounded ChatGPT pills */
+html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] .conversation,
+html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] [data-test-id="conversation"],
+html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] conversations-list a,
+html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] .conversation-items-container > *,
+html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] bard-sidenav .mat-mdc-list-item,
+html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] side-navigation-content .mat-mdc-list-item,
+html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] .side-nav-action-button {
+  border-radius: 8px !important;
+  min-height: 36px !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+  font-size: 13.5px !important;
+  line-height: 1.4 !important;
+}
+
+html[data-rg-enabled="true"] .conversation:hover,
+html[data-rg-enabled="true"] [data-test-id="conversation"]:hover,
+html[data-rg-enabled="true"] conversations-list a:hover,
+html[data-rg-enabled="true"] bard-sidenav .mat-mdc-list-item:hover {
+  background-color: var(--rg-bg-hover) !important;
+}
+
+html[data-rg-enabled="true"] .conversation.selected,
+html[data-rg-enabled="true"] .conversation.active,
+html[data-rg-enabled="true"] [data-test-id="conversation"].selected,
+html[data-rg-enabled="true"] [data-test-id="conversation"][aria-selected="true"],
+html[data-rg-enabled="true"] conversations-list a[aria-current="page"],
+html[data-rg-enabled="true"] bard-sidenav .mat-mdc-list-item.mdc-list-item--activated {
+  background-color: var(--rg-bg-active) !important;
+  color: var(--rg-text-primary) !important;
+  font-weight: 500 !important;
+}
+
+/* ==========================================================================
+   4. Typography & Explicit Icon / Math Font Isolation
+   ========================================================================== */
+
+html[data-rg-enabled="true"] .markdown,
+html[data-rg-enabled="true"] .markdown-main-panel,
+html[data-rg-enabled="true"] message-content,
+html[data-rg-enabled="true"] model-response,
+html[data-rg-enabled="true"] user-query,
+html[data-rg-enabled="true"] .query-text,
+html[data-rg-enabled="true"] rich-textarea,
+html[data-rg-enabled="true"] .ql-editor,
+html[data-rg-enabled="true"] bard-sidenav,
+html[data-rg-enabled="true"] side-navigation-v2 {
+  font-family: var(--rg-font-sans) !important;
+}
+
+/* CRITICAL: Preserve Google Symbols & Material ligature icon fonts (100% zero garbled icons) */
+html[data-rg-enabled="true"] mat-icon,
+html[data-rg-enabled="true"] .mat-icon,
+html[data-rg-enabled="true"] .google-symbols,
+html[data-rg-enabled="true"] .material-symbols-outlined,
+html[data-rg-enabled="true"] .material-symbols-rounded,
+html[data-rg-enabled="true"] .material-symbols-sharp,
+html[data-rg-enabled="true"] .material-icons,
+html[data-rg-enabled="true"] .material-icons-outlined,
+html[data-rg-enabled="true"] [class*="google-symbols"],
+html[data-rg-enabled="true"] [class*="material-symbols"],
+html[data-rg-enabled="true"] [data-mat-icon-type="font"] {
+  font-family: "Google Symbols", "Material Symbols Outlined",
+    "Material Symbols Rounded", "Material Icons" !important;
+  font-weight: normal;
+  font-style: normal;
+  font-feature-settings: "liga" 1;
+  -webkit-font-feature-settings: "liga" 1;
+}
+
+/* Preserve KaTeX math typography */
+html[data-rg-enabled="true"] .katex,
+html[data-rg-enabled="true"] .katex * {
+  font-family: KaTeX_Main, "Times New Roman", serif;
+}
+
+/* Prose typography rhythm (1:1 ChatGPT Web) */
+html[data-rg-enabled="true"] .markdown,
+html[data-rg-enabled="true"] .markdown-main-panel,
+html[data-rg-enabled="true"] message-content {
+  font-size: var(--rg-font-size, 16px) !important;
+  line-height: var(--rg-line-height, 1.72) !important;
+  color: var(--rg-text-primary) !important;
+  letter-spacing: -0.004em;
+}
+
+html[data-rg-enabled="true"] .markdown p,
+html[data-rg-enabled="true"] .markdown-main-panel p,
+html[data-rg-enabled="true"] message-content p {
+  margin-top: 0 !important;
+  margin-bottom: 1rem !important;
+  line-height: var(--rg-line-height, 1.72) !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] .markdown p:last-child,
+html[data-rg-enabled="true"] .markdown-main-panel p:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* High-contrast bold for CJK + English mixed prose */
+html[data-rg-enabled="true"] .markdown strong,
+html[data-rg-enabled="true"] .markdown b,
+html[data-rg-enabled="true"] .markdown-main-panel strong,
+html[data-rg-enabled="true"] .markdown-main-panel b,
+html[data-rg-enabled="true"] message-content strong,
+html[data-rg-enabled="true"] message-content b {
+  font-weight: 600 !important;
+  color: var(--rg-text-strong) !important;
+}
+
+/* Headings */
+html[data-rg-enabled="true"] .markdown h1,
+html[data-rg-enabled="true"] .markdown-main-panel h1 {
+  font-size: 1.6em !important;
+  font-weight: 650 !important;
+  line-height: 1.3 !important;
+  margin: 1.6rem 0 0.75rem !important;
+  color: var(--rg-text-strong) !important;
+  letter-spacing: -0.015em;
+}
+
+html[data-rg-enabled="true"] .markdown h2,
+html[data-rg-enabled="true"] .markdown-main-panel h2 {
+  font-size: 1.32em !important;
+  font-weight: 650 !important;
+  line-height: 1.35 !important;
+  margin: 1.45rem 0 0.65rem !important;
+  color: var(--rg-text-strong) !important;
+  letter-spacing: -0.01em;
+}
+
+html[data-rg-enabled="true"] .markdown h3,
+html[data-rg-enabled="true"] .markdown-main-panel h3 {
+  font-size: 1.125em !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  margin: 1.2rem 0 0.45rem !important;
+  color: var(--rg-text-strong) !important;
+}
+
+html[data-rg-enabled="true"] .markdown h4,
+html[data-rg-enabled="true"] .markdown-main-panel h4 {
+  font-size: 1em !important;
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  margin: 1rem 0 0.35rem !important;
+  color: var(--rg-text-strong) !important;
+}
+
+/* Compact, clean lists */
+html[data-rg-enabled="true"] .markdown ul,
+html[data-rg-enabled="true"] .markdown ol,
+html[data-rg-enabled="true"] .markdown-main-panel ul,
+html[data-rg-enabled="true"] .markdown-main-panel ol {
+  padding-left: 1.5rem !important;
+  margin: 0.45rem 0 1rem !important;
+}
+
+html[data-rg-enabled="true"] .markdown li,
+html[data-rg-enabled="true"] .markdown-main-panel li {
+  margin-bottom: 0.3rem !important;
+  line-height: 1.7 !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] .markdown li > ul,
+html[data-rg-enabled="true"] .markdown li > ol,
+html[data-rg-enabled="true"] .markdown-main-panel li > ul,
+html[data-rg-enabled="true"] .markdown-main-panel li > ol {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.3rem !important;
+}
+
+/* Blockquotes & Horizontal Dividers */
+html[data-rg-enabled="true"] .markdown blockquote,
+html[data-rg-enabled="true"] .markdown-main-panel blockquote {
+  margin: 0.85rem 0 1rem !important;
+  padding: 0.2rem 0 0.2rem 1rem !important;
+  border-left: 3px solid var(--rg-border-default) !important;
+  background: transparent !important;
+  color: var(--rg-text-secondary) !important;
+}
+
+html[data-rg-enabled="true"] .markdown hr,
+html[data-rg-enabled="true"] .markdown-main-panel hr {
+  border: none !important;
+  border-top: 1px solid var(--rg-border-subtle) !important;
+  margin: 1.5rem 0 !important;
+}
+
+/* Display Math / KaTeX block spacing */
+html[data-rg-enabled="true"] .katex-display,
+html[data-rg-enabled="true"] math-block,
+html[data-rg-enabled="true"] .math-block {
+  margin: 1.25rem 0 !important;
+  padding: 0.25rem 0 !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* ==========================================================================
+   5. Conversation Column Width, User Capsule & Flush-Left AI Baseline
+   ========================================================================== */
+
+html[data-rg-enabled="true"] .conversation-container,
+html[data-rg-enabled="true"] chat-window-content .conversation-container,
+html[data-rg-enabled="true"] user-query,
+html[data-rg-enabled="true"] model-response,
+html[data-rg-enabled="true"] .input-area-container,
+html[data-rg-enabled="true"] input-container .input-area-container,
+html[data-rg-enabled="true"] .bottom-container {
+  max-width: var(--rg-chat-max-width, 768px) !important;
+  width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* User message capsule (ChatGPT neutral right-aligned pill) */
+html[data-rg-enabled="true"] .user-query-bubble-with-background,
+html[data-rg-enabled="true"] user-query .query-content .user-query-bubble-with-background,
+html[data-rg-enabled="true"] .user-query-container .query-text-box {
+  background-color: var(--rg-bg-user-bubble) !important;
+  color: var(--rg-text-primary) !important;
+  border-radius: 20px !important;
+  padding: 10px 18px !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+html[data-rg-enabled="true"] user-query .query-text,
+html[data-rg-enabled="true"] .user-query-bubble-with-background .query-text {
+  font-size: var(--rg-font-size, 16px) !important;
+  line-height: 1.6 !important;
+  color: var(--rg-text-primary) !important;
+}
+
+/* Hide AI Avatar for 1:1 ChatGPT flush-left single-baseline reading flow */
+html[data-rg-enabled="true"][data-rg-hide-avatar="true"] bard-avatar,
+html[data-rg-enabled="true"][data-rg-hide-avatar="true"] .bard-avatar,
+html[data-rg-enabled="true"][data-rg-hide-avatar="true"] .avatar-gutter,
+html[data-rg-enabled="true"][data-rg-hide-avatar="true"] .model-response-avatar,
+html[data-rg-enabled="true"][data-rg-hide-avatar="true"] [data-test-id="bard-avatar"],
+html[data-rg-enabled="true"][data-rg-hide-avatar="true"]
+  model-response .response-container-header .avatar-component {
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html[data-rg-enabled="true"][data-rg-hide-avatar="true"] model-response .response-container,
+html[data-rg-enabled="true"][data-rg-hide-avatar="true"] model-response .presented-response-container,
+html[data-rg-enabled="true"][data-rg-hide-avatar="true"] model-response .response-container-content {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+  gap: 0 !important;
+}
+
+/* Remove surface card tint on model-response containers */
+html[data-rg-enabled="true"] model-response .response-container,
+html[data-rg-enabled="true"] .response-container-with-gpi {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* ==========================================================================
+   6. 1:1 ChatGPT Markdown Tables (Borderless, Flush-Left, Clean Horizontal Rules)
+   ========================================================================== */
+
+html[data-rg-enabled="true"] table-block,
+html[data-rg-enabled="true"] .table-block,
+html[data-rg-enabled="true"] .table-content,
+html[data-rg-enabled="true"] .table-wrapper,
+html[data-rg-enabled="true"] .horizontal-scroll-wrapper {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0.75rem 0 1.15rem !important;
+}
+
+html[data-rg-enabled="true"] .markdown table,
+html[data-rg-enabled="true"] .markdown-main-panel table,
+html[data-rg-enabled="true"] table-block table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-size: 0.9375em !important;
+  line-height: 1.55 !important;
+  margin: 0 !important;
+}
+
+html[data-rg-enabled="true"] .markdown thead,
+html[data-rg-enabled="true"] .markdown thead tr,
+html[data-rg-enabled="true"] .markdown-main-panel thead,
+html[data-rg-enabled="true"] .markdown-main-panel thead tr,
+html[data-rg-enabled="true"] table-block thead,
+html[data-rg-enabled="true"] table-block thead tr {
+  background: transparent !important;
+}
+
+html[data-rg-enabled="true"] .markdown th,
+html[data-rg-enabled="true"] .markdown-main-panel th,
+html[data-rg-enabled="true"] table-block th {
+  background: transparent !important;
+  color: var(--rg-text-strong) !important;
+  font-weight: 600 !important;
+  text-align: left !important;
+  border: none !important;
+  border-bottom: 1px solid var(--rg-table-head-border) !important;
+  padding: 9px 16px 9px 0 !important;
+  vertical-align: bottom !important;
+}
+
+html[data-rg-enabled="true"] .markdown td,
+html[data-rg-enabled="true"] .markdown-main-panel td,
+html[data-rg-enabled="true"] table-block td {
+  background: transparent !important;
+  color: var(--rg-text-primary) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--rg-table-row-border) !important;
+  padding: 10px 16px 10px 0 !important;
+  vertical-align: top !important;
+}
+
+/* Strictly align first column flush with prose left baseline */
+html[data-rg-enabled="true"] .markdown th:first-child,
+html[data-rg-enabled="true"] .markdown td:first-child,
+html[data-rg-enabled="true"] .markdown-main-panel th:first-child,
+html[data-rg-enabled="true"] .markdown-main-panel td:first-child,
+html[data-rg-enabled="true"] table-block th:first-child,
+html[data-rg-enabled="true"] table-block td:first-child {
+  padding-left: 0 !important;
+}
+
+html[data-rg-enabled="true"] .markdown th:last-child,
+html[data-rg-enabled="true"] .markdown td:last-child,
+html[data-rg-enabled="true"] .markdown-main-panel th:last-child,
+html[data-rg-enabled="true"] .markdown-main-panel td:last-child,
+html[data-rg-enabled="true"] table-block th:last-child,
+html[data-rg-enabled="true"] table-block td:last-child {
+  padding-right: 0 !important;
+}
+
+/* ==========================================================================
+   7. 1:1 ChatGPT Code Cards & Compact Inline Code
+   ========================================================================== */
+
+html[data-rg-enabled="true"] code-block,
+html[data-rg-enabled="true"] .code-block {
+  display: block;
+  background-color: var(--rg-bg-code-card) !important;
+  border: 1px solid var(--rg-border-subtle) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  margin: 0.9rem 0 1.15rem !important;
+  box-shadow: none !important;
+}
+
+/* Seamless header fused into code card body (no split gray banner) */
+html[data-rg-enabled="true"] code-block .code-block-decoration,
+html[data-rg-enabled="true"] .code-block .code-block-decoration,
+html[data-rg-enabled="true"] .code-block-header,
+html[data-rg-enabled="true"] [class*="code-block-decoration"] {
+  background-color: var(--rg-bg-code-card) !important;
+  color: var(--rg-text-secondary) !important;
+  border-bottom: none !important;
+  padding: 8px 14px 4px !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 12px !important;
+}
+
+html[data-rg-enabled="true"] code-block pre,
+html[data-rg-enabled="true"] .code-block pre,
+html[data-rg-enabled="true"] .markdown pre,
+html[data-rg-enabled="true"] .markdown-main-panel pre {
+  background-color: var(--rg-bg-code-card) !important;
+  border: none !important;
+  border-radius: 0 0 12px 12px !important;
+  margin: 0 !important;
+  padding: 8px 16px 14px !important;
+  overflow-x: auto !important;
+}
+
+/* Standalone <pre> not wrapped inside <code-block> */
+html[data-rg-enabled="true"] .markdown > pre,
+html[data-rg-enabled="true"] .markdown-main-panel > pre {
+  border: 1px solid var(--rg-border-subtle) !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  margin: 0.9rem 0 1.15rem !important;
+}
+
+html[data-rg-enabled="true"] pre code,
+html[data-rg-enabled="true"] code-block code {
+  font-family: var(--rg-font-mono) !important;
+  font-size: 13.5px !important;
+  line-height: 1.6 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* Inline code pill (`session_id`) */
+html[data-rg-enabled="true"] .markdown :not(pre) > code,
+html[data-rg-enabled="true"] .markdown-main-panel :not(pre) > code,
+html[data-rg-enabled="true"] message-content :not(pre) > code {
+  font-family: var(--rg-font-mono) !important;
+  font-size: 0.875em !important;
+  background-color: var(--rg-bg-inline-code) !important;
+  color: var(--rg-text-primary) !important;
+  padding: 0.15em 0.42em !important;
+  border-radius: 5px !important;
+  border: none !important;
+  word-break: break-word;
+}
+
+/* ==========================================================================
+   8. Floating Capsule Composer (1:1 ChatGPT Input Pill)
+   ========================================================================== */
+
+html[data-rg-enabled="true"] input-area-v2,
+html[data-rg-enabled="true"] .input-area,
+html[data-rg-enabled="true"] .text-input-field,
+html[data-rg-enabled="true"] .input-box {
+  background-color: var(--rg-bg-composer) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 26px !important;
+  box-shadow: var(--rg-composer-shadow) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+html[data-rg-enabled="true"] input-area-v2:focus-within,
+html[data-rg-enabled="true"] .input-area:focus-within,
+html[data-rg-enabled="true"] .text-input-field:focus-within {
+  border-color: var(--rg-border-focus) !important;
+}
+
+/* Remove nested inner background boxes inside the composer */
+html[data-rg-enabled="true"] input-area-v2 rich-textarea,
+html[data-rg-enabled="true"] .input-area rich-textarea,
+html[data-rg-enabled="true"] .ql-container {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] rich-textarea .ql-editor {
+  font-size: 15.5px !important;
+  line-height: 1.55 !important;
+  color: var(--rg-text-primary) !important;
+}
+
+/* ==========================================================================
+   9. Clean View Mode (Distraction-Free Noise Reduction)
+   ========================================================================== */
+
+html[data-rg-enabled="true"][data-rg-clean-view="true"] hallucination-disclaimer,
+html[data-rg-enabled="true"][data-rg-clean-view="true"] .hallucination-disclaimer,
+html[data-rg-enabled="true"][data-rg-clean-view="true"] [data-test-id="disclaimer"],
+html[data-rg-enabled="true"][data-rg-clean-view="true"] .bottom-disclaimer,
+html[data-rg-enabled="true"][data-rg-clean-view="true"] location-footer,
+html[data-rg-enabled="true"][data-rg-clean-view="true"] .location-footer,
+html[data-rg-enabled="true"][data-rg-clean-view="true"] [data-test-id="location-info"],
+html[data-rg-enabled="true"][data-rg-clean-view="true"] upsell-button,
+html[data-rg-enabled="true"][data-rg-clean-view="true"] g1-upsell-button,
+html[data-rg-enabled="true"][data-rg-clean-view="true"] [data-test-id="upsell-button"],
+html[data-rg-enabled="true"][data-rg-clean-view="true"] .adv-upsell,
+html[data-rg-enabled="true"][data-rg-clean-view="true"] suggestion-chips,
+html[data-rg-enabled="true"][data-rg-clean-view="true"] .suggestion-chips-container,
+html[data-rg-enabled="true"][data-rg-clean-view="true"] follow-up-suggestions,
+html[data-rg-enabled="true"][data-rg-clean-view="true"] code-block .code-block-footer,
+html[data-rg-enabled="true"][data-rg-clean-view="true"] .code-block .disclaimer-suffix,
+html[data-rg-enabled="true"][data-rg-clean-view="true"] table-block .table-footer {
+  display: none !important;
+}
+
+/* ==========================================================================
+   10. Subtle Neutral Scrollbars
+   ========================================================================== */
+
+html[data-rg-enabled="true"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html[data-rg-enabled="true"] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html[data-rg-enabled="true"] ::-webkit-scrollbar-thumb {
+  background-color: var(--rg-scrollbar-thumb);
+  border-radius: 999px;
+}
+
+html[data-rg-enabled="true"] ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--rg-scrollbar-thumb-hover);
+}

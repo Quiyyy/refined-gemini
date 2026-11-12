@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Refined Gemini 设置</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="popup-shell">
+    <!-- Top Header & Master Toggle -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3C12.4 7.8 16.2 11.6 21 12C16.2 12.4 12.4 16.2 12 21C11.6 16.2 7.8 12.4 3 12C7.8 11.6 11.6 7.8 12 3Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">Refined Gemini</h1>
+          <p class="brand-subtitle" id="statusLabel">1:1 对齐 ChatGPT · 实时生效</p>
+        </div>
+      </div>
+
+      <label class="switch" title="一键开启或暂停美化，即时对比原生效果">
+        <input type="checkbox" id="toggleEnabled" checked />
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </label>
+    </header>
+
+    <!-- Main Settings Body -->
+    <main class="settings-body" id="settingsBody">
+      <!-- Segmented Controls Group -->
+      <section class="group">
+        <div class="field-block">
+          <div class="field-header">
+            <span class="field-label">外观配色</span>
+            <span class="field-hint">跟随 Gemini 或强制指定</span>
+          </div>
+          <div class="segmented" role="radiogroup" aria-label="外观配色" data-key="themeMode">
+            <button type="button" class="seg-btn active" data-value="auto">跟随页面</button>
+            <button type="button" class="seg-btn" data-value="light">浅色</button>
+            <button type="button" class="seg-btn" data-value="dark">深色</button>
+          </div>
+        </div>
+
+        <div class="field-block">
+          <div class="field-header">
+            <span class="field-label">对话列宽度</span>
+            <span class="field-hint">默认 768px 对齐 ChatGPT</span>
+          </div>
+          <div class="segmented" role="radiogroup" aria-label="对话列宽度" data-key="chatWidth">
+            <button type="button" class="seg-btn active" data-value="768px">标准 768</button>
+            <button type="button" class="seg-btn" data-value="920px">适中 920</button>
+            <button type="button" class="seg-btn" data-value="1120px">宽屏 1120</button>
+            <button type="button" class="seg-btn" data-value="90%">超宽 90%</button>
+          </div>
+        </div>
+
+        <div class="field-block">
+          <div class="field-header">
+            <span class="field-label">正文字号密度</span>
+            <span class="field-hint">行高固定 1.72</span>
+          </div>
+          <div class="segmented" role="radiogroup" aria-label="正文字号密度" data-key="fontSize">
+            <button type="button" class="seg-btn" data-value="15px">紧凑 15px</button>
+            <button type="button" class="seg-btn active" data-value="16px">标准 16px</button>
+            <button type="button" class="seg-btn" data-value="17px">宽松 17px</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- Boolean Switches Group -->
+      <section class="group switches-list">
+        <label class="row-item" for="toggleHideAvatar">
+          <div class="row-copy">
+            <span class="row-title">隐藏 AI 回复头像</span>
+            <span class="row-desc">正文、表格与代码沿左基准线直排</span>
+          </div>
+          <span class="switch switch-sm">
+            <input type="checkbox" id="toggleHideAvatar" checked />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </span>
+        </label>
+
+        <label class="row-item" for="toggleCompactSidebar">
+          <div class="row-copy">
+            <span class="row-title">紧凑侧边栏</span>
+            <span class="row-desc">收敛至 260px 定宽与 8px 圆角会话行</span>
+          </div>
+          <span class="switch switch-sm">
+            <input type="checkbox" id="toggleCompactSidebar" checked />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </span>
+        </label>
+
+        <label class="row-item" for="toggleCleanView">
+          <div class="row-copy">
+            <span class="row-title">纯净降噪模式</span>
+            <span class="row-desc">隐藏免责声明、IP 定位栏、推广与追问气泡</span>
+          </div>
+          <span class="switch switch-sm">
+            <input type="checkbox" id="toggleCleanView" checked />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </span>
+        </label>
+
+        <label class="row-item" for="toggleCtrlEnter">
+          <div class="row-copy">
+            <span class="row-title"><kbd id="modKeyLabel">Ctrl</kbd> + <kbd>Enter</kbd> 发送</span>
+            <span class="row-desc">单按 Enter 仅换行，防长 Prompt 误触发送</span>
+          </div>
+          <span class="switch switch-sm">
+            <input type="checkbox" id="toggleCtrlEnter" />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </span>
+        </label>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span class="version">v1.0.0</span>
+      <button type="button" id="resetBtn" class="reset-btn">恢复默认配置</button>
+    </footer>
+  </div>
+
+  <script src="../defaults.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

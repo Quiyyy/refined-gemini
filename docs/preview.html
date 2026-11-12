@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Refined Gemini — 1:1 对齐 ChatGPT 交互式对比预览</title>
+  <style>
+    :root {
+      --page-bg: #f6f6f7;
+      --panel-bg: #ffffff;
+      --panel-border: rgba(0, 0, 0, 0.09);
+      --text-main: #0d0d0d;
+      --text-muted: #5d5d5d;
+      --btn-active-bg: #0d0d0d;
+      --btn-active-fg: #ffffff;
+      --btn-idle-bg: #f0f0f2;
+      --btn-idle-fg: #333333;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--page-bg);
+      color: var(--text-main);
+      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      padding: 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .toolbar-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .toolbar-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .toolbar-title { font-size: 14px; font-weight: 600; }
+    .toolbar-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .mode-group { display: flex; gap: 8px; }
+    .mode-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 7px 13px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .mode-btn.active { background: var(--btn-active-bg); color: var(--btn-active-fg); }
+    .mode-btn.idle { background: var(--btn-idle-bg); color: var(--btn-idle-fg); }
+
+    .config-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px 22px;
+      font-size: 12px;
+      transition: opacity 0.15s ease;
+    }
+
+    .ctrl-item { display: flex; align-items: center; gap: 6px; }
+    .ctrl-label { color: var(--text-muted); }
+
+    select {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.14);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-family: inherit;
+      color: #0d0d0d;
+    }
+
+    label.chk-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Simulated Browser Viewport */
+    .viewport {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--panel-border);
+      display: flex;
+      min-height: 580px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.05);
+      transition: all 0.16s ease;
+    }
+
+    .sidebar {
+      flex-shrink: 0;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.16s ease;
+    }
+
+    .nav-list { display: flex; flex-direction: column; gap: 4px; }
+    .brand-row {
+      padding: 8px 10px;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .upsell-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 5px;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    .nav-section-label { padding: 6px 10px; font-size: 11.5px; opacity: 0.55; }
+    .nav-item {
+      padding: 8px 10px;
+      font-size: 12.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+    .nav-item.muted { opacity: 0.78; }
+    .loc-footer { padding: 8px 10px; font-size: 11px; opacity: 0.5; }
+
+    .canvas {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 28px 28px 20px;
+      overflow-x: auto;
+      transition: all 0.16s ease;
+    }
+
+    .chat-col {
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      transition: max-width 0.16s ease;
+    }
+
+    .user-row { display: flex; justify-content: flex-end; }
+    .user-bubble { padding: 10px 16px; font-size: 14.5px; max-width: 78%; line-height: 1.55; }
+
+    .ai-row { display: flex; align-items: flex-start; gap: 12px; }
+    .ai-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .prose { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; text-align: left; border-collapse: collapse; font-size: 0.93em; }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px 4px;
+      font-size: 12px;
+    }
+    pre {
+      padding: 6px 16px 14px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.6;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .composer-wrap { margin: 0 auto; width: 100%; padding-top: 20px; transition: max-width 0.16s ease; }
+    .composer-box { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; }
+    .send-circle { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+    .disclaimer { text-align: center; font-size: 11px; opacity: 0.55; padding-top: 8px; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Interactive Extension Popup Controls Bar -->
+    <div class="toolbar-card">
+      <div class="toolbar-top">
+        <div>
+          <h1 class="toolbar-title">Refined Gemini 实时效果预览</h1>
+          <p class="toolbar-desc">切换开关即时对比「原生 Gemini」与「1:1 对齐 ChatGPT 网页端」排版效果</p>
+        </div>
+        <div class="mode-group">
+          <button id="modeRefined" class="mode-btn active">Refined (对齐 ChatGPT)</button>
+          <button id="modeNative" class="mode-btn idle">原生 Gemini 对比</button>
+        </div>
+      </div>
+
+      <div id="configRow" class="config-row">
+        <div class="ctrl-item">
+          <span class="ctrl-label">配色:</span>
+          <select id="selScheme">
+            <option value="light" selected>ChatGPT 浅色 (#FFFFFF)</option>
+            <option value="dark">ChatGPT 深色 (#212121)</option>
+          </select>
+        </div>
+
+        <div class="ctrl-item">
+          <span class="ctrl-label">列宽:</span>
+          <select id="selWidth">
+            <option value="640px" selected>标准 (768px 比例)</option>
+            <option value="780px">适中 (920px 比例)</option>
+            <option value="100%">宽屏铺满</option>
+          </select>
+        </div>
+
+        <div class="ctrl-item">
+          <span class="ctrl-label">字号:</span>
+          <select id="selFont">
+            <option value="14px">紧凑 15px</option>
+            <option value="15px" selected>标准 16px</option>
+            <option value="16.5px">宽松 17px</option>
+          </select>
+        </div>
+
+        <label class="chk-item">
+          <input type="checkbox" id="chkHideAvatar" checked />
+          <span>隐藏 AI 头像 (左基准线直排)</span>
+        </label>
+
+        <label class="chk-item">
+          <input type="checkbox" id="chkClean" checked />
+          <span>纯净降噪</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Simulated Gemini Browser Viewport -->
+    <div id="viewport" class="viewport">
+      <!-- Left Sidebar -->
+      <aside id="sidebar" class="sidebar" style="width: 210px;">
+        <div class="nav-list">
+          <div class="brand-row">
+            <span>Gemini</span>
+            <span id="upsellBadge" class="upsell-badge hidden">Upgrade</span>
+          </div>
+          <div class="nav-section-label">Recents</div>
+          <div id="navActive" class="nav-item">后端知识梳理与协议栈</div>
+          <div class="nav-item muted">前沿模型发布追踪</div>
+          <div class="nav-item muted">优化 Gemini 网页端界面</div>
+          <div class="nav-item muted">对比订阅额度与任务成本</div>
+        </div>
+        <div id="locFooter" class="loc-footer hidden">📍 San Francisco, CA · 根据 IP 估算</div>
+      </aside>
+
+      <!-- Main Chat Area -->
+      <main id="canvas" class="canvas">
+        <div id="chatCol" class="chat-col" style="max-width: 640px;">
+          <!-- User Query Bubble -->
+          <div class="user-row">
+            <div id="userBubble" class="user-bubble">
+              说明网络分层协议各自解决的问题，并给出一个 HTTP 请求报文示例。
+            </div>
+          </div>
+
+          <!-- Model Response -->
+          <div class="ai-row">
+            <div id="aiAvatar" class="ai-avatar hidden">✦</div>
+
+            <div id="prose" class="prose" style="font-size: 15px; line-height: 1.72;">
+              <p>从当前后端开发实践来看，各核心网络层次的职责划分如下：</p>
+
+              <!-- Markdown Table -->
+              <div id="tableWrap" class="table-wrap">
+                <table id="mdTable">
+                  <thead>
+                    <tr id="trHead">
+                      <th>层次</th>
+                      <th>解决的问题</th>
+                      <th>开发中对应什么</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tBody">
+                    <tr>
+                      <td>IP</td>
+                      <td>数据发往哪台机器</td>
+                      <td>IP 地址、路由</td>
+                    </tr>
+                    <tr>
+                      <td>TCP</td>
+                      <td>提供可靠、有序的字节流</td>
+                      <td>连接、重传、流量控制</td>
+                    </tr>
+                    <tr>
+                      <td>TLS</td>
+                      <td>加密传输、验证服务端身份</td>
+                      <td>HTTPS 证书</td>
+                    </tr>
+                    <tr>
+                      <td>Web 框架</td>
+                      <td>将请求映射到业务处理逻辑</td>
+                      <td>FastAPI 路由、参数校验、依赖注入</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p>通常 HTTP/1.1、HTTP/2 使用 TCP；<strong>HTTP/3 使用基于 UDP 的 QUIC</strong>。例如：</p>
+
+              <!-- Code Block Card -->
+              <div id="codeCard" style="overflow: hidden;">
+                <div id="codeHeader" class="code-header">
+                  <span>&lt;/&gt; HTTP</span>
+                  <span>复制</span>
+                </div>
+                <pre id="codePre"><code><span style="color:#9d2867">POST</span> /runs HTTP/1.1
+<span style="color:#9a5b13">Content-Type:</span> application/json
+<span style="color:#9a5b13">Idempotency-Key:</span> request-123
+
+{"message": <span style="color:#1f7a3f">"查询附近的营养门诊"</span>}</code></pre>
+              </div>
+
+              <p>
+                HTTP 是无状态协议，意思是<strong>协议本身不要求服务端记住前一次请求的业务上下文</strong>。应用仍然可以通过 Cookie、Token 或数据库中的 <code id="inlineCode">session_id</code> 实现登录与会话状态。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Composer -->
+        <div id="composerWrap" class="composer-wrap" style="max-width: 640px;">
+          <div id="composerBox" class="composer-box">
+            <span style="opacity: 0.5;">+ &nbsp;Ask Gemini</span>
+            <span id="sendCircle" class="send-circle">↑</span>
+          </div>
+          <div id="disclaimer" class="disclaimer hidden">
+            Gemini 可能会显示不准确的信息（包括人物信息），请仔细核实其回答。
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      refined: true,
+      scheme: 'light',
+      width: '640px',
+      fontSize: '15px',
+      hideAvatar: true,
+      clean: true
+    };
+
+    const els = {
+      modeRefined: document.getElementById('modeRefined'),
+      modeNative: document.getElementById('modeNative'),
+      configRow: document.getElementById('configRow'),
+      selScheme: document.getElementById('selScheme'),
+      selWidth: document.getElementById('selWidth'),
+      selFont: document.getElementById('selFont'),
+      chkHideAvatar: document.getElementById('chkHideAvatar'),
+      chkClean: document.getElementById('chkClean'),
+      viewport: document.getElementById('viewport'),
+      sidebar: document.getElementById('sidebar'),
+      navActive: document.getElementById('navActive'),
+      upsellBadge: document.getElementById('upsellBadge'),
+      locFooter: document.getElementById('locFooter'),
+      canvas: document.getElementById('canvas'),
+      chatCol: document.getElementById('chatCol'),
+      composerWrap: document.getElementById('composerWrap'),
+      userBubble: document.getElementById('userBubble'),
+      aiAvatar: document.getElementById('aiAvatar'),
+      prose: document.getElementById('prose'),
+      tableWrap: document.getElementById('tableWrap'),
+      mdTable: document.getElementById('mdTable'),
+      trHead: document.getElementById('trHead'),
+      tBody: document.getElementById('tBody'),
+      codeCard: document.getElementById('codeCard'),
+      codeHeader: document.getElementById('codeHeader'),
+      inlineCode: document.getElementById('inlineCode'),
+      composerBox: document.getElementById('composerBox'),
+      sendCircle: document.getElementById('sendCircle'),
+      disclaimer: document.getElementById('disclaimer')
+    };
+
+    function render() {
+      els.modeRefined.className = state.refined ? 'mode-btn active' : 'mode-btn idle';
+      els.modeNative.className = !state.refined ? 'mode-btn active' : 'mode-btn idle';
+      els.configRow.style.opacity = state.refined ? '1' : '0.45';
+      els.configRow.style.pointerEvents = state.refined ? 'auto' : 'none';
+
+      if (!state.refined) {
+        els.viewport.style.fontFamily = 'Roboto, Arial, sans-serif';
+        els.sidebar.style.background = '#f0f4f9';
+        els.sidebar.style.color = '#1f1f1f';
+        els.sidebar.style.borderRight = 'none';
+        els.sidebar.style.width = '245px';
+        els.navActive.style.background = '#d3e3fd';
+        els.navActive.style.color = '#041e49';
+        els.navActive.style.borderRadius = '999px';
+        els.upsellBadge.classList.remove('hidden');
+        els.locFooter.classList.remove('hidden');
+
+        els.canvas.style.background = '#ffffff';
+        els.canvas.style.color = '#1f1f1f';
+        els.chatCol.style.maxWidth = '540px';
+        els.composerWrap.style.maxWidth = '540px';
+        els.prose.style.fontSize = '15px';
+        els.prose.style.lineHeight = '1.65';
+
+        els.userBubble.style.background = '#f0f4f9';
+        els.userBubble.style.color = '#1f1f1f';
+        els.userBubble.style.borderRadius = '20px 4px 20px 20px';
+        els.aiAvatar.classList.remove('hidden');
+
+        els.tableWrap.style.border = '1px solid #dfe3e8';
+        els.tableWrap.style.borderRadius = '12px';
+        els.trHead.style.background = '#f0f4f9';
+        els.mdTable.querySelectorAll('th').forEach((th) => {
+          th.style.padding = '10px 14px';
+          th.style.borderBottom = '1px solid #dfe3e8';
+          th.style.fontWeight = '500';
+        });
+        els.tBody.querySelectorAll('td').forEach((td) => {
+          td.style.padding = '10px 14px';
+          td.style.borderBottom = '1px solid #eef1f5';
+        });
+
+        els.codeCard.style.background = '#f0f4f9';
+        els.codeCard.style.borderRadius = '12px';
+        els.codeCard.style.border = 'none';
+        els.codeHeader.style.background = '#e2e7ee';
+        els.codeHeader.style.color = '#444746';
+        els.codeHeader.style.paddingBottom = '8px';
+
+        els.inlineCode.style.background = '#f0f4f9';
+        els.inlineCode.style.padding = '2px 5px';
+        els.inlineCode.style.borderRadius = '4px';
+
+        els.composerBox.style.background = '#f0f4f9';
+        els.composerBox.style.border = 'none';
+        els.composerBox.style.borderRadius = '28px';
+        els.composerBox.style.boxShadow = 'none';
+        els.sendCircle.style.background = '#d3e3fd';
+        els.sendCircle.style.color = '#041e49';
+        els.disclaimer.classList.remove('hidden');
+        return;
+      }
+
+      const dark = state.scheme === 'dark';
+      const p = dark
+        ? {
+            canvas: '#212121', sidebar: '#171717', active: '#2f2f2f', text: '#ececec',
+            sub: '#b4b4b4', bubble: '#2f2f2f', code: '#171717', inline: '#2f2f2f',
+            composer: '#2f2f2f', borderSubtle: 'rgba(255,255,255,0.06)',
+            borderDefault: 'rgba(255,255,255,0.12)', thBorder: 'rgba(255,255,255,0.18)',
+            tdBorder: 'rgba(255,255,255,0.08)', sendBg: '#ececec', sendFg: '#0d0d0d'
+          }
+        : {
+            canvas: '#ffffff', sidebar: '#f9f9f9', active: '#ececec', text: '#0d0d0d',
+            sub: '#5d5d5d', bubble: '#f4f4f4', code: '#f9f9f9', inline: '#ececec',
+            composer: '#ffffff', borderSubtle: 'rgba(0,0,0,0.06)',
+            borderDefault: 'rgba(0,0,0,0.10)', thBorder: 'rgba(0,0,0,0.15)',
+            tdBorder: 'rgba(0,0,0,0.07)', sendBg: '#0d0d0d', sendFg: '#ffffff'
+          };
+
+      els.viewport.style.fontFamily = 'ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
+      els.sidebar.style.background = p.sidebar;
+      els.sidebar.style.color = p.text;
+      els.sidebar.style.borderRight = `1px solid ${p.borderSubtle}`;
+      els.sidebar.style.width = '205px';
+      els.navActive.style.background = p.active;
+      els.navActive.style.color = p.text;
+      els.navActive.style.borderRadius = '8px';
+
+      els.upsellBadge.classList.toggle('hidden', state.clean);
+      els.locFooter.classList.toggle('hidden', state.clean);
+      els.disclaimer.classList.toggle('hidden', state.clean);
+
+      els.canvas.style.background = p.canvas;
+      els.canvas.style.color = p.text;
+      els.chatCol.style.maxWidth = state.width;
+      els.composerWrap.style.maxWidth = state.width;
+      els.prose.style.fontSize = state.fontSize;
+      els.prose.style.lineHeight = '1.72';
+
+      els.userBubble.style.background = p.bubble;
+      els.userBubble.style.color = p.text;
+      els.userBubble.style.borderRadius = '20px';
+
+      els.aiAvatar.classList.toggle('hidden', state.hideAvatar);
+
+      els.tableWrap.style.border = 'none';
+      els.tableWrap.style.borderRadius = '0';
+      els.trHead.style.background = 'transparent';
+      els.mdTable.querySelectorAll('th').forEach((th) => {
+        th.style.padding = '9px 16px 9px 0';
+        th.style.borderBottom = `1px solid ${p.thBorder}`;
+        th.style.fontWeight = '600';
+      });
+      els.tBody.querySelectorAll('tr').forEach((tr) => {
+        tr.querySelectorAll('td').forEach((td) => {
+          td.style.padding = '9px 16px 9px 0';
+          td.style.borderBottom = `1px solid ${p.tdBorder}`;
+        });
+      });
+
+      els.codeCard.style.background = p.code;
+      els.codeCard.style.borderRadius = '12px';
+      els.codeCard.style.border = `1px solid ${p.borderSubtle}`;
+      els.codeHeader.style.background = p.code;
+      els.codeHeader.style.color = p.sub;
+      els.codeHeader.style.paddingBottom = '4px';
+
+      els.inlineCode.style.background = p.inline;
+      els.inlineCode.style.padding = '2px 6px';
+      els.inlineCode.style.borderRadius = '5px';
+      els.inlineCode.style.fontFamily = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+      els.inlineCode.style.fontSize = '0.875em';
+
+      els.composerBox.style.background = p.composer;
+      els.composerBox.style.border = `1px solid ${p.borderDefault}`;
+      els.composerBox.style.borderRadius = '26px';
+      els.composerBox.style.boxShadow = dark ? '0 4px 20px rgba(0,0,0,0.28)' : '0 4px 16px rgba(0,0,0,0.05)';
+      els.sendCircle.style.background = p.sendBg;
+      els.sendCircle.style.color = p.sendFg;
+    }
+
+    els.modeRefined.onclick = () => { state.refined = true; render(); };
+    els.modeNative.onclick = () => { state.refined = false; render(); };
+    els.selScheme.onchange = (e) => { state.scheme = e.target.value; render(); };
+    els.selWidth.onchange = (e) => { state.width = e.target.value; render(); };
+    els.selFont.onchange = (e) => { state.fontSize = e.target.value; render(); };
+    els.chkHideAvatar.onchange = (e) => { state.hideAvatar = e.target.checked; render(); };
+    els.chkClean.onchange = (e) => { state.clean = e.target.checked; render(); };
+
+    render();
+  </script>
+</body>
+</html>
