@@ -119,9 +119,57 @@ html[data-rg-enabled="true"] body {
   --gem-sys-color--surface-container-highest: var(--rg-bg-active) !important;
   --gem-sys-color--on-surface: var(--rg-text-primary) !important;
   --gem-sys-color--on-surface-variant: var(--rg-text-secondary) !important;
+  --gem-sys-color--outline: var(--rg-border-default) !important;
+  --gem-sys-color--outline-variant: var(--rg-border-subtle) !important;
+  --mdc-icon-button-icon-color: var(--rg-text-secondary) !important;
+  --mat-icon-color: var(--rg-text-secondary) !important;
   --mat-sidenav-content-background-color: var(--rg-bg-canvas) !important;
   --mat-sidenav-container-background-color: var(--rg-bg-sidebar) !important;
   --mat-app-background-color: var(--rg-bg-canvas) !important;
+}
+
+/* Ensure wordmark, sidebar icons, & composer controls follow theme even when forcing Dark over Light */
+html[data-rg-enabled="true"] :is(
+  .gemini-sidenav-text,
+  .input-area-switch-label,
+  .model-picker-container button
+) {
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  bard-sidenav mat-icon,
+  bard-sidenav a,
+  bard-sidenav button:not(.mdc-button--unelevated),
+  bard-sidenav :has(> a.action-link),
+  bard-sidenav [class*="disclaimer"],
+  bard-sidenav [class*="activity"],
+  input-area-v2 button:not(.send-button),
+  input-area-v2 mat-icon
+) {
+  color: var(--rg-text-secondary) !important;
+}
+
+/* Tonal sidebar footer pill ("下载应用") & primary sign-in pill contrast in both themes */
+html[data-rg-enabled="true"] bard-sidenav :is(
+  button.mat-tonal-button,
+  .mavatar-get-app-button button
+) {
+  background-color: var(--rg-bg-active) !important;
+  color: var(--rg-text-primary) !important;
+  border: 1px solid var(--rg-border-subtle) !important;
+}
+
+html[data-rg-enabled="true"] bard-sidenav :is(
+  button.mat-tonal-button,
+  .mavatar-get-app-button button
+) :is(.mdc-button__label, .gds-body-m, mat-icon) {
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] bard-sidenav button.mdc-button--unelevated,
+html[data-rg-enabled="true"] bard-sidenav button.mdc-button--unelevated * {
+  color: #041e49 !important;
 }
 
 html[data-rg-enabled="true"] chat-app,
@@ -140,16 +188,16 @@ html[data-rg-enabled="true"] #chat-history {
   color: var(--rg-text-primary) !important;
 }
 
-/* Remove Gemini's hazy blue-gray gradient scrims & blurred halo blobs */
+/* Remove Gemini's hazy blue-gray gradient scrims & blurred halo blobs
+   (Keep `input-container` excluded so Section 9 can paint a clean canvas bottom dock!) */
 html[data-rg-enabled="true"] chat-window::before,
-html[data-rg-enabled="true"] .input-gradient,
+html[data-rg-enabled="true"] :not(input-container).input-gradient,
 html[data-rg-enabled="true"] .bottom-gradient,
 html[data-rg-enabled="true"] .gradient-container,
 html[data-rg-enabled="true"] .scroll-gradient,
 html[data-rg-enabled="true"] .header-gradient,
 html[data-rg-enabled="true"] .luminous-expand-fade,
-html[data-rg-enabled="true"] [class*="gradient-overlay"],
-html[data-rg-enabled="true"] input-container,
+html[data-rg-enabled="true"] :not(input-container)[class*="gradient-overlay"],
 html[data-rg-enabled="true"] input-container::before,
 html[data-rg-enabled="true"] .input-area-container::before,
 html[data-rg-enabled="true"] .input-area-container::after {
@@ -426,7 +474,9 @@ html[data-rg-enabled="true"] bard-sidenav :is(
       guarantees 100% crisp icons with zero broken glyphs.
    ========================================================================== */
 
-/* Clean ChatGPT-style 32x32 8px-rounded icon buttons (replaces bulky Material circles) */
+/* Clean ChatGPT-style 32x32 8px-rounded icon buttons (replaces bulky Material circles)
+   IMPORTANT: Never set `display: inline-flex !important` here, or Gemini's hidden
+   collapsed-state `side-nav-sparkle-button button` (`display: none`) becomes visible! */
 html[data-rg-enabled="true"] :is(
   message-actions button,
   .message-actions button,
@@ -440,14 +490,15 @@ html[data-rg-enabled="true"] :is(
   code-block .code-block-decoration button,
   .code-block .code-block-decoration button,
   side-nav-menu-button button,
-  .side-nav-menu-button button,
+  .side-nav-menu-button button:not(side-nav-sparkle-button button),
   button[data-test-id="side-nav-menu-button"],
-  bard-sidenav .close-sidenav-button,
+  bard-sidenav .close-sidenav-button button,
+  bard-sidenav button.close-sidenav-button,
   bard-sidenav button[aria-label*="sidebar" i],
   bard-sidenav button[aria-label*="菜单"],
   bard-sidenav button[aria-label*="边栏"],
   search-nav-button button
-) {
+):not([hidden]) {
   --mdc-icon-button-state-layer-size: 32px !important;
   --mdc-icon-button-icon-size: 18px !important;
   width: 32px !important;
@@ -459,7 +510,6 @@ html[data-rg-enabled="true"] :is(
   color: var(--rg-text-secondary) !important;
   box-shadow: none !important;
   overflow: visible !important;
-  display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   transition: background-color 0.14s ease, color 0.14s ease !important;
@@ -478,9 +528,10 @@ html[data-rg-enabled="true"] :is(
   code-block .code-block-decoration button,
   .code-block .code-block-decoration button,
   side-nav-menu-button button,
-  .side-nav-menu-button button,
+  .side-nav-menu-button button:not(side-nav-sparkle-button button),
   button[data-test-id="side-nav-menu-button"],
-  bard-sidenav .close-sidenav-button,
+  bard-sidenav .close-sidenav-button button,
+  bard-sidenav button.close-sidenav-button,
   bard-sidenav button[aria-label*="sidebar" i],
   bard-sidenav button[aria-label*="菜单"],
   bard-sidenav button[aria-label*="边栏"],
@@ -525,7 +576,8 @@ html[data-rg-enabled="true"] :is(
   button[data-test-id="copy-button"] mat-icon,
   code-block .code-block-decoration button mat-icon,
   side-nav-menu-button button mat-icon,
-  .side-nav-menu-button button mat-icon,
+  .side-nav-menu-button button:not(side-nav-sparkle-button button) mat-icon,
+  bard-sidenav .close-sidenav-button mat-icon,
   search-nav-button button mat-icon
 ) {
   font-size: 18px !important;
@@ -542,7 +594,7 @@ html[data-rg-enabled="true"] :is(
   copy-button button svg,
   code-block .code-block-decoration button svg,
   side-nav-menu-button button svg,
-  .side-nav-menu-button button svg
+  .side-nav-menu-button button:not(side-nav-sparkle-button button) svg
 ) {
   width: 18px !important;
   height: 18px !important;
@@ -560,16 +612,21 @@ html[data-rg-enabled="true"] :is(
   margin-inline-start: 0 !important;
 }
 
+html[data-rg-enabled="true"] message-actions {
+  padding-left: 0 !important;
+  padding-inline-start: 0 !important;
+  margin-left: -7px !important;
+  margin-top: 2px !important;
+}
+
 html[data-rg-enabled="true"] :is(
-  message-actions,
   .message-actions,
   .actions-container-v2,
   .buttons-container-v2
 ) {
   padding-left: 0 !important;
   padding-inline-start: 0 !important;
-  margin-left: -6px !important;
-  margin-top: 2px !important;
+  margin-left: 0 !important;
   gap: 2px !important;
 }
 
@@ -720,25 +777,30 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) li > :is(ul, o
   padding-inline-start: 1.25rem !important;
 }
 
-/* Standard ChatGPT bullet hierarchy: solid disc -> circle -> square */
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) ul {
+/* Standard ChatGPT bullet & ordered-list hierarchy:
+   Explicitly target `> li` AND `li::marker { content: normal !important }` because
+   live Gemini's `enable-lr26-markdown-styling` sets `ol > li::marker { content: "" }`! */
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :is(ul, ul > li) {
   list-style-type: disc !important;
+  list-style-position: outside !important;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) ul ul {
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :is(ul ul, ul ul > li) {
   list-style-type: circle !important;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) ul ul ul {
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :is(ul ul ul, ul ul ul > li) {
   list-style-type: square !important;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) ol {
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :is(ol, ol > li) {
   list-style-type: decimal !important;
+  list-style-position: outside !important;
 }
 
 /* List items: reset Gemini's wide li padding so marker sits crisp 3px before text */
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) li {
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) li {
+  display: list-item !important;
   font-size: var(--rg-font-size, 16px) !important;
   line-height: 1.7 !important;
   color: var(--rg-text-primary) !important;
@@ -750,8 +812,21 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) li {
   padding-inline-start: 0.2rem !important;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) li::marker {
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) li::before {
+  content: none !important;
+  display: none !important;
+}
+
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) li::marker {
+  content: normal !important;
   color: var(--rg-text-secondary) !important;
+}
+
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) ol > li::marker {
+  content: normal !important;
+  color: var(--rg-text-primary) !important;
+  font-weight: 500 !important;
+  font-variant-numeric: tabular-nums !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) li > p {
@@ -884,6 +959,10 @@ html[data-rg-enabled="true"] .user-query-container .query-text-box {
   width: fit-content !important;
   box-shadow: none !important;
   border: none !important;
+}
+
+html[data-rg-enabled="true"] .user-query-bubble-with-background:is(.luminous-collapsed, :has(button)) {
+  padding-right: 42px !important;
 }
 
 html[data-rg-enabled="true"] user-query .query-text,
@@ -1096,7 +1175,7 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) > pre {
   overflow-x: auto !important;
 }
 
-html[data-rg-enabled="true"] :is(code-block pre, code-block code, code-block code.code-container, pre code, code-block .hljs) {
+html[data-rg-enabled="true"] :is(code-block code, code-block code.code-container, pre code, code-block .hljs) {
   font-family: var(--rg-font-mono) !important;
   font-size: 13.5px !important;
   line-height: 1.6 !important;
@@ -1191,13 +1270,26 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, message-conten
    9. Floating Capsule Composer (Elevated Above Bottom Edge, Single Crisp Layer)
    ========================================================================== */
 
-/* Lift composer comfortably off the bottom viewport edge (matches ChatGPT's ~22px gap) */
-html[data-rg-enabled="true"] input-container {
+/* Lift composer comfortably off the bottom viewport edge & mask scrolling text cleanly
+   (Match `.input-gradient` & `.input-gradient-overlay` explicitly because Angular adds
+   `.input-gradient` to `<input-container>` dynamically once a conversation begins!) */
+html[data-rg-enabled="true"] input-container,
+html[data-rg-enabled="true"] input-container.input-gradient,
+html[data-rg-enabled="true"] input-container.input-gradient-overlay {
   max-width: none !important;
   width: 100% !important;
-  padding-top: 8px !important;
+  padding-top: 16px !important;
   padding-bottom: 22px !important;
   margin-bottom: 0 !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+  background-color: transparent !important;
+  background-image: linear-gradient(
+    180deg,
+    transparent 0px,
+    var(--rg-bg-canvas) 16px,
+    var(--rg-bg-canvas) 100%
+  ) !important;
 }
 
 html[data-rg-enabled="true"] input-container .input-area-container {
@@ -1258,7 +1350,10 @@ html[data-rg-enabled="true"] rich-textarea .ql-editor {
 html[data-rg-enabled="true"] :is(
   button.scroll-to-bottom-button,
   .scroll-to-bottom-button button,
-  [data-test-id="scroll-to-bottom-button"]
+  [class*="scroll-to-bottom"] button,
+  button[data-test-id="scroll-to-bottom-button"],
+  chat-window button[aria-label*="底部"],
+  chat-window button[aria-label*="bottom"]
 ) {
   background-color: var(--rg-bg-elevated) !important;
   color: var(--rg-text-primary) !important;

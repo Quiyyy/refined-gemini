@@ -16,7 +16,7 @@ fs.mkdirSync(outDir, { recursive: true });
 const userScript = `// ==UserScript==
 // @name         Refined Gemini (1:1 ChatGPT Web UI Alignment)
 // @namespace    https://github.com/Quiyyy/refined-gemini
-// @version      1.0.1
+// @version      1.0.2
 // @description  1:1 对齐 ChatGPT 网页端视觉与排版基准：纯白/深灰画布、现代中英混排字体栈、无竖框左对齐表格、柔和圆角代码卡片与极简降噪布局。
 // @author       Quiyyy
 // @license      MIT
