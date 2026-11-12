@@ -50,7 +50,8 @@
 }
 
 body {
-  width: 344px;
+  width: 340px;
+  max-width: 100%;
   overflow-x: hidden;
   background-color: var(--bg);
   color: var(--text);

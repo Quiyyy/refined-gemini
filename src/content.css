@@ -8,7 +8,7 @@
  */
 
 /* ==========================================================================
-   1. Design Tokens (1:1 ChatGPT Web Light & Dark Palettes)
+   1. Design Tokens (1:1 Official OpenAI ChatGPT Web Light & Dark Palettes)
    ========================================================================== */
 
 html[data-rg-enabled="true"] {
@@ -26,35 +26,47 @@ html[data-rg-enabled="true"] {
   --rg-bg-canvas: #ffffff;
   --rg-bg-sidebar: #f9f9f9;
   --rg-bg-active: #ececec;
-  --rg-bg-hover: rgba(0, 0, 0, 0.05);
+  --rg-bg-hover: rgba(13, 13, 13, 0.05);
   --rg-bg-user-bubble: #f4f4f4;
   --rg-bg-code-card: #f9f9f9;
-  --rg-bg-inline-code: #ececec;
+  --rg-bg-inline-code: rgba(13, 13, 13, 0.048);
+  --rg-inline-code-ring: rgba(13, 13, 13, 0.085);
   --rg-bg-composer: #ffffff;
   --rg-bg-elevated: #ffffff;
 
   --rg-text-primary: #0d0d0d;
   --rg-text-strong: #0d0d0d;
   --rg-text-secondary: #5d5d5d;
-  --rg-text-muted: #8e8ea0;
+  --rg-text-muted: #8f8f8f;
+  --rg-link-color: #0169cc;
 
-  --rg-border-hairline: rgba(0, 0, 0, 0.04);
-  --rg-border-subtle: rgba(0, 0, 0, 0.06);
-  --rg-border-default: rgba(0, 0, 0, 0.11);
-  --rg-border-focus: rgba(0, 0, 0, 0.20);
-  --rg-table-head-border: rgba(0, 0, 0, 0.14);
-  --rg-table-row-border: rgba(0, 0, 0, 0.07);
+  /* ChatGPT Monochrome Primary CTA & Send Circle */
+  --rg-cta-bg: #0d0d0d;
+  --rg-cta-fg: #ffffff;
+  --rg-cta-bg-hover: #2f2f2f;
+  --rg-send-disabled-bg: #d7d7d7;
+  --rg-send-disabled-fg: #f4f4f4;
 
-  /* 1:1 ChatGPT Light Syntax Highlighting Palette (high contrast on #F9F9F9) */
+  --rg-border-hairline: rgba(13, 13, 13, 0.05);
+  --rg-border-subtle: rgba(13, 13, 13, 0.07);
+  --rg-border-code: rgba(13, 13, 13, 0.08);
+  --rg-border-default: rgba(13, 13, 13, 0.11);
+  --rg-border-focus: rgba(13, 13, 13, 0.22);
+  --rg-blockquote-border: rgba(13, 13, 13, 0.16);
+  --rg-table-head-border: rgba(13, 13, 13, 0.15);
+  --rg-table-row-border: rgba(13, 13, 13, 0.08);
+
+  /* Official OpenAI ChatGPT Light Syntax Highlighting Palette (apps-sdk-ui) */
   --rg-syn-text: #0d0d0d;
-  --rg-syn-keyword: #ad235e;
-  --rg-syn-attr: #9a5b13;
-  --rg-syn-string: #16794b;
-  --rg-syn-number: #0550ae;
-  --rg-syn-title: #0969da;
-  --rg-syn-comment: #6e7781;
+  --rg-syn-keyword: #0169cc;   /* --syntax2: def, import, if, return, const */
+  --rg-syn-title: #c0660d;     /* --syntax1: function/class names, builtins, types */
+  --rg-syn-string: #008635;    /* --syntax3: strings, docstrings, regex */
+  --rg-syn-attr: #d63384;      /* --syntax4: properties, decorators, variables, tags */
+  --rg-syn-number: #8046d9;    /* --syntax5: numbers, booleans, literals */
+  --rg-syn-comment: rgba(13, 13, 13, 0.50);
+  --rg-syn-punct: rgba(13, 13, 13, 0.68);
 
-  --rg-composer-shadow: 0 2px 12px rgba(0, 0, 0, 0.04), 0 0 1px rgba(0, 0, 0, 0.06);
+  --rg-composer-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), 0 0 1px rgba(0, 0, 0, 0.08);
   --rg-scrollbar-thumb: rgba(0, 0, 0, 0.15);
   --rg-scrollbar-thumb-hover: rgba(0, 0, 0, 0.26);
 }
@@ -64,41 +76,53 @@ html[data-rg-enabled="true"][data-rg-theme="dark"] {
   --rg-bg-canvas: #212121;
   --rg-bg-sidebar: #171717;
   --rg-bg-active: #2f2f2f;
-  --rg-bg-hover: rgba(255, 255, 255, 0.065);
-  --rg-bg-user-bubble: #2f2f2f;
+  --rg-bg-hover: rgba(255, 255, 255, 0.07);
+  --rg-bg-user-bubble: #303030;
   --rg-bg-code-card: #171717;
-  --rg-bg-inline-code: #2f2f2f;
-  --rg-bg-composer: #2f2f2f;
+  --rg-bg-inline-code: rgba(255, 255, 255, 0.10);
+  --rg-inline-code-ring: rgba(255, 255, 255, 0.12);
+  --rg-bg-composer: #303030;
   --rg-bg-elevated: #2f2f2f;
 
   --rg-text-primary: #ececec;
   --rg-text-strong: #ffffff;
   --rg-text-secondary: #b4b4b4;
   --rg-text-muted: #8e8ea0;
+  --rg-link-color: #339cff;
+
+  /* ChatGPT Monochrome Primary CTA & Send Circle (Dark) */
+  --rg-cta-bg: #ffffff;
+  --rg-cta-fg: #0d0d0d;
+  --rg-cta-bg-hover: #e3e3e3;
+  --rg-send-disabled-bg: #424242;
+  --rg-send-disabled-fg: #212121;
 
   --rg-border-hairline: rgba(255, 255, 255, 0.05);
-  --rg-border-subtle: rgba(255, 255, 255, 0.07);
+  --rg-border-subtle: rgba(255, 255, 255, 0.08);
+  --rg-border-code: rgba(255, 255, 255, 0.10);
   --rg-border-default: rgba(255, 255, 255, 0.12);
   --rg-border-focus: rgba(255, 255, 255, 0.24);
+  --rg-blockquote-border: rgba(255, 255, 255, 0.22);
   --rg-table-head-border: rgba(255, 255, 255, 0.18);
-  --rg-table-row-border: rgba(255, 255, 255, 0.08);
+  --rg-table-row-border: rgba(255, 255, 255, 0.09);
 
-  /* 1:1 ChatGPT Dark Syntax Highlighting Palette */
+  /* Official OpenAI ChatGPT Dark Syntax Highlighting Palette (apps-sdk-ui) */
   --rg-syn-text: #ececec;
-  --rg-syn-keyword: #ff7b72;
-  --rg-syn-attr: #df9b52;
-  --rg-syn-string: #7ee787;
-  --rg-syn-number: #79c0ff;
-  --rg-syn-title: #d2a8ff;
-  --rg-syn-comment: #8b949e;
+  --rg-syn-keyword: #66b5ff;
+  --rg-syn-title: #ffe48c;
+  --rg-syn-string: #40c977;
+  --rg-syn-attr: #ff66ad;
+  --rg-syn-number: #ad7bf9;
+  --rg-syn-comment: rgba(255, 255, 255, 0.50);
+  --rg-syn-punct: rgba(255, 255, 255, 0.68);
 
-  --rg-composer-shadow: 0 4px 20px rgba(0, 0, 0, 0.26);
+  --rg-composer-shadow: 0 4px 20px rgba(0, 0, 0, 0.28), 0 0 1px rgba(255, 255, 255, 0.08);
   --rg-scrollbar-thumb: rgba(255, 255, 255, 0.16);
   --rg-scrollbar-thumb-hover: rgba(255, 255, 255, 0.28);
 }
 
 /* ==========================================================================
-   2. Material 3 Surface Overrides & Gradient / Halo Removal
+   2. Material 3 Surface Overrides, Monochrome Chrome & Zero-State Alignment
    ========================================================================== */
 
 html[data-rg-enabled="true"],
@@ -134,42 +158,274 @@ html[data-rg-enabled="true"] :is(
   .input-area-switch-label,
   .model-picker-container button
 ) {
+  font-family: var(--rg-font-sans) !important;
   color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] .gemini-sidenav-text {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Monochrome top-left Gemini mark (eliminates rainbow Google branding clash) */
+html[data-rg-enabled="true"] side-nav-sparkle-button img.sparkle-image,
+html[data-rg-enabled="true"] .sparkle-image-container img.sparkle-image {
+  filter: grayscale(1) contrast(1.22) brightness(0.35) !important;
+  opacity: 0.88 !important;
+}
+
+html[data-rg-enabled="true"][data-rg-theme="dark"] side-nav-sparkle-button img.sparkle-image,
+html[data-rg-enabled="true"][data-rg-theme="dark"] .sparkle-image-container img.sparkle-image {
+  filter: grayscale(1) brightness(2.3) contrast(1.1) !important;
+  opacity: 0.92 !important;
 }
 
 html[data-rg-enabled="true"] :is(
   bard-sidenav mat-icon,
-  bard-sidenav a,
+  bard-sidenav a:not(.mdc-button--unelevated):not([href*="ServiceLogin"]),
   bard-sidenav button:not(.mdc-button--unelevated),
   bard-sidenav :has(> a.action-link),
   bard-sidenav [class*="disclaimer"],
   bard-sidenav [class*="activity"],
-  input-area-v2 button:not(.send-button),
-  input-area-v2 mat-icon
+  input-area-v2 button:not(.send-button):not(gem-icon-button.send-button button),
+  input-area-v2 :not(.send-button) > gem-icon > mat-icon
 ) {
   color: var(--rg-text-secondary) !important;
 }
 
-/* Tonal sidebar footer pill ("下载应用") & primary sign-in pill contrast in both themes */
+/* Clean sidebar activity note ("登录即可保存活动记录") — remove noisy dotted underline */
 html[data-rg-enabled="true"] bard-sidenav :is(
-  button.mat-tonal-button,
-  .mavatar-get-app-button button
+  a.action-link,
+  [class*="activity"] a,
+  [class*="disclaimer"] a
 ) {
-  background-color: var(--rg-bg-active) !important;
-  color: var(--rg-text-primary) !important;
-  border: 1px solid var(--rg-border-subtle) !important;
+  text-decoration: none !important;
+  border-bottom: none !important;
+}
+
+/* ChatGPT Monochrome Primary CTA Pills ("登录" in Top Bar, OneGoogleBar & Sidebar) */
+html[data-rg-enabled="true"] :is(
+  top-bar-actions a[href*="ServiceLogin"],
+  top-bar-actions .mdc-button--unelevated,
+  top-bar-actions .gem-button-type-primary button,
+  top-bar-actions .gem-button-type-filled button,
+  .boqOnegoogleliteOgbOneGoogleBar a[href*="ServiceLogin"],
+  #gb a[href*="ServiceLogin"],
+  a[href*="accounts.google.com/ServiceLogin"]:not(bard-sidenav [class*="activity"] a),
+  bard-sidenav button.mdc-button--unelevated,
+  bard-sidenav a.mdc-button--unelevated,
+  bard-sidenav .gem-button-type-primary button,
+  bard-sidenav .gem-button-type-filled button
+) {
+  background: var(--rg-cta-bg) !important;
+  background-color: var(--rg-cta-bg) !important;
+  color: var(--rg-cta-fg) !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-decoration: none !important;
+  transition: background-color 0.14s ease, opacity 0.14s ease !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  top-bar-actions a[href*="ServiceLogin"],
+  top-bar-actions .mdc-button--unelevated,
+  .boqOnegoogleliteOgbOneGoogleBar a[href*="ServiceLogin"],
+  #gb a[href*="ServiceLogin"]
+) {
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 15px !important;
+}
+
+/* Keep legacy OneGoogleBar sign-in hidden whenever Angular top-bar-actions renders its own sign-in pill */
+html[data-rg-enabled="true"] body:has(top-bar-actions .mdc-button--unelevated) .boqOnegoogleliteOgbOneGoogleBar a[href*="ServiceLogin"] {
+  display: none !important;
 }
 
 html[data-rg-enabled="true"] bard-sidenav :is(
-  button.mat-tonal-button,
-  .mavatar-get-app-button button
-) :is(.mdc-button__label, .gds-body-m, mat-icon) {
+  button.mdc-button--unelevated,
+  a.mdc-button--unelevated,
+  .gem-button-type-primary button,
+  .gem-button-type-filled button
+) {
+  height: 36px !important;
+  min-height: 36px !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  top-bar-actions a[href*="ServiceLogin"],
+  top-bar-actions .mdc-button--unelevated,
+  .boqOnegoogleliteOgbOneGoogleBar a[href*="ServiceLogin"],
+  #gb a[href*="ServiceLogin"],
+  a[href*="accounts.google.com/ServiceLogin"]:not(bard-sidenav [class*="activity"] a),
+  bard-sidenav button.mdc-button--unelevated,
+  bard-sidenav a.mdc-button--unelevated
+) *:not(mat-icon):not(.mat-icon) {
+  color: var(--rg-cta-fg) !important;
+  font-family: var(--rg-font-sans) !important;
+  font-weight: 500 !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  top-bar-actions a[href*="ServiceLogin"],
+  top-bar-actions .mdc-button--unelevated,
+  bard-sidenav button.mdc-button--unelevated,
+  bard-sidenav a.mdc-button--unelevated
+) mat-icon {
+  color: var(--rg-cta-fg) !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  top-bar-actions a[href*="ServiceLogin"],
+  top-bar-actions .mdc-button--unelevated,
+  .boqOnegoogleliteOgbOneGoogleBar a[href*="ServiceLogin"],
+  #gb a[href*="ServiceLogin"],
+  a[href*="accounts.google.com/ServiceLogin"]:not(bard-sidenav [class*="activity"] a),
+  bard-sidenav button.mdc-button--unelevated,
+  bard-sidenav a.mdc-button--unelevated
+):hover {
+  background: var(--rg-cta-bg-hover) !important;
+  background-color: var(--rg-cta-bg-hover) !important;
+}
+
+/* Secondary Outline Pills ("下载应用" in Top Bar & Sidebar) */
+html[data-rg-enabled="true"] :is(
+  bard-sidenav button.mat-tonal-button,
+  bard-sidenav .mavatar-get-app-button button,
+  top-bar-actions desktop-get-app-button button,
+  top-bar-actions button.mat-tonal-button,
+  top-bar-actions .gem-button-type-tonal button
+) {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: var(--rg-text-primary) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 999px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  box-shadow: none !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  bard-sidenav button.mat-tonal-button,
+  bard-sidenav .mavatar-get-app-button button,
+  top-bar-actions desktop-get-app-button button,
+  top-bar-actions button.mat-tonal-button,
+  top-bar-actions .gem-button-type-tonal button
+):hover {
+  background-color: var(--rg-bg-hover) !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  bard-sidenav button.mat-tonal-button,
+  bard-sidenav .mavatar-get-app-button button,
+  top-bar-actions desktop-get-app-button button,
+  top-bar-actions button.mat-tonal-button,
+  top-bar-actions .gem-button-type-tonal button
+) :is(.mdc-button__label, .gds-body-m, .gds-label-l, span):not(mat-icon):not(.mat-icon) {
+  color: var(--rg-text-primary) !important;
+  font-family: var(--rg-font-sans) !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  bard-sidenav button.mat-tonal-button,
+  bard-sidenav .mavatar-get-app-button button,
+  top-bar-actions desktop-get-app-button button,
+  top-bar-actions button.mat-tonal-button,
+  top-bar-actions .gem-button-type-tonal button
+) mat-icon {
   color: var(--rg-text-primary) !important;
 }
 
-html[data-rg-enabled="true"] bard-sidenav button.mdc-button--unelevated,
-html[data-rg-enabled="true"] bard-sidenav button.mdc-button--unelevated * {
-  color: #041e49 !important;
+/* Neutral Top-Bar Links ("关于 Gemini", "订阅", "企业版" — replaces Google royal blue #0B57D0) */
+html[data-rg-enabled="true"] top-bar-actions :is(
+  .signed-out-buttons a.mdc-button:not(.mdc-button--unelevated),
+  a.top-bar-button:not(.mdc-button--unelevated):not([href*="ServiceLogin"])
+) {
+  color: var(--rg-text-secondary) !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+  height: 32px !important;
+  padding: 0 10px !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+}
+
+html[data-rg-enabled="true"] top-bar-actions :is(
+  .signed-out-buttons a.mdc-button:not(.mdc-button--unelevated),
+  a.top-bar-button:not(.mdc-button--unelevated):not([href*="ServiceLogin"])
+) .mdc-button__label {
+  color: inherit !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+}
+
+html[data-rg-enabled="true"] top-bar-actions :is(
+  .signed-out-buttons a.mdc-button:not(.mdc-button--unelevated),
+  a.top-bar-button:not(.mdc-button--unelevated):not([href*="ServiceLogin"])
+):hover {
+  color: var(--rg-text-primary) !important;
+  background-color: var(--rg-bg-hover) !important;
+}
+
+/* Logged-in Top-Left Model Switcher (`Gemini 2.5 Pro ▾` -> ChatGPT `ChatGPT 4o ⌄` ghost pill) */
+html[data-rg-enabled="true"] bard-sidenav-content > bard-mode-switcher button,
+html[data-rg-enabled="true"] header bard-mode-switcher button {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 6px 10px !important;
+  height: 36px !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: var(--rg-text-primary) !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] bard-sidenav-content > bard-mode-switcher button:hover,
+html[data-rg-enabled="true"] header bard-mode-switcher button:hover {
+  background-color: var(--rg-bg-hover) !important;
+}
+
+/* Zero-State Greeting ("嗨，我是 Gemini..." -> ChatGPT 28px 600 Semibold Monochrome Heading) */
+html[data-rg-enabled="true"] modular-zero-state .blur-bg,
+html[data-rg-enabled="true"] .zero-state-container .blur-bg,
+html[data-rg-enabled="true"] .diwali-stage-overlay {
+  display: none !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  modular-zero-state h1,
+  modular-zero-state .gds-display-m,
+  modular-zero-state .gds-display-l,
+  modular-zero-state .message-text,
+  .zero-state-container h1,
+  .zero-state-container .gds-display-m,
+  .zero-state-container .message-text,
+  .assistant-messages-primary-container h1,
+  .assistant-messages-primary-container .message-text
+) {
+  font-family: var(--rg-font-sans) !important;
+  font-size: 28px !important;
+  font-weight: 600 !important;
+  line-height: 1.28 !important;
+  letter-spacing: -0.02em !important;
+  color: var(--rg-text-primary) !important;
+  -webkit-text-fill-color: var(--rg-text-primary) !important;
+  background: none !important;
+  background-image: none !important;
 }
 
 html[data-rg-enabled="true"] chat-app,
@@ -467,6 +723,18 @@ html[data-rg-enabled="true"] bard-sidenav :is(
   border-radius: 8px !important;
 }
 
+/* Ensure conversation text sections never spill into the 53px collapsed icon rail */
+html[data-rg-enabled="true"] bard-sidenav:has(side-navigation-content > div.collapsed) :is(
+  expandable-section,
+  conversations-list,
+  .chat-history,
+  .rg-sidebar-history,
+  [data-test-id="chats-expandable-section"],
+  [data-test-id="all-conversations"]
+) {
+  display: none !important;
+}
+
 /* ==========================================================================
    4. Icon Buttons Refinement (Sidebar Toggle, Copy Button, Action Bar)
       NOTE: Never override mat-icon font-family! Gemini uses subsetted icon
@@ -482,6 +750,7 @@ html[data-rg-enabled="true"] :is(
   .message-actions button,
   .actions-container-v2 button,
   .buttons-container-v2 button,
+  user-query .luminous-actions-container button,
   copy-button button,
   button[data-test-id="copy-button"],
   thumb-up-button button,
@@ -520,6 +789,7 @@ html[data-rg-enabled="true"] :is(
   .message-actions button,
   .actions-container-v2 button,
   .buttons-container-v2 button,
+  user-query .luminous-actions-container button,
   copy-button button,
   button[data-test-id="copy-button"],
   thumb-up-button button,
@@ -546,6 +816,7 @@ html[data-rg-enabled="true"] :is(
   message-actions,
   .message-actions,
   .buttons-container-v2,
+  user-query .luminous-actions-container,
   copy-button,
   code-block .code-block-decoration,
   side-nav-menu-button,
@@ -559,6 +830,7 @@ html[data-rg-enabled="true"] :is(
   message-actions,
   .message-actions,
   .buttons-container-v2,
+  user-query .luminous-actions-container,
   copy-button,
   code-block .code-block-decoration,
   side-nav-menu-button,
@@ -572,6 +844,7 @@ html[data-rg-enabled="true"] :is(
 html[data-rg-enabled="true"] :is(
   message-actions button mat-icon,
   .buttons-container-v2 button mat-icon,
+  user-query .luminous-actions-container button mat-icon,
   copy-button button mat-icon,
   button[data-test-id="copy-button"] mat-icon,
   code-block .code-block-decoration button mat-icon,
@@ -591,6 +864,7 @@ html[data-rg-enabled="true"] :is(
 html[data-rg-enabled="true"] :is(
   message-actions button svg,
   .buttons-container-v2 button svg,
+  user-query .luminous-actions-container button svg,
   copy-button button svg,
   code-block .code-block-decoration button svg,
   side-nav-menu-button button svg,
@@ -649,6 +923,7 @@ html[data-rg-enabled="true"] :is(
   .markdown td,
   .markdown th,
   .markdown blockquote,
+  .gds-extended-blockquote,
   .query-text,
   .query-text-line,
   user-query .gds-body-l,
@@ -700,7 +975,7 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) p
   font-size: var(--rg-font-size, 16px) !important;
   line-height: var(--rg-line-height, 1.72) !important;
   margin-top: 0 !important;
-  margin-bottom: 0.95rem !important;
+  margin-bottom: 1rem !important;
   color: var(--rg-text-primary) !important;
 }
 
@@ -714,67 +989,81 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, message-conten
   color: var(--rg-text-strong) !important;
 }
 
-/* Headings (1:1 ChatGPT proportions & vertical rhythm) */
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) h1 {
-  font-size: 1.55em !important;
-  font-weight: 650 !important;
-  line-height: 1.3 !important;
-  margin-top: 1.5rem !important;
+/* Links inside Markdown (OpenAI apps-sdk-ui #0169cc / #339cff) */
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) a {
+  color: var(--rg-link-color) !important;
+  font-weight: 500 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  text-decoration-thickness: 1px !important;
+}
+
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) a:hover {
+  opacity: 0.84;
+}
+
+/* Headings (1:1 OpenAI Markdown.module.css proportions & vertical rhythm) */
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) h1 {
+  font-size: 1.75em !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  margin-top: 1.85rem !important;
+  margin-bottom: 0.8rem !important;
+  color: var(--rg-text-strong) !important;
+  letter-spacing: -0.02em;
+}
+
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) h2 {
+  font-size: 1.45em !important;
+  font-weight: 600 !important;
+  line-height: 1.28 !important;
+  margin-top: 1.75rem !important;
   margin-bottom: 0.7rem !important;
   color: var(--rg-text-strong) !important;
   letter-spacing: -0.015em;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) h2 {
-  font-size: 1.28em !important;
-  font-weight: 650 !important;
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) h3 {
+  font-size: 1.2em !important;
+  font-weight: 600 !important;
   line-height: 1.35 !important;
-  margin-top: 1.4rem !important;
-  margin-bottom: 0.6rem !important;
+  margin-top: 1.35rem !important;
+  margin-bottom: 0.5rem !important;
   color: var(--rg-text-strong) !important;
   letter-spacing: -0.01em;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) h3 {
-  font-size: 1.12em !important;
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) h4 {
+  font-size: 1.02em !important;
   font-weight: 600 !important;
-  line-height: 1.42 !important;
-  margin-top: 1.15rem !important;
-  margin-bottom: 0.45rem !important;
+  line-height: 1.45 !important;
+  margin-top: 1.05rem !important;
+  margin-bottom: 0.4rem !important;
   color: var(--rg-text-strong) !important;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) h4 {
-  font-size: 1em !important;
-  font-weight: 600 !important;
-  line-height: 1.5 !important;
-  margin-top: 0.95rem !important;
-  margin-bottom: 0.35rem !important;
-  color: var(--rg-text-strong) !important;
-}
-
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) > :first-child {
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) > :first-child {
   margin-top: 0 !important;
 }
 
-/* 1:1 ChatGPT List Indentation (fixes Gemini's double logical indent & wide bullet gap) */
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) :is(ul, ol) {
-  margin-top: 0.4rem !important;
-  margin-bottom: 0.95rem !important;
+/* 1:1 ChatGPT List Indentation (OpenAI Markdown.module.css: 1.625rem / 0.32rem) */
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :is(ul, ol) {
+  margin-top: 0.45rem !important;
+  margin-bottom: 1rem !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
   margin-inline-start: 0 !important;
   margin-inline-end: 0 !important;
-  padding-left: 1.5rem !important;
-  padding-inline-start: 1.5rem !important;
+  padding-left: 1.625rem !important;
+  padding-inline-start: 1.625rem !important;
 }
 
-/* Nested lists: clean, compact 1.25rem step */
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) li > :is(ul, ol) {
-  margin-top: 0.3rem !important;
-  margin-bottom: 0.35rem !important;
-  padding-left: 1.25rem !important;
-  padding-inline-start: 1.25rem !important;
+/* Nested lists: clean, compact 1.35rem step */
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) li > :is(ul, ol) {
+  margin-top: 0.32rem !important;
+  margin-bottom: 0.38rem !important;
+  padding-left: 1.35rem !important;
+  padding-inline-start: 1.35rem !important;
 }
 
 /* Standard ChatGPT bullet & ordered-list hierarchy:
@@ -798,18 +1087,18 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :
   list-style-position: outside !important;
 }
 
-/* List items: reset Gemini's wide li padding so marker sits crisp 3px before text */
+/* List items: reset Gemini's wide li padding so marker sits crisp ~5px before text */
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) li {
   display: list-item !important;
   font-size: var(--rg-font-size, 16px) !important;
-  line-height: 1.7 !important;
+  line-height: 1.72 !important;
   color: var(--rg-text-primary) !important;
-  margin-top: 0.28rem !important;
-  margin-bottom: 0.28rem !important;
+  margin-top: 0.32rem !important;
+  margin-bottom: 0.32rem !important;
   margin-left: 0 !important;
   margin-inline-start: 0 !important;
-  padding-left: 0.2rem !important;
-  padding-inline-start: 0.2rem !important;
+  padding-left: 0.32rem !important;
+  padding-inline-start: 0.32rem !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) li::before {
@@ -829,40 +1118,139 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) o
   font-variant-numeric: tabular-nums !important;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) li > p {
-  margin-bottom: 0.35rem !important;
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) li > p {
+  margin-bottom: 0.38rem !important;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) li > p:last-child {
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) li > p:last-child {
   margin-bottom: 0 !important;
 }
 
-/* Blockquotes & Horizontal Rules */
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) blockquote {
-  margin: 0.85rem 0 1rem 0 !important;
-  padding: 0.15rem 0 0.15rem 1rem !important;
-  border-left: 3px solid var(--rg-border-default) !important;
+/* Blockquotes (fixes Gemini's radial-gradient dotted `blockquote::before` & italic CJK) */
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) :is(blockquote, .gds-extended-blockquote) {
+  position: relative !important;
+  margin: 1rem 0 1.15rem 0 !important;
+  margin-inline: 0 !important;
+  padding: 0.15rem 0 0.15rem 1.1rem !important;
+  padding-inline-start: 1.1rem !important;
+  padding-inline-end: 0 !important;
+  border: none !important;
+  border-left: 3.5px solid var(--rg-blockquote-border) !important;
+  border-inline-start: 3.5px solid var(--rg-blockquote-border) !important;
   background: transparent !important;
   color: var(--rg-text-secondary) !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: var(--rg-font-size, 16px) !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  line-height: 1.72 !important;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) hr {
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) blockquote::before,
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) blockquote::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) blockquote :is(p, span, li) {
+  color: var(--rg-text-secondary) !important;
+  font-style: normal !important;
+}
+
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) blockquote > p:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Horizontal Rules */
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) hr {
   border: none !important;
-  border-top: 1px solid var(--rg-border-subtle) !important;
-  margin: 1.4rem 0 !important;
+  border-top: 1px solid var(--rg-border-default) !important;
+  margin: 1.65rem 0 !important;
 }
 
-/* Display Math / KaTeX spacing */
+/* Display & Inline Math / KaTeX (including forced Dark/Light SVG delimiter inversion) */
 html[data-rg-enabled="true"] .katex-display,
 html[data-rg-enabled="true"] math-block,
 html[data-rg-enabled="true"] .math-block {
-  margin: 1.2rem 0 !important;
-  padding: 0.2rem 0 !important;
+  margin: 1.25rem 0 !important;
+  padding: 0.25rem 0 !important;
   overflow-x: auto;
   overflow-y: hidden;
+  color: var(--rg-text-primary) !important;
 }
 
-/* Subtle inline citation chips (like ChatGPT's compact source pills) */
+html[data-rg-enabled="true"][data-rg-theme="light"] .katex .katex-svg {
+  filter: invert(0) !important;
+}
+
+html[data-rg-enabled="true"][data-rg-theme="dark"] .katex .katex-svg {
+  filter: invert(100%) !important;
+}
+
+/* Inline generated/diagram images inside Markdown */
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) img:not([class*="icon"]):not([class*="sparkle"]) {
+  border-radius: 10px !important;
+}
+
+/* Thinking / Reasoning Accordion (`model-thoughts` -> ChatGPT "已思考 X 秒 ⌄" minimal toggle) */
+html[data-rg-enabled="true"] :is(model-thoughts, .thoughts-container) {
+  display: block !important;
+  margin: 0 0 0.85rem 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  model-thoughts button,
+  .thoughts-container .thoughts-header-button,
+  .thoughts-container > button,
+  [data-test-id*="thoughts"] button
+) {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 4px 8px 4px 0 !important;
+  margin: 0 !important;
+  height: auto !important;
+  min-height: 28px !important;
+  box-shadow: none !important;
+  color: var(--rg-text-secondary) !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  transition: color 0.14s ease !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  model-thoughts button,
+  .thoughts-container .thoughts-header-button,
+  .thoughts-container > button,
+  [data-test-id*="thoughts"] button
+):hover {
+  color: var(--rg-text-primary) !important;
+  background: transparent !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  model-thoughts .thoughts-content,
+  model-thoughts .thoughts-content-expanded,
+  model-thoughts .thoughts-body,
+  .thoughts-container .thoughts-content,
+  .thoughts-container .thoughts-content-expanded,
+  .thoughts-container .markdown
+) {
+  margin: 0.45rem 0 0.65rem 2px !important;
+  padding: 0.1rem 0 0.1rem 14px !important;
+  border-left: 2px solid var(--rg-border-default) !important;
+  color: var(--rg-text-secondary) !important;
+  font-size: 14px !important;
+  line-height: 1.65 !important;
+}
+
+/* Compact inline citation pills (ChatGPT #F4F4F4 / #2F2F2F rounded source chips) */
 html[data-rg-enabled="true"] :is(
   source-footnote,
   inline-source-card,
@@ -870,8 +1258,27 @@ html[data-rg-enabled="true"] :is(
   [class*="citation-marker"],
   .source-inline-chip
 ) {
+  font-family: var(--rg-font-sans) !important;
   font-size: 11.5px !important;
-  opacity: 0.82;
+  font-weight: 500 !important;
+  color: var(--rg-text-secondary) !important;
+}
+
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, body) :is(
+  source-footnote button,
+  source-footnote a,
+  .source-inline-chip
+) {
+  background-color: var(--rg-bg-user-bubble) !important;
+  color: var(--rg-text-secondary) !important;
+  border-radius: 999px !important;
+  padding: 1.5px 8px !important;
+  font-size: 11.5px !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  border: none !important;
 }
 
 /* ==========================================================================
@@ -911,6 +1318,17 @@ html[data-rg-enabled="true"] chat-window-content .conversation-container {
   box-sizing: border-box !important;
 }
 
+/* Multi-turn vertical rhythm matching ChatGPT */
+html[data-rg-enabled="true"] .conversation-container user-query {
+  display: block !important;
+  margin-bottom: 18px !important;
+}
+
+html[data-rg-enabled="true"] .conversation-container model-response {
+  display: block !important;
+  margin-bottom: 24px !important;
+}
+
 html[data-rg-enabled="true"] .conversation-container :is(
   user-query,
   model-response,
@@ -947,15 +1365,15 @@ html[data-rg-enabled="true"] .enable-extended-and-xl-grid .conversation-containe
   max-width: 100% !important;
 }
 
-/* User message capsule (1:1 ChatGPT right-aligned #F4F4F4 / #2F2F2F pill) */
+/* User message capsule (1:1 ChatGPT right-aligned #F4F4F4 / #303030 24px pill) */
 html[data-rg-enabled="true"] .user-query-bubble-with-background,
 html[data-rg-enabled="true"] user-query .query-content .user-query-bubble-with-background,
 html[data-rg-enabled="true"] .user-query-container .query-text-box {
   background-color: var(--rg-bg-user-bubble) !important;
   color: var(--rg-text-primary) !important;
-  border-radius: 20px !important;
-  padding: 10px 18px !important;
-  max-width: min(78%, var(--rg-chat-max-width, 768px)) !important;
+  border-radius: 24px !important;
+  padding: 10px 20px !important;
+  max-width: min(72%, var(--rg-chat-max-width, 768px)) !important;
   width: fit-content !important;
   box-shadow: none !important;
   border: none !important;
@@ -965,12 +1383,40 @@ html[data-rg-enabled="true"] .user-query-bubble-with-background:is(.luminous-col
   padding-right: 42px !important;
 }
 
+html[data-rg-enabled="true"] .user-query-bubble-with-background :is(
+  gem-icon-button,
+  [class*="toggle"],
+  [class*="expand"],
+  button
+),
+html[data-rg-enabled="true"] .user-query-bubble-with-background button::before {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: var(--rg-text-secondary) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] .user-query-bubble-with-background button:hover {
+  background-color: var(--rg-bg-hover) !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] .user-query-bubble-with-background :is([class*="gradient"], [class*="fade"], div:has(> gem-icon-button), div:has(> button)) {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
 html[data-rg-enabled="true"] user-query .query-text,
 html[data-rg-enabled="true"] user-query .query-text-line,
 html[data-rg-enabled="true"] .user-query-bubble-with-background .gds-body-l {
   font-size: var(--rg-font-size, 16px) !important;
-  line-height: 1.6 !important;
+  line-height: 1.55 !important;
   color: var(--rg-text-primary) !important;
+  margin: 0 !important;
 }
 
 /* Hide AI Avatar & eliminate all left gutter offsets for flush-left baseline */
@@ -1013,7 +1459,7 @@ html[data-rg-enabled="true"] .response-container-with-gpi {
 }
 
 /* ==========================================================================
-   7. 1:1 ChatGPT Markdown Tables (Borderless, Flush-Left, Horizontal Rules)
+   7. 1:1 ChatGPT Markdown Tables (Borderless, Flush-Left, Zero Spurious Scroll)
    ========================================================================== */
 
 html[data-rg-enabled="true"] :is(
@@ -1029,9 +1475,21 @@ html[data-rg-enabled="true"] :is(
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
   padding: 0 !important;
-  margin: 0.7rem 0 1.1rem 0 !important;
+  margin: 0 !important;
   max-width: 100% !important;
+}
+
+html[data-rg-enabled="true"] :is(table-block, .markdown > table) {
+  display: block !important;
+  margin: 0.9rem 0 1.25rem 0 !important;
+}
+
+html[data-rg-enabled="true"] table-block .table-content {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) table {
@@ -1041,13 +1499,27 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) t
   background: transparent !important;
   border: none !important;
   border-radius: 0 !important;
-  font-size: 0.9375em !important;
+  font-size: 14px !important;
   line-height: 1.55 !important;
   margin: 0 !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) :is(thead, thead tr, tbody, tr) {
   background: transparent !important;
+}
+
+/* Defeat Gemini's `min-width: 173px` & `17px` cell font-size + `::after` segmented borders */
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) :is(th, td) {
+  min-width: 0 !important;
+  max-width: none !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) :is(th, td)::before,
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) :is(th, td)::after {
+  content: none !important;
+  display: none !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) th {
@@ -1070,16 +1542,23 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) t
   vertical-align: top !important;
 }
 
+/* OpenAI Markdown.module.css: no trailing bottom border under the final table row */
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) :is(th, td):first-child {
   padding-left: 0 !important;
+  padding-inline-start: 0 !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) :is(th, td):last-child {
   padding-right: 0 !important;
+  padding-inline-end: 0 !important;
 }
 
 /* ==========================================================================
-   8. 1:1 ChatGPT Code Cards & Syntax Highlighting
+   8. 1:1 ChatGPT Code Cards & Official OpenAI Syntax Highlighting
       Fixes Gemini's `enable-luminous-code-block` hard-dark #141414 inner shell,
       double borders, -16px header offset, invisible buttons, & dark token colors.
    ========================================================================== */
@@ -1088,16 +1567,16 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) :
 html[data-rg-enabled="true"] code-block {
   display: block !important;
   background-color: var(--rg-bg-code-card) !important;
-  border: 1px solid var(--rg-border-hairline) !important;
+  border: 1px solid var(--rg-border-code) !important;
   border-radius: 12px !important;
   overflow: hidden !important;
-  margin: 0.75rem 0 1.05rem 0 !important;
+  margin: 0.85rem 0 1.15rem 0 !important;
   padding: 0 !important;
   box-shadow: none !important;
 }
 
 html[data-rg-enabled="true"] li code-block {
-  margin: 0.5rem 0 0.65rem 0 !important;
+  margin: 0.5rem 0 0.7rem 0 !important;
 }
 
 /* Completely flatten & zero out ALL nested wrappers inside <code-block>
@@ -1117,7 +1596,7 @@ html[data-rg-enabled="true"] code-block :is(
   padding: 0 !important;
 }
 
-/* Seamless ChatGPT top header bar (resets Gemini's `top: -16px` offset) */
+/* Seamless ChatGPT top header bar (resets Gemini's `top: -16px` / `-72px` & `-2rem` offsets) */
 html[data-rg-enabled="true"] code-block .code-block-decoration,
 html[data-rg-enabled="true"] code-block [class*="code-block-decoration"] {
   position: relative !important;
@@ -1129,8 +1608,10 @@ html[data-rg-enabled="true"] code-block [class*="code-block-decoration"] {
   border-bottom: none !important;
   border-radius: 0 !important;
   margin: 0 !important;
+  margin-inline-start: 0 !important;
   padding: 8px 10px 2px 16px !important;
-  min-height: 34px !important;
+  padding-inline-start: 16px !important;
+  min-height: 36px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -1147,6 +1628,11 @@ html[data-rg-enabled="true"] code-block .code-block-decoration > span {
   text-transform: lowercase;
 }
 
+html[data-rg-enabled="true"] code-block .code-block-decoration :is(.buttons, gem-icon-button, button) {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 html[data-rg-enabled="true"] code-block .code-block-decoration .buttons {
   display: inline-flex !important;
   align-items: center !important;
@@ -1154,31 +1640,31 @@ html[data-rg-enabled="true"] code-block .code-block-decoration .buttons {
   color: var(--rg-text-secondary) !important;
 }
 
-/* Code body container & <pre><code> */
+/* Code body container & <pre><code> (OpenAI CodeBlock.module.css: 14px / 1.58) */
 html[data-rg-enabled="true"] code-block pre {
   background: transparent !important;
   background-color: transparent !important;
   border: none !important;
   border-radius: 0 !important;
   margin: 0 !important;
-  padding: 6px 16px 14px 16px !important;
+  padding: 6px 16px 15px 16px !important;
   overflow-x: auto !important;
 }
 
 /* Standalone <pre> not wrapped in <code-block> */
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) > pre {
   background-color: var(--rg-bg-code-card) !important;
-  border: 1px solid var(--rg-border-hairline) !important;
+  border: 1px solid var(--rg-border-code) !important;
   border-radius: 12px !important;
   padding: 12px 16px !important;
-  margin: 0.75rem 0 1.05rem 0 !important;
+  margin: 0.85rem 0 1.15rem 0 !important;
   overflow-x: auto !important;
 }
 
 html[data-rg-enabled="true"] :is(code-block code, code-block code.code-container, pre code, code-block .hljs) {
   font-family: var(--rg-font-mono) !important;
-  font-size: 13.5px !important;
-  line-height: 1.6 !important;
+  font-size: 14px !important;
+  line-height: 1.58 !important;
   color: var(--rg-syn-text) !important;
   background: transparent !important;
   background-color: transparent !important;
@@ -1186,7 +1672,7 @@ html[data-rg-enabled="true"] :is(code-block code, code-block code.code-container
   padding: 0 !important;
 }
 
-/* 1:1 ChatGPT Syntax Token Colors (overrides Gemini's dark-only highlight.js palette) */
+/* Official OpenAI ChatGPT Syntax Token Mapping (apps-sdk-ui CodeBlock.module.css) */
 html[data-rg-enabled="true"] code-block :is(
   .hljs-keyword,
   .hljs-selector-tag,
@@ -1197,16 +1683,15 @@ html[data-rg-enabled="true"] code-block :is(
 }
 
 html[data-rg-enabled="true"] code-block :is(
-  .hljs-attr,
-  .hljs-attribute,
-  .hljs-property,
-  .hljs-variable,
-  .hljs-template-variable,
-  .hljs-type,
+  .hljs-title,
+  .hljs-title.function_,
+  .hljs-title.class_,
   .hljs-built_in,
-  .hljs-meta
+  .hljs-type,
+  .hljs-section,
+  .hljs-name
 ) {
-  color: var(--rg-syn-attr) !important;
+  color: var(--rg-syn-title) !important;
 }
 
 html[data-rg-enabled="true"] code-block :is(
@@ -1219,6 +1704,17 @@ html[data-rg-enabled="true"] code-block :is(
 }
 
 html[data-rg-enabled="true"] code-block :is(
+  .hljs-attr,
+  .hljs-attribute,
+  .hljs-property,
+  .hljs-variable,
+  .hljs-template-variable,
+  .hljs-meta
+) {
+  color: var(--rg-syn-attr) !important;
+}
+
+html[data-rg-enabled="true"] code-block :is(
   .hljs-number,
   .hljs-literal,
   .hljs-symbol,
@@ -1228,46 +1724,35 @@ html[data-rg-enabled="true"] code-block :is(
   color: var(--rg-syn-number) !important;
 }
 
-html[data-rg-enabled="true"] code-block :is(
-  .hljs-title,
-  .hljs-title.function_,
-  .hljs-title.class_,
-  .hljs-section,
-  .hljs-name
-) {
-  color: var(--rg-syn-title) !important;
-}
-
 html[data-rg-enabled="true"] code-block :is(.hljs-comment, .hljs-quote) {
   color: var(--rg-syn-comment) !important;
   font-style: normal !important;
 }
 
-html[data-rg-enabled="true"] code-block :is(
-  .hljs-function,
-  .hljs-operator,
-  .hljs-punctuation,
-  .hljs-params,
-  .hljs-subst
-) {
+html[data-rg-enabled="true"] code-block :is(.hljs-operator, .hljs-punctuation) {
+  color: var(--rg-syn-punct) !important;
+}
+
+html[data-rg-enabled="true"] code-block :is(.hljs-function, .hljs-params, .hljs-subst) {
   color: var(--rg-syn-text) !important;
 }
 
-/* Inline code pill (`weasel.custom.yaml`, `session_id`) */
+/* Inline code pill (`weasel.custom.yaml`, `session_id` — OpenAI InlineCode 1px inset ring) */
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, message-content) :not(pre) > code {
   font-family: var(--rg-font-mono) !important;
-  font-size: 0.86em !important;
-  font-weight: 450 !important;
+  font-size: 0.875em !important;
+  font-weight: 500 !important;
   background-color: var(--rg-bg-inline-code) !important;
+  box-shadow: inset 0 0 0 1px var(--rg-inline-code-ring) !important;
   color: var(--rg-text-primary) !important;
-  padding: 2px 6px !important;
+  padding: 1.5px 5.5px !important;
   border-radius: 5px !important;
   border: none !important;
   word-break: break-word;
 }
 
 /* ==========================================================================
-   9. Floating Capsule Composer (Elevated Above Bottom Edge, Single Crisp Layer)
+   9. Floating Capsule Composer & ChatGPT Circular Send/Stop Button
    ========================================================================== */
 
 /* Lift composer comfortably off the bottom viewport edge & mask scrolling text cleanly
@@ -1346,7 +1831,139 @@ html[data-rg-enabled="true"] rich-textarea .ql-editor {
   color: var(--rg-text-primary) !important;
 }
 
-/* Scroll-to-bottom floating button -> ChatGPT crisp 32px white circle */
+html[data-rg-enabled="true"] rich-textarea .ql-editor.ql-blank::before {
+  font-family: var(--rg-font-sans) !important;
+  font-style: normal !important;
+  font-size: 15.5px !important;
+  color: var(--rg-text-muted) !important;
+}
+
+/* Composer utility controls (`+` upload, mic, fullscreen expand, `Flash-Lite ⌄` pill) */
+html[data-rg-enabled="true"] input-area-v2 :is(
+  simplified-input-menu button,
+  speech-dictation-mic-button button,
+  button[aria-label*="全屏"],
+  button[aria-label*="fullscreen" i]
+) {
+  border-radius: 999px !important;
+}
+
+html[data-rg-enabled="true"] input-area-v2 :is(
+  simplified-input-menu button,
+  speech-dictation-mic-button button,
+  button[aria-label*="全屏"],
+  button[aria-label*="fullscreen" i],
+  button.input-area-switch
+):hover {
+  background-color: var(--rg-bg-hover) !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] input-area-v2 button.input-area-switch {
+  border-radius: 999px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  padding: 0 10px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] input-area-v2 .input-area-switch-label {
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--rg-text-secondary) !important;
+}
+
+/* ChatGPT Iconic 32x32 Monochrome Circular Send & Stop Button
+   Replaces Google Material baby-blue `#A8C7FA` circle with `#0D0D0D` (Light) / `#FFFFFF` (Dark)! */
+html[data-rg-enabled="true"] :is(input-area-v2, .input-area) :is(
+  gem-icon-button.send-button:not(.gem-button-disabled):not([aria-disabled="true"]) button:not([disabled]):not([aria-disabled="true"]),
+  button.send-button:not([disabled]):not([aria-disabled="true"])
+) {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  border: none !important;
+  background: var(--rg-cta-bg) !important;
+  background-color: var(--rg-cta-bg) !important;
+  color: var(--rg-cta-fg) !important;
+  box-shadow: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background-color 0.14s ease, transform 0.1s ease !important;
+}
+
+html[data-rg-enabled="true"] :is(input-area-v2, .input-area) :is(
+  gem-icon-button.send-button:not(.gem-button-disabled):not([aria-disabled="true"]) button:not([disabled]):not([aria-disabled="true"]),
+  button.send-button:not([disabled]):not([aria-disabled="true"])
+):hover {
+  background: var(--rg-cta-bg-hover) !important;
+  background-color: var(--rg-cta-bg-hover) !important;
+}
+
+html[data-rg-enabled="true"] :is(input-area-v2, .input-area) :is(
+  gem-icon-button.send-button:not(.gem-button-disabled):not([aria-disabled="true"]) button:not([disabled]):not([aria-disabled="true"]),
+  button.send-button:not([disabled]):not([aria-disabled="true"])
+) :is(.blue-circle, .mat-mdc-button-persistent-ripple, .mdc-icon-button__ripple) {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+html[data-rg-enabled="true"] :is(input-area-v2, .input-area) :is(
+  gem-icon-button.send-button:not(.gem-button-disabled):not([aria-disabled="true"]) button:not([disabled]):not([aria-disabled="true"]),
+  button.send-button:not([disabled]):not([aria-disabled="true"])
+) :is(mat-icon, svg, .send-button-icon, .stop-icon) {
+  color: var(--rg-cta-fg) !important;
+  fill: var(--rg-cta-fg) !important;
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
+}
+
+/* Disabled Send Button (#D7D7D7 Light / #424242 Dark) */
+html[data-rg-enabled="true"] :is(input-area-v2, .input-area) :is(
+  gem-icon-button.send-button.gem-button-disabled button,
+  gem-icon-button.send-button[aria-disabled="true"] button,
+  gem-icon-button.send-button button[disabled],
+  gem-icon-button.send-button button[aria-disabled="true"],
+  button.send-button[disabled],
+  button.send-button[aria-disabled="true"]
+) {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  background: var(--rg-send-disabled-bg) !important;
+  background-color: var(--rg-send-disabled-bg) !important;
+  color: var(--rg-send-disabled-fg) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+html[data-rg-enabled="true"] :is(input-area-v2, .input-area) :is(
+  gem-icon-button.send-button.gem-button-disabled button,
+  gem-icon-button.send-button[aria-disabled="true"] button,
+  gem-icon-button.send-button button[disabled],
+  gem-icon-button.send-button button[aria-disabled="true"],
+  button.send-button[disabled],
+  button.send-button[aria-disabled="true"]
+) :is(mat-icon, svg, .send-button-icon) {
+  color: var(--rg-send-disabled-fg) !important;
+  fill: var(--rg-send-disabled-fg) !important;
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
+}
+
+/* Scroll-to-bottom floating button -> ChatGPT crisp 32px white/elevated circle */
 html[data-rg-enabled="true"] :is(
   button.scroll-to-bottom-button,
   .scroll-to-bottom-button button,
@@ -1362,6 +1979,15 @@ html[data-rg-enabled="true"] :is(
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
 }
 
+/* Non-cleanView fallback: flatten sign-in-nudge banner so it never casts giant blurred shadows */
+html[data-rg-enabled="true"] sign-in-nudge .gem-banner-container {
+  background-color: var(--rg-bg-sidebar) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
 /* ==========================================================================
    10. Clean View Mode (Distraction-Free Noise Reduction)
    ========================================================================== */
@@ -1369,6 +1995,8 @@ html[data-rg-enabled="true"] :is(
 html[data-rg-enabled="true"][data-rg-clean-view="true"] :is(
   hallucination-disclaimer,
   .hallucination-disclaimer,
+  zero-state-disclaimers,
+  .human-review-disclosure-container,
   .capabilities-disclaimer,
   [data-test-id="disclaimer"],
   .bottom-disclaimer,
@@ -1379,6 +2007,7 @@ html[data-rg-enabled="true"][data-rg-clean-view="true"] :is(
   g1-upsell-button,
   [data-test-id="upsell-button"],
   .adv-upsell,
+  sign-in-nudge,
   suggestion-chips,
   .suggestion-chips-container,
   follow-up-suggestions,
@@ -1397,8 +2026,8 @@ html[data-rg-enabled="true"][data-rg-clean-view="true"] :is(
    ========================================================================== */
 
 html[data-rg-enabled="true"] ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 
 html[data-rg-enabled="true"] ::-webkit-scrollbar-track {
@@ -1413,3 +2042,4 @@ html[data-rg-enabled="true"] ::-webkit-scrollbar-thumb {
 html[data-rg-enabled="true"] ::-webkit-scrollbar-thumb:hover {
   background-color: var(--rg-scrollbar-thumb-hover);
 }
+

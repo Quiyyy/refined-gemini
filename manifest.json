@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Refined Gemini",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "1:1 对齐 ChatGPT 网页端视觉与排版基准：纯白/深灰画布、中英混排现代字体栈、无竖框左对齐表格、柔和圆角代码卡片与极简降噪布局。",
   "icons": {
     "16": "icons/icon16.png",

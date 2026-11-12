@@ -182,11 +182,14 @@
 
   function findSendButton() {
     const selectors = [
+      'input-area-v2 gem-icon-button.send-button:not(.gem-button-disabled):not([aria-disabled="true"]) button:not([disabled]):not([aria-disabled="true"])',
       'input-area-v2 button.send-button:not([disabled]):not([aria-disabled="true"])',
+      '.input-area gem-icon-button.send-button:not(.gem-button-disabled):not([aria-disabled="true"]) button:not([disabled]):not([aria-disabled="true"])',
       '.input-area button.send-button:not([disabled]):not([aria-disabled="true"])',
-      'button[aria-label*="Send message"]:not([disabled])',
-      'button[aria-label*="发送"]:not([disabled])',
-      'button.submit:not([disabled])'
+      '.send-button-container button:not([disabled]):not([aria-disabled="true"])',
+      'button[aria-label*="Send message"]:not([disabled]):not([aria-disabled="true"])',
+      'button[aria-label*="发送"]:not([disabled]):not([aria-disabled="true"])',
+      'button.submit:not([disabled]):not([aria-disabled="true"])'
     ];
     for (const sel of selectors) {
       const btn = document.querySelector(sel);

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Builds userscript/refined-gemini.user.js directly from src/content.css,
- * ensuring Tampermonkey / Violentmonkey users get the exact same 1:1 ChatGPT styles.
+ * ensuring Tampermonkey / Violentmonkey users get 100% visual & interactive parity
+ * with the Manifest V3 browser extension.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,8 +17,8 @@ fs.mkdirSync(outDir, { recursive: true });
 const userScript = `// ==UserScript==
 // @name         Refined Gemini (1:1 ChatGPT Web UI Alignment)
 // @namespace    https://github.com/Quiyyy/refined-gemini
-// @version      1.0.2
-// @description  1:1 对齐 ChatGPT 网页端视觉与排版基准：纯白/深灰画布、现代中英混排字体栈、无竖框左对齐表格、柔和圆角代码卡片与极简降噪布局。
+// @version      1.1.0
+// @description  1:1 对齐 ChatGPT 网页端视觉与排版基准：纯白/深灰画布、现代中英混排字体栈、无竖框左对齐表格、OpenAI 官方代码配色卡片与极简黑白灰交互控件。
 // @author       Quiyyy
 // @license      MIT
 // @match        https://gemini.google.com/*
@@ -90,6 +91,8 @@ const userScript = `// ==UserScript==
     if (!root) return;
     if (!settings.enabled) {
       root.setAttribute('data-rg-enabled', 'false');
+      root.style.removeProperty('--rg-chat-max-width');
+      root.style.removeProperty('--rg-font-size');
       return;
     }
     const theme = settings.themeMode === 'auto' ? (detectNativeDark() ? 'dark' : 'light') : settings.themeMode;
@@ -98,16 +101,106 @@ const userScript = `// ==UserScript==
     root.setAttribute('data-rg-hide-avatar', String(Boolean(settings.hideAvatar)));
     root.setAttribute('data-rg-compact-sidebar', String(Boolean(settings.compactSidebar)));
     root.setAttribute('data-rg-clean-view', String(Boolean(settings.cleanView)));
+    root.setAttribute('data-rg-ctrl-enter', String(Boolean(settings.ctrlEnterSend)));
     root.style.setProperty('--rg-chat-max-width', settings.chatWidth);
     root.style.setProperty('--rg-font-size', settings.fontSize);
   }
 
-  apply();
+  function isPromptEditorElement(target) {
+    if (!(target instanceof Element)) return false;
+    return Boolean(
+      target.closest(
+        'rich-textarea, .ql-editor, input-area-v2 [contenteditable="true"], .input-area [contenteditable="true"], .query-input textarea'
+      )
+    );
+  }
+
+  function findSendButton() {
+    const selectors = [
+      'input-area-v2 gem-icon-button.send-button:not(.gem-button-disabled):not([aria-disabled="true"]) button:not([disabled]):not([aria-disabled="true"])',
+      'input-area-v2 button.send-button:not([disabled]):not([aria-disabled="true"])',
+      '.input-area gem-icon-button.send-button:not(.gem-button-disabled):not([aria-disabled="true"]) button:not([disabled]):not([aria-disabled="true"])',
+      '.input-area button.send-button:not([disabled]):not([aria-disabled="true"])',
+      '.send-button-container button:not([disabled]):not([aria-disabled="true"])',
+      'button[aria-label*="Send message"]:not([disabled]):not([aria-disabled="true"])',
+      'button[aria-label*="发送"]:not([disabled]):not([aria-disabled="true"])',
+      'button.submit:not([disabled]):not([aria-disabled="true"])'
+    ];
+    for (const sel of selectors) {
+      const btn = document.querySelector(sel);
+      if (btn instanceof HTMLElement) return btn;
+    }
+    return null;
+  }
+
+  const bypassedEvents = new WeakSet();
+  window.addEventListener(
+    'keydown',
+    (event) => {
+      if (!settings.enabled || !settings.ctrlEnterSend) return;
+      if (bypassedEvents.has(event)) return;
+      if (event.key !== 'Enter') return;
+      if (event.isComposing || event.keyCode === 229) return;
+      if (!isPromptEditorElement(event.target)) return;
+
+      const hasSendModifier = event.ctrlKey || event.metaKey;
+      if (hasSendModifier && !event.altKey) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const sendBtn = findSendButton();
+        if (sendBtn) {
+          sendBtn.click();
+        } else if (event.target instanceof HTMLElement) {
+          const submitEvt = new KeyboardEvent('keydown', {
+            key: 'Enter',
+            code: 'Enter',
+            keyCode: 13,
+            which: 13,
+            bubbles: true,
+            cancelable: true
+          });
+          bypassedEvents.add(submitEvt);
+          event.target.dispatchEvent(submitEvt);
+        }
+        return;
+      }
+
+      if (!event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const target = event.target;
+        if (target instanceof HTMLTextAreaElement) {
+          const start = target.selectionStart ?? target.value.length;
+          const end = target.selectionEnd ?? target.value.length;
+          target.setRangeText('\\n', start, end, 'end');
+          target.dispatchEvent(new Event('input', { bubbles: true }));
+        } else {
+          document.execCommand('insertParagraph', false);
+        }
+      }
+    },
+    true
+  );
+
   const obs = new MutationObserver(() => {
     injectStyle();
     if (settings.enabled && settings.themeMode === 'auto') apply();
   });
-  obs.observe(document.documentElement, { attributes: true, childList: true, attributeFilter: ['class', 'data-theme'] });
+
+  function bootstrapRoot() {
+    if (!document.documentElement) {
+      setTimeout(bootstrapRoot, 0);
+      return;
+    }
+    apply();
+    obs.observe(document.documentElement, {
+      attributes: true,
+      childList: true,
+      attributeFilter: ['class', 'data-theme']
+    });
+  }
+
+  bootstrapRoot();
   document.addEventListener('DOMContentLoaded', () => {
     apply();
     if (document.body) {
@@ -115,7 +208,6 @@ const userScript = `// ==UserScript==
     }
   });
 
-  // Register quick menu commands in Tampermonkey
   if (typeof GM_registerMenuCommand === 'function') {
     GM_registerMenuCommand('切换总开关 (开启 / 暂停美化)', () => {
       settings.enabled = !settings.enabled;
@@ -136,6 +228,16 @@ const userScript = `// ==UserScript==
     });
     GM_registerMenuCommand('开启/关闭 AI 头像隐藏', () => {
       settings.hideAvatar = !settings.hideAvatar;
+      saveSettings(settings);
+      apply();
+    });
+    GM_registerMenuCommand('开启/关闭纯净降噪模式', () => {
+      settings.cleanView = !settings.cleanView;
+      saveSettings(settings);
+      apply();
+    });
+    GM_registerMenuCommand('开启/关闭 Ctrl/⌘ + Enter 发送', () => {
+      settings.ctrlEnterSend = !settings.ctrlEnterSend;
       saveSettings(settings);
       apply();
     });
