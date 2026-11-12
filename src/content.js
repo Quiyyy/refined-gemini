@@ -13,6 +13,7 @@
   const STORAGE_KEY = globalThis.REFINED_GEMINI_STORAGE_KEY || 'refined_gemini_settings_v1';
   const DEFAULTS = globalThis.REFINED_GEMINI_DEFAULTS || {
     enabled: true,
+    uiLang: 'auto',
     themeMode: 'auto',
     chatWidth: '800px',
     fontSize: '16px',
@@ -24,6 +25,7 @@
   };
 
   const VALID_INDENT_SCALES = new Set(['0', '0.65', '1', '1.25']);
+  const VALID_LANGS = new Set(['auto', 'zh', 'en']);
 
   function normalizeSettings(rawSettings) {
     const merged = { ...DEFAULTS, ...rawSettings };
@@ -34,6 +36,9 @@
       merged.indentScale = '1';
     } else {
       merged.indentScale = String(merged.indentScale);
+    }
+    if (!VALID_LANGS.has(String(merged.uiLang))) {
+      merged.uiLang = 'auto';
     }
     return merged;
   }

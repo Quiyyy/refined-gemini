@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "Refined Gemini",
+    "description": "扩展显示名称"
+  },
+  "extDescription": {
+    "message": "1:1 对齐 ChatGPT 网页端视觉与排版：纯净白/深灰画布、浅蓝用户气泡、可调列表缩进、紧凑代码块与无竖框表格。",
+    "description": "扩展商店与管理页简短描述（<= 132 字符）"
+  },
+  "actionTitle": {
+    "message": "Refined Gemini 设置",
+    "description": "工具栏按钮悬停提示"
+  }
+}

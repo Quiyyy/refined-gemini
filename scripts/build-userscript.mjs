@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Builds userscript/refined-gemini.user.js directly from src/content.css,
- * ensuring Tampermonkey / Violentmonkey users get 100% visual & interactive parity
- * with the Manifest V3 browser extension.
+ * producing a Greasy Fork & ScriptCat compliant bilingual UserScript with
+ * 100% visual & interactive parity with the Manifest V3 browser extension.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,22 +10,30 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
+const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 const cssContent = fs.readFileSync(path.join(ROOT, 'src/content.css'), 'utf8');
 const outDir = path.join(ROOT, 'userscript');
 fs.mkdirSync(outDir, { recursive: true });
 
 const userScript = `// ==UserScript==
-// @name         Refined Gemini (1:1 ChatGPT Web UI Alignment)
-// @namespace    https://github.com/Quiyyy/refined-gemini
-// @version      1.3.0
-// @description  1:1 对齐 ChatGPT 网页端视觉与排版基准：纯白/深灰画布、浅蓝用户气泡与 #0285FF 强调色、可配置缩进比例（默认对齐 GPT）、紧凑代码块与无竖框表格。
-// @author       Quiyyy
-// @license      MIT
-// @match        https://gemini.google.com/*
-// @run-at       document-start
-// @grant        GM_getValue
-// @grant        GM_setValue
-// @grant        GM_registerMenuCommand
+// @name               Refined Gemini — 1:1 ChatGPT Web UI Alignment
+// @name:zh-CN         Refined Gemini — 1:1 对齐 ChatGPT 网页端界面
+// @name:zh-TW         Refined Gemini — 1:1 對齊 ChatGPT 網頁端介面
+// @namespace          https://github.com/Quiyyy/refined-gemini
+// @version            ${pkg.version}
+// @description        Align Google Gemini Web UI 1:1 with ChatGPT: clean white/dark surfaces, soft-blue user bubbles, #0285FF accents, configurable list indentation, compact code blocks & borderless tables.
+// @description:zh-CN  1:1 对齐 ChatGPT 网页端视觉与排版：纯白/深灰画布、浅蓝用户气泡与 #0285FF 强调色、可调列表缩进比例（默认对齐 GPT）、紧凑代码块与无竖框表格。
+// @description:zh-TW  1:1 對齊 ChatGPT 網頁端視覺與排版：純白/深灰畫布、淺藍用戶氣泡與 #0285FF 強調色、可調清單縮排比例（預設對齊 GPT）、緊湊程式碼區塊與無豎框表格。
+// @author             Quiyyy
+// @license            MIT
+// @homepageURL        https://github.com/Quiyyy/refined-gemini
+// @supportURL         https://github.com/Quiyyy/refined-gemini/issues
+// @icon               https://raw.githubusercontent.com/Quiyyy/refined-gemini/main/icons/icon128.png
+// @match              https://gemini.google.com/*
+// @run-at             document-start
+// @grant              GM_getValue
+// @grant              GM_setValue
+// @grant              GM_registerMenuCommand
 // ==/UserScript==
 
 (function () {
@@ -34,6 +42,7 @@ const userScript = `// ==UserScript==
   const STORAGE_KEY = 'refined_gemini_settings_v1';
   const DEFAULTS = {
     enabled: true,
+    uiLang: 'auto',         // 'auto' | 'zh' | 'en'
     themeMode: 'auto',      // 'auto' | 'light' | 'dark'
     chatWidth: '800px',     // '800px' (768px prose) | '920px' | '1120px' | '90%'
     fontSize: '16px',       // '15px' | '16px' | '17px'
@@ -45,6 +54,7 @@ const userScript = `// ==UserScript==
   };
 
   const VALID_INDENT_SCALES = new Set(['0', '0.65', '1', '1.25']);
+  const VALID_LANGS = new Set(['auto', 'zh', 'en']);
   const CSS = ${JSON.stringify(cssContent)};
 
   function normalize(obj) {
@@ -55,7 +65,15 @@ const userScript = `// ==UserScript==
     } else {
       merged.indentScale = String(merged.indentScale);
     }
+    if (!VALID_LANGS.has(String(merged.uiLang))) {
+      merged.uiLang = 'auto';
+    }
     return merged;
+  }
+
+  function resolveLang(uiLang) {
+    if (uiLang === 'zh' || uiLang === 'en') return uiLang;
+    return String(navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
   }
 
   function readSettings() {
@@ -227,44 +245,72 @@ const userScript = `// ==UserScript==
   });
 
   if (typeof GM_registerMenuCommand === 'function') {
-    GM_registerMenuCommand('切换总开关 (开启 / 暂停美化)', () => {
+    const isZh = resolveLang(settings.uiLang) === 'zh';
+    const L = isZh
+      ? {
+          toggle: '开启 / 暂停美化',
+          theme: '切换外观 (跟随 / 浅色 / 深色)',
+          width: '切换列宽 (768px / 920px / 1120px / 90%)',
+          indent: '切换缩进 (标准GPT / 65% / 0% / 125%)',
+          avatar: '显示 / 隐藏 AI 头像',
+          clean: '开启 / 关闭纯净模式',
+          ctrlEnter: '开启 / 关闭 Ctrl+Enter 发送',
+          lang: 'Language: 切换为 English (需刷新菜单)'
+        }
+      : {
+          toggle: 'Enable / Pause Styling',
+          theme: 'Cycle Theme (Auto / Light / Dark)',
+          width: 'Cycle Width (768px / 920px / 1120px / 90%)',
+          indent: 'Cycle Indent (GPT / 65% / 0% / 125%)',
+          avatar: 'Show / Hide AI Avatar',
+          clean: 'Toggle Clean View',
+          ctrlEnter: 'Toggle Ctrl+Enter to Send',
+          lang: '语言: 切换为中文 (Reload for menu)'
+        };
+
+    GM_registerMenuCommand(L.toggle, () => {
       settings.enabled = !settings.enabled;
       saveSettings(settings);
       apply();
     });
-    GM_registerMenuCommand('切换对话列宽 (标准768 / 920px / 1120px / 90%)', () => {
+    GM_registerMenuCommand(L.theme, () => {
+      const modes = ['auto', 'light', 'dark'];
+      settings.themeMode = modes[(modes.indexOf(settings.themeMode) + 1) % modes.length];
+      saveSettings(settings);
+      apply();
+    });
+    GM_registerMenuCommand(L.width, () => {
       const widths = ['800px', '920px', '1120px', '90%'];
       settings.chatWidth = widths[(widths.indexOf(settings.chatWidth) + 1) % widths.length];
       saveSettings(settings);
       apply();
     });
-    GM_registerMenuCommand('切换缩进比例 (标准GPT / 紧凑65% / 无0% / 宽松125%)', () => {
+    GM_registerMenuCommand(L.indent, () => {
       const scales = ['1', '0.65', '0', '1.25'];
       const curIdx = scales.indexOf(String(settings.indentScale));
       settings.indentScale = scales[(curIdx === -1 ? 0 : curIdx + 1) % scales.length];
       saveSettings(settings);
       apply();
     });
-    GM_registerMenuCommand('切换外观配色 (跟随 / 浅色 / 深色)', () => {
-      const modes = ['auto', 'light', 'dark'];
-      settings.themeMode = modes[(modes.indexOf(settings.themeMode) + 1) % modes.length];
-      saveSettings(settings);
-      apply();
-    });
-    GM_registerMenuCommand('开启/关闭 AI 头像隐藏', () => {
+    GM_registerMenuCommand(L.avatar, () => {
       settings.hideAvatar = !settings.hideAvatar;
       saveSettings(settings);
       apply();
     });
-    GM_registerMenuCommand('开启/关闭纯净降噪模式', () => {
+    GM_registerMenuCommand(L.clean, () => {
       settings.cleanView = !settings.cleanView;
       saveSettings(settings);
       apply();
     });
-    GM_registerMenuCommand('开启/关闭 Ctrl/⌘ + Enter 发送', () => {
+    GM_registerMenuCommand(L.ctrlEnter, () => {
       settings.ctrlEnterSend = !settings.ctrlEnterSend;
       saveSettings(settings);
       apply();
+    });
+    GM_registerMenuCommand(L.lang, () => {
+      settings.uiLang = resolveLang(settings.uiLang) === 'zh' ? 'en' : 'zh';
+      saveSettings(settings);
+      window.location.reload();
     });
   }
 })();

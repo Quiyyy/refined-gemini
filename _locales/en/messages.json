@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "Refined Gemini",
+    "description": "Extension display name"
+  },
+  "extDescription": {
+    "message": "Align Google Gemini Web UI 1:1 with ChatGPT: clean canvas, soft-blue bubbles, configurable indent & code cards.",
+    "description": "Store & extension manager short description (<= 132 chars)"
+  },
+  "actionTitle": {
+    "message": "Refined Gemini Settings",
+    "description": "Toolbar button tooltip"
+  }
+}

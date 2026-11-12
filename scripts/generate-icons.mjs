@@ -117,12 +117,14 @@ function renderIcon(size) {
         rgba[idx + 3] = 0;
       } else {
         const starRatio = starHits / bgHits;
-        // Blend between #0D0D0D (13, 13, 13) and #FFFFFF (255, 255, 255)
-        const c = Math.round(13 + (255 - 13) * starRatio);
+        // Blend between ChatGPT Accent Blue #0285FF (2, 133, 255) and #FFFFFF (255, 255, 255)
+        const r = Math.round(2 + (255 - 2) * starRatio);
+        const g = Math.round(133 + (255 - 133) * starRatio);
+        const b = 255;
         const alpha = Math.round((bgHits / total) * 255);
-        rgba[idx] = c;
-        rgba[idx + 1] = c;
-        rgba[idx + 2] = c;
+        rgba[idx] = r;
+        rgba[idx + 1] = g;
+        rgba[idx + 2] = b;
         rgba[idx + 3] = alpha;
       }
     }
@@ -137,3 +139,9 @@ for (const size of [16, 32, 48, 128]) {
   fs.writeFileSync(outPath, renderIcon(size));
   console.log(`Generated ${outPath}`);
 }
+
+const ASSETS_DIR = path.resolve(__dirname, '../docs/assets');
+fs.mkdirSync(ASSETS_DIR, { recursive: true });
+const storeLogoPath = path.join(ASSETS_DIR, 'store-logo-300.png');
+fs.writeFileSync(storeLogoPath, renderIcon(300));
+console.log(`Generated ${storeLogoPath}`);

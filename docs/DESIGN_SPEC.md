@@ -1,38 +1,38 @@
-# Refined Gemini：1:1 对齐 ChatGPT 网页端设计规范与配置方案
+# Refined Gemini — 1:1 ChatGPT Web UI Design Specification (`v1.4.0`)
+
+**English** · [简体中文](./DESIGN_SPEC.zh-CN.md)
 
 > [!IMPORTANT]
-> **核心设计准则**：放弃主观自创主题与复杂装饰，以 **ChatGPT 网页端成熟克制的视觉与排版体系作为唯一基准（Single Source of Truth）**，全面对齐字体、配色、缩进、表格、代码块与页面布局；在此之上仅提供高实用价值、零认知负担的可选配置项。
+> **Design Principle**: Rather than inventing arbitrary custom themes, **Refined Gemini** treats the **official ChatGPT Web UI (`openai/apps-sdk-ui`) as its Single Source of Truth** for color primitives, typography, list hierarchy, borderless tables, code cards, and single-left-baseline alignment—exposing only high-utility, zero-clutter user controls.
 
 ---
 
-## 一、 视觉、色板与组件规范 1:1 对齐拆解（`v1.3.0`）
+## 1. Visual & Component Token Alignment (`openai/apps-sdk-ui`)
 
-所有色彩、字号与间距均提取自 OpenAI 官方开源组件库 `openai/apps-sdk-ui`（`variables-primitive.css`、`variables-semantic.css`、`Markdown.module.css`、`CodeBlock.module.css`）：
+All tokens are derived from OpenAI's official design system (`variables-primitive.css`, `variables-semantic.css`, `Markdown.module.css`, and `CodeBlock.module.css`):
 
-| 维度 | Gemini 原生痛点 | `refined-gemini` 对齐 ChatGPT 后的精确 Token 表现 |
+| Layer | Native Gemini Pain Point | Refined Gemini Token & Layout Specification |
 | :--- | :--- | :--- |
-| **画布、侧栏与强调色体系** | 泛冷蓝灰 Material 底色（`#f0f4f9`）、单调灰暗或皇家蓝杂乱色块 | **浅色**：画布 `#FFFFFF`，侧栏 `#F9F9F9`，选中项 `#ECECEC`；**深色**：画布 `#212121`，侧栏 `#171717`，选中项 `#2F2F2F`<br>**强调色**：恢复左上 Gemini 原生彩色星标，默认采用 ChatGPT 官方强调蓝 **`#0285FF`**（`--blue-400`，悬停 `#0169CC`）点亮发送圆钮、激活工具胶囊与面板开关 |
-| **浅蓝用户气泡与防折行** | 弹性父容器宽度收缩导致百分比 `max-width` 循环压缩，10 字短句被强行换行 | 接入 OpenAI `--blue-50` **浅蓝气泡**（浅色 `#E5F3FF` / 深色 `#1A3550`，`20px` 圆角），基于完整聊天列宽 `70%` 计算最大宽度，短消息单行舒展不折行；轮次间距紧凑收敛至 `~20px` |
-| **可配置缩进比例与标准列宽** | 多级列表层层叠加过深空白、`ol > li::marker` 序号被置空；默认容器含内边距导致实际正文窄于 `48rem` | 默认容器 `800px`（扣除两侧 `16px` 内边距后正文精确 **`768px = 48rem`**）；正文 `16px` / `1.68` 行高 / 一级块元素 `0px` 共线；**默认缩进 1:1 对齐 `Markdown.module.css`**（`ul/ol` `1.625em`、子级 `1.5em`、`li` `0.375em` 外置标号），并提供 **`0% / 65% / 标准 GPT / 125%`** 四档实时切换 |
-| **Markdown 表格** | 单元格 `min-width: 173px` 触发假横向滚动条、`::after` 双横线、`17px` 大字号 | **极简 `14px` 无竖框横线表**：`min-width: 0` 消除假溢出，末行 `border-bottom: none`，首列 `padding-left: 0` 与正文严格共线 |
-| **紧凑代码块与行内代码** | 浅色模式强套 `#141414` 暗黑内壳、`.header-formatted` `46px` 顶栏导致语言标签距代码过远 | **`#F9F9F9` / `#171717` 一体化 `12px` 圆角卡片**：顶栏锁定 `32px` 紧凑高度（`26×26` 按钮）+ `pre` `2px` 顶内边距，`14px/1.5` 等宽字体映射 OpenAI 官方语法高亮色板；行内代码配 `1px` 内嵌微环 |
-| **防透字底部输入舱** | 滚动时对话文字在输入框下方露头或在顶部渐变区半透明穿模 | `input-container` 改为 **100% 纯色不透明画布底座 + 底部防漏遮罩**，彻底杜绝输入框下方露字与上方残影；配 **`32×32` `#0285FF` 蓝色圆形发送按钮** |
+| **Surfaces & Accents** | Cool blue-gray Material background (`#f0f4f9`), scattered royal-blue buttons | **Light**: Canvas `#FFFFFF`, Sidebar `#F9F9F9`, Active item `#ECECEC`<br>**Dark**: Canvas `#212121`, Sidebar `#171717`, Active item `#2F2F2F`<br>**Accent**: Keeps native colorful top-left Gemini sparkle; applies ChatGPT **`#0285FF`** (`--blue-400`, hover `#0169CC`) to the `32×32` circular Send button & switches |
+| **User Bubbles** | Shrink-to-fit flex parents compress percentage `max-width`, wrapping short 10-char messages | Soft-blue **`#E5F3FF` / `#1A3550`** (`--blue-50`), `20px` radius, non-circular `70%` full-column width cap, and `~20px` multi-turn vertical rhythm |
+| **Prose & Indentation** | Deeply stacked nested list indentation, blanked `ol > li::marker`, narrow or inconsistent column width | `800px` container = **`768px` (`48rem`)** prose width (`16px` / `1.68` line-height); top-level blocks strictly `0px` collinear; default list indent matches `Markdown.module.css` (`ul/ol` `1.625em`, nested `1.5em`, `li` `0.375em` outside markers) with `0% / 65% / GPT / 125%` presets |
+| **Markdown Tables** | `min-width: 173px` per cell causing fake horizontal scrollbars, double borders, `17px` oversized text | Clean `14px` horizontal-rule tables (`min-width: 0`), `600` bold header row, no bottom border on final row, `0px` left padding on first column |
+| **Code Blocks & Inline Code** | Forced `#141414` dark boxes in Light mode, `46px` header creating excessive gap above first line | Unified `#F9F9F9` / `#171717` `12px` card, `32px` compact header (`26×26` icon buttons), `14px/1.5` monospace with OpenAI syntax colors (`#0169cc`/`#66b5ff`, `#c0660d`/`#ffe48c`, `#008635`/`#40c977`, `#8046d9`/`#ad7bf9`); inline code pill with `1px` inset ring |
+| **Bottom Composer Dock** | Scrolling text peeks below `.text-input-field` or ghosts behind semi-transparent top gradients | Flush-top 100% opaque `--rg-bg-canvas` dock + `::after` viewport shield with `136px` final-turn scroll clearance |
 
 ---
 
-## 二、 克制、零设计负担的「可选配置项」
+## 2. Minimalist Bilingual Controls (`中文 / EN`)
 
-在 1:1 复刻 ChatGPT 默认观感的基础上，插件 Popup 面板仅保留以下实用微调项：
+To keep cognitive load near zero, all verbose explanatory subtitles were removed from the Popup in `v1.4.0`:
 
-1. **总开关（Master Toggle）**：一键实时开启/暂停美化，随时对比原生效果。
-2. **外观配色（`themeMode`）**：`跟随页面（默认）` / `强制 ChatGPT 浅色` / `强制 ChatGPT 深色`。
-3. **对话列宽度（`chatWidth`）**：`标准 768（默认，800px 容器 = 768px 正文列宽）` / `适中 920px` / `宽屏 1120px` / `超宽 90%`。
-4. **正文字号密度（`fontSize`）**：`紧凑 15px` / `标准 16px（默认，行高 1.68）` / `宽松 17px`。
-5. **缩进比例（`indentScale`）**：`无 0%` / `紧凑 65%` / **`标准 GPT（默认，1:1 对齐 OpenAI 列表与引用缩进）`** / `宽松 125%`。
-6. **隐藏 AI 回复头像（`hideAvatar`，默认开启）**：对齐 ChatGPT 无头像左基准线直排；若习惯保留 Gemini 星标可随时关闭。
-7. **紧凑侧边栏（`compactSidebar`，默认开启）**：将侧栏定宽收敛至 ChatGPT 同款 `260px` 与 `8px` 圆角紧凑会话行。
-8. **纯净降噪模式（`cleanView`，默认开启）**：隐藏底部免责声明、定位栏、升级推广按钮与回答末尾的追问建议气泡。
-9. **`Ctrl / ⌘ + Enter` 发送（`ctrlEnterSend`，默认关闭）**：开启后单按 `Enter` 仅换行，防止撰写多段结构化 Prompt 时误触发送。
+1. **Language (`uiLang`)**: `中` / `EN` (defaults to `auto` based on `navigator.language`).
+2. **Master Toggle (`enabled`)**: Instant live toggle without page reload.
+3. **Theme (`themeMode`)**: `Auto` / `Light` / `Dark`.
+4. **Width (`chatWidth`)**: `768px` (default) / `920px` / `1120px` / `90%`.
+5. **Font Size (`fontSize`)**: `15px` / `16px` (default) / `17px`.
+6. **Indent (`indentScale`)**: `0%` / `65%` / `GPT` (default) / `125%`.
+7. **Switches**: `Hide AI Avatar`, `Compact Sidebar`, `Clean View`, and `Ctrl/⌘ + Enter to Send`.
 
 > [!TIP]
-> **防图标乱码保障**：样式表在替换全局排版字体时，显式隔离并保留了 `mat-icon`、`.google-symbols`、`Material Symbols Outlined` 连字图标字体，确保侧边栏、工具栏与复制按钮图标 100% 正常显示。
+> **Icon & Math Font Isolation**: Global typography rules explicitly preserve `mat-icon`, `.google-symbols`, `Material Symbols Outlined`, and `KaTeX` font families so UI ligature icons and mathematical formulas never break.
