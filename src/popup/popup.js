@@ -8,7 +8,7 @@
   const DEFAULTS = globalThis.REFINED_GEMINI_DEFAULTS || {
     enabled: true,
     themeMode: 'auto',
-    chatWidth: '768px',
+    chatWidth: '800px',
     fontSize: '16px',
     hideAvatar: true,
     compactSidebar: true,
@@ -38,6 +38,9 @@
 
   function renderUI(settings) {
     state = { ...DEFAULTS, ...settings };
+    if (state.chatWidth === '768px') {
+      state.chatWidth = '800px';
+    }
 
     els.toggleEnabled.checked = Boolean(state.enabled);
     els.settingsBody.classList.toggle('is-disabled', !state.enabled);

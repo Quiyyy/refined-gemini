@@ -17,8 +17,8 @@ fs.mkdirSync(outDir, { recursive: true });
 const userScript = `// ==UserScript==
 // @name         Refined Gemini (1:1 ChatGPT Web UI Alignment)
 // @namespace    https://github.com/Quiyyy/refined-gemini
-// @version      1.1.0
-// @description  1:1 对齐 ChatGPT 网页端视觉与排版基准：纯白/深灰画布、现代中英混排字体栈、无竖框左对齐表格、OpenAI 官方代码配色卡片与极简黑白灰交互控件。
+// @version      1.2.0
+// @description  1:1 对齐 ChatGPT 网页端视觉与排版基准：纯白/深灰画布、浅蓝用户气泡与 #0285FF 强调色、零缩进顶格正文、紧凑代码块与无竖框表格。
 // @author       Quiyyy
 // @license      MIT
 // @match        https://gemini.google.com/*
@@ -35,7 +35,7 @@ const userScript = `// ==UserScript==
   const DEFAULTS = {
     enabled: true,
     themeMode: 'auto',      // 'auto' | 'light' | 'dark'
-    chatWidth: '768px',     // '768px' | '920px' | '1120px' | '90%'
+    chatWidth: '800px',     // '800px' (768px prose) | '920px' | '1120px' | '90%'
     fontSize: '16px',       // '15px' | '16px' | '17px'
     hideAvatar: true,
     compactSidebar: true,
@@ -45,14 +45,20 @@ const userScript = `// ==UserScript==
 
   const CSS = ${JSON.stringify(cssContent)};
 
+  function normalize(obj) {
+    const merged = { ...DEFAULTS, ...(obj || {}) };
+    if (merged.chatWidth === '768px') merged.chatWidth = '800px';
+    return merged;
+  }
+
   function readSettings() {
     try {
       if (typeof GM_getValue === 'function') {
         const saved = GM_getValue(STORAGE_KEY, null);
-        if (saved && typeof saved === 'object') return { ...DEFAULTS, ...saved };
+        if (saved && typeof saved === 'object') return normalize(saved);
       }
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return { ...DEFAULTS, ...JSON.parse(raw) };
+      if (raw) return normalize(JSON.parse(raw));
     } catch (_) {}
     return { ...DEFAULTS };
   }
@@ -214,8 +220,8 @@ const userScript = `// ==UserScript==
       saveSettings(settings);
       apply();
     });
-    GM_registerMenuCommand('切换对话列宽 (768px / 920px / 1120px / 90%)', () => {
-      const widths = ['768px', '920px', '1120px', '90%'];
+    GM_registerMenuCommand('切换对话列宽 (标准768 / 920px / 1120px / 90%)', () => {
+      const widths = ['800px', '920px', '1120px', '90%'];
       settings.chatWidth = widths[(widths.indexOf(settings.chatWidth) + 1) % widths.length];
       saveSettings(settings);
       apply();

@@ -16,9 +16,9 @@
 
   --border: rgba(0, 0, 0, 0.08);
   --switch-off: #d9d9e3;
-  --switch-on: #0d0d0d;
+  --switch-on: #0285ff;
   --switch-thumb: #ffffff;
-  --brand-bg: #0d0d0d;
+  --brand-bg: #0285ff;
   --brand-fg: #ffffff;
 }
 
@@ -36,10 +36,10 @@
 
     --border: rgba(255, 255, 255, 0.08);
     --switch-off: #3c3c3c;
-    --switch-on: #ececec;
-    --switch-thumb: #171717;
-    --brand-bg: #ececec;
-    --brand-fg: #0d0d0d;
+    --switch-on: #0285ff;
+    --switch-thumb: #ffffff;
+    --brand-bg: #0285ff;
+    --brand-fg: #ffffff;
   }
 }
 

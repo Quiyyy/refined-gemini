@@ -6,7 +6,7 @@
   const DEFAULTS = Object.freeze({
     enabled: true,          // Master toggle: instant on/off comparison with native Gemini
     themeMode: 'auto',      // 'auto' (follow Gemini/system) | 'light' | 'dark'
-    chatWidth: '768px',     // '768px' (1:1 ChatGPT default) | '920px' | '1120px' | '90%'
+    chatWidth: '800px',     // '800px' (768px prose + 32px padding = 1:1 ChatGPT 48rem) | '920px' | '1120px' | '90%'
     fontSize: '16px',       // '15px' (compact) | '16px' (default) | '17px' (comfortable)
     hideAvatar: true,       // Hide Gemini star avatar for flush-left baseline alignment
     compactSidebar: true,   // Converge sidebar to 260px width & 8px rounded items

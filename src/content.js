@@ -14,13 +14,21 @@
   const DEFAULTS = globalThis.REFINED_GEMINI_DEFAULTS || {
     enabled: true,
     themeMode: 'auto',
-    chatWidth: '768px',
+    chatWidth: '800px',
     fontSize: '16px',
     hideAvatar: true,
     compactSidebar: true,
     cleanView: true,
     ctrlEnterSend: false
   };
+
+  function normalizeSettings(rawSettings) {
+    const merged = { ...DEFAULTS, ...rawSettings };
+    if (merged.chatWidth === '768px') {
+      merged.chatWidth = '800px';
+    }
+    return merged;
+  }
 
   let currentSettings = { ...DEFAULTS };
 
@@ -91,7 +99,7 @@
    * Apply all settings as root attributes and CSS custom properties on <html>.
    */
   function applySettings(nextSettings) {
-    currentSettings = { ...DEFAULTS, ...nextSettings };
+    currentSettings = normalizeSettings(nextSettings);
     const root = document.documentElement;
     if (!root) return;
 
