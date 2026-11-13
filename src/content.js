@@ -123,6 +123,44 @@
   }
 
   /**
+   * Broadcast active theme, enable state, and font-size to any embedded Generative UI
+   * sandbox iframes (`*.scf.usercontent.goog` / `*.googleusercontent.com`, including
+   * inside open `<safe-content-frame>` Shadow DOM roots).
+   */
+  function getSandboxSyncPayload() {
+    const enabled = Boolean(currentSettings.enabled);
+    const theme = resolveEffectiveTheme(currentSettings.themeMode);
+    return {
+      type: 'RG_SANDBOX_SYNC',
+      enabled,
+      theme,
+      themeMode: currentSettings.themeMode || 'auto',
+      fontSize: currentSettings.fontSize || DEFAULTS.fontSize
+    };
+  }
+
+  function broadcastToSandboxFrames() {
+    if (!document.documentElement) return;
+    const payload = getSandboxSyncPayload();
+    const frames = new Set(document.querySelectorAll('iframe'));
+    const scfHosts = document.querySelectorAll('safe-content-frame');
+    for (const hostEl of scfHosts) {
+      if (hostEl.shadowRoot) {
+        for (const innerFrame of hostEl.shadowRoot.querySelectorAll('iframe')) {
+          frames.add(innerFrame);
+        }
+      }
+    }
+    for (const frame of frames) {
+      try {
+        if (frame.contentWindow) {
+          frame.contentWindow.postMessage(payload, '*');
+        }
+      } catch (_) {}
+    }
+  }
+
+  /**
    * Apply all settings as root attributes and CSS custom properties on <html>.
    */
   function applySettings(nextSettings) {
@@ -136,6 +174,7 @@
       root.style.removeProperty('--rg-chat-max-width');
       root.style.removeProperty('--rg-font-size');
       root.style.removeProperty('--rg-indent-scale');
+      broadcastToSandboxFrames();
       return;
     }
 
@@ -154,6 +193,7 @@
     root.style.setProperty('--rg-font-size', currentSettings.fontSize || DEFAULTS.fontSize);
     root.style.setProperty('--rg-indent-scale', indentScale);
     resetOuterChatScroll();
+    broadcastToSandboxFrames();
   }
 
   /**
@@ -173,6 +213,7 @@
         const nextTheme = resolveEffectiveTheme('auto');
         if (root.getAttribute('data-rg-theme') !== nextTheme) {
           root.setAttribute('data-rg-theme', nextTheme);
+          broadcastToSandboxFrames();
         }
       });
     };
@@ -356,13 +397,27 @@
     );
   }
 
+  function setupSandboxHandshake() {
+    window.addEventListener('message', (event) => {
+      const data = event && event.data;
+      if (!data || typeof data !== 'object' || data.type !== 'RG_SANDBOX_READY') return;
+      try {
+        if (event.source && typeof event.source.postMessage === 'function') {
+          event.source.postMessage(getSandboxSyncPayload(), '*');
+        }
+      } catch (_) {}
+      broadcastToSandboxFrames();
+    });
+  }
+
   // 1. Apply cached configuration synchronously at document_start
   loadCachedSettings();
   applySettings(currentSettings);
 
-  // 2. Attach observers, scroll guard & keyboard handler
+  // 2. Attach observers, scroll guard, sandbox handshake & keyboard handler
   setupThemeObservers();
   setupScrollGuard();
+  setupSandboxHandshake();
   setupCtrlEnterHandler();
 
   // 3. Hydrate from chrome.storage.sync

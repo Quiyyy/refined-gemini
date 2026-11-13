@@ -1,6 +1,6 @@
 {
   "name": "refined-gemini",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Align Google Gemini Web UI 1:1 with ChatGPT Web typography, color surfaces, and clean layout (Manifest V3 Extension & UserScript).",
   "type": "module",
   "license": "MIT",
@@ -17,7 +17,7 @@
     "build:icons": "node scripts/generate-icons.mjs",
     "build:userscript": "node scripts/build-userscript.mjs",
     "build": "npm run build:icons && npm run build:userscript",
-    "check": "node --check src/defaults.js && node --check src/content.js && node --check src/popup/popup.js && node --check userscript/refined-gemini.user.js",
+    "check": "node --check src/defaults.js && node --check src/content.js && node --check src/sandbox.js && node --check src/popup/popup.js && node --check userscript/refined-gemini.user.js",
     "pack": "npm run build && npm run check && node scripts/pack-extension.mjs"
   }
 }

@@ -26,6 +26,8 @@ const EXTENSION_FILES = [
   'src/defaults.js',
   'src/content.css',
   'src/content.js',
+  'src/sandbox.css',
+  'src/sandbox.js',
   'src/popup/popup.html',
   'src/popup/popup.css',
   'src/popup/popup.js'
@@ -126,6 +128,11 @@ const entries = EXTENSION_FILES.map((relPath) => {
 });
 
 fs.mkdirSync(DIST_DIR, { recursive: true });
+for (const existing of fs.readdirSync(DIST_DIR)) {
+  if (existing.endsWith('.zip')) {
+    fs.unlinkSync(path.join(DIST_DIR, existing));
+  }
+}
 const zipName = `refined-gemini-v${manifest.version}-extension.zip`;
 const outZip = path.join(DIST_DIR, zipName);
 const zipBuffer = buildZip(entries);

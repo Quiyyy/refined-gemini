@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * Builds userscript/refined-gemini.user.js directly from src/content.css,
+ * Builds userscript/refined-gemini.user.js directly from src/content.css & src/sandbox.css,
  * producing a Greasy Fork & ScriptCat compliant bilingual UserScript with
- * 100% visual & interactive parity with the Manifest V3 browser extension.
+ * 100% visual & interactive parity (including Generative UI sandbox frames)
+ * with the Manifest V3 browser extension.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,6 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 const cssContent = fs.readFileSync(path.join(ROOT, 'src/content.css'), 'utf8');
+const sandboxCssContent = fs.readFileSync(path.join(ROOT, 'src/sandbox.css'), 'utf8');
 const outDir = path.join(ROOT, 'userscript');
 fs.mkdirSync(outDir, { recursive: true });
 
@@ -21,15 +23,17 @@ const userScript = `// ==UserScript==
 // @name:zh-TW         Refined Gemini — 1:1 對齊 ChatGPT 網頁端介面
 // @namespace          https://github.com/Quiyyy/refined-gemini
 // @version            ${pkg.version}
-// @description        Align Google Gemini Web UI 1:1 with ChatGPT: clean white/dark surfaces, soft-blue user bubbles, #0285FF accents, configurable list indentation, compact code blocks & borderless tables.
-// @description:zh-CN  1:1 对齐 ChatGPT 网页端视觉与排版：纯白/深灰画布、浅蓝用户气泡与 #0285FF 强调色、可调列表缩进比例（默认对齐 GPT）、紧凑代码块与无竖框表格。
-// @description:zh-TW  1:1 對齊 ChatGPT 網頁端視覺與排版：純白/深灰畫布、淺藍用戶氣泡與 #0285FF 強調色、可調清單縮排比例（預設對齊 GPT）、緊湊程式碼區塊與無豎框表格。
+// @description        Align Google Gemini Web UI 1:1 with ChatGPT: uniform typography, clean white/dark surfaces, soft-blue user bubbles, #0285FF accents, ChatGPT follow-up cards & Generative UI diagram alignment.
+// @description:zh-CN  1:1 对齐 ChatGPT 网页端视觉与排版：全局统一字号、纯白/深灰画布、浅蓝用户气泡与 #0285FF 强调色、轻量细框追问建议卡片与交互式流程图同源对齐。
+// @description:zh-TW  1:1 對齊 ChatGPT 網頁端視覺與排版：全域統一字級、純白/深灰畫布、淺藍用戶氣泡與 #0285FF 強調色、輕量細框追問建議卡片與互動式流程圖同源對齊。
 // @author             Quiyyy
 // @license            MIT
 // @homepageURL        https://github.com/Quiyyy/refined-gemini
 // @supportURL         https://github.com/Quiyyy/refined-gemini/issues
 // @icon               https://raw.githubusercontent.com/Quiyyy/refined-gemini/main/icons/icon128.png
 // @match              https://gemini.google.com/*
+// @match              https://*.scf.usercontent.goog/*
+// @match              https://*.googleusercontent.com/*
 // @run-at             document-start
 // @grant              GM_getValue
 // @grant              GM_setValue
@@ -56,6 +60,7 @@ const userScript = `// ==UserScript==
   const VALID_INDENT_SCALES = new Set(['0', '0.65', '1', '1.25']);
   const VALID_LANGS = new Set(['auto', 'zh', 'en']);
   const CSS = ${JSON.stringify(cssContent)};
+  const SANDBOX_CSS = ${JSON.stringify(sandboxCssContent)};
 
   function normalize(obj) {
     const merged = { ...DEFAULTS, ...(obj || {}) };
@@ -96,7 +101,115 @@ const userScript = `// ==UserScript==
   }
 
   let settings = readSettings();
+  const host = String(location.hostname || '').toLowerCase();
+  const isMainHost = host === 'gemini.google.com';
 
+  // --- Generative UI Sandbox Subframe Branch (*.scf.usercontent.goog / *.googleusercontent.com) ---
+  if (!isMainHost) {
+    if (window === window.top) return;
+    if (host.startsWith('feedback') || host.includes('accounts.google') || host.includes('uservoice')) return;
+
+    const isScf = host.endsWith('.scf.usercontent.goog') || host === 'scf.usercontent.goog';
+    let sbState = {
+      enabled: Boolean(settings.enabled),
+      themeMode: settings.themeMode || 'auto',
+      parentTheme: null,
+      fontSize: settings.fontSize || '16px'
+    };
+
+    const LIGHT_MAP = {
+      '#3186ff': '#0285ff', '#1a73e8': '#0285ff', '#4285f4': '#0285ff',
+      '#0b57d0': '#0169cc', '#0e57d0': '#0169cc', '#1967d2': '#0169cc',
+      '#041e49': '#0d0d0d', '#001d35': '#0d0d0d',
+      '#dcf1ff': '#e5f3ff', '#d3e3fd': '#e5f3ff', '#e8f0fe': '#e5f3ff',
+      '#f2f0f0': '#f7f7f8', '#f4f3f2': '#f7f7f8', '#faf9f9': '#f9f9f9', '#f0f4f9': '#f7f7f8', '#f8f9fa': '#f7f7f8',
+      '#e8eef6': '#f4f4f4', '#dde3e9': '#ececec', '#f1f3f4': '#f4f4f4',
+      '#1f1f1f': '#0d0d0d', '#444746': '#5d5d5d', '#5f6368': '#5d5d5d', '#747775': '#8f8f8f'
+    };
+    const DARK_MAP = {
+      '#3186ff': '#0285ff', '#1a73e8': '#0285ff', '#4285f4': '#0285ff',
+      '#0b57d0': '#66b5ff', '#0e57d0': '#66b5ff', '#1967d2': '#66b5ff', '#a8c7fa': '#66b5ff',
+      '#dcf1ff': '#1a3550', '#d3e3fd': '#1a3550', '#e8f0fe': '#1a3550', '#0842a0': '#1a3550',
+      '#f2f0f0': '#2a2a2a', '#f4f3f2': '#2a2a2a', '#faf9f9': '#262626', '#f0f4f9': '#2a2a2a',
+      '#f8f9fa': '#262626', '#f1f3f4': '#2f2f2f', '#e8eef6': '#2f2f2f', '#dadce0': '#3c3c3c',
+      '#282a2c': '#2a2a2a', '#1b1b1b': '#212121', '#041e49': '#ececec', '#1f1f1f': '#ececec',
+      '#202124': '#ececec', '#e3e3e3': '#ececec', '#444746': '#b4b4b4', '#5f6368': '#b4b4b4', '#c4c7c5': '#b4b4b4'
+    };
+
+    function injectSandboxStyle() {
+      if (document.getElementById('refined-gemini-sandbox-style')) return;
+      const st = document.createElement('style');
+      st.id = 'refined-gemini-sandbox-style';
+      st.setAttribute('data-rg-own-style', 'true');
+      st.textContent = SANDBOX_CSS;
+      (document.head || document.documentElement).appendChild(st);
+    }
+
+    function applySandbox() {
+      const root = document.documentElement;
+      if (!root) return;
+      const isGenUi = isScf || Boolean(document.getElementById('app-root') || document.querySelector('.bot-response, script[data-sandbox-runtime]'));
+      if (!sbState.enabled || !isGenUi) {
+        root.removeAttribute('data-rg-sandbox');
+        root.removeAttribute('data-rg-theme');
+        return;
+      }
+      injectSandboxStyle();
+      const theme = (sbState.themeMode === 'light' || sbState.themeMode === 'dark')
+        ? sbState.themeMode
+        : (sbState.parentTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+      root.setAttribute('data-rg-sandbox', 'true');
+      root.setAttribute('data-rg-theme', theme);
+      root.style.setProperty('--rg-font-size', sbState.fontSize || '16px');
+      const map = theme === 'dark' ? DARK_MAP : LIGHT_MAP;
+      for (const s of document.querySelectorAll('style:not([data-rg-own-style])')) {
+        const cur = s.textContent || '';
+        if (s.__rgOrig === undefined || (s.__rgOut !== undefined && s.__rgOut !== cur)) s.__rgOrig = cur;
+        let next = s.__rgOrig
+          .replace(/#[0-9a-fA-F]{6}\\b/g, (h) => map[h.toLowerCase()] || h)
+          .replace(/font-size\\s*:\\s*(?:1[789]|2[0-4])(?:\\.\\d+)?px\\b/gi, 'font-size: var(--rg-font-size, 16px)');
+        if (theme === 'dark') {
+          next = next.replace(/(background(?:-color)?\\s*:\\s*)#(?:ffffff|fff)\\b/gi, '$1#212121');
+        }
+        if (cur !== next) s.textContent = next;
+        s.__rgOut = next;
+      }
+      for (const el of document.querySelectorAll('svg [fill], svg [stroke]')) {
+        for (const attr of ['fill', 'stroke']) {
+          if (!el.hasAttribute(attr)) continue;
+          const bAttr = 'data-rg-orig-' + attr;
+          const val = (el.getAttribute(attr) || '').trim();
+          const orig = el.hasAttribute(bAttr) ? (el.getAttribute(bAttr) || val) : val;
+          const mapped = (theme === 'dark' && attr === 'fill' && /^#(?:ffffff|fff)$/i.test(orig))
+            ? '#212121'
+            : map[orig.toLowerCase()];
+          if (mapped && val.toLowerCase() !== mapped) {
+            if (!el.hasAttribute(bAttr)) el.setAttribute(bAttr, val);
+            el.setAttribute(attr, mapped);
+          }
+        }
+      }
+    }
+
+    window.addEventListener('message', (e) => {
+      const d = e && e.data;
+      if (!d || d.type !== 'RG_SANDBOX_SYNC') return;
+      if (typeof d.enabled === 'boolean') sbState.enabled = d.enabled;
+      if (d.theme === 'light' || d.theme === 'dark') sbState.parentTheme = d.theme;
+      if (typeof d.themeMode === 'string') sbState.themeMode = d.themeMode;
+      if (typeof d.fontSize === 'string') sbState.fontSize = d.fontSize;
+      applySandbox();
+    });
+
+    if (document.documentElement) applySandbox();
+    document.addEventListener('DOMContentLoaded', () => {
+      applySandbox();
+      try { window.parent.postMessage({ type: 'RG_SANDBOX_READY' }, '*'); } catch (_) {}
+    });
+    return;
+  }
+
+  // --- Main Host Branch (gemini.google.com) ---
   function injectStyle() {
     if (document.getElementById('refined-gemini-style')) return;
     const style = document.createElement('style');
@@ -114,6 +227,29 @@ const userScript = `// ==UserScript==
     }
     if (docEl && (docEl.classList.contains('dark') || docEl.classList.contains('dark-theme'))) return true;
     return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+
+  function resolveTheme() {
+    return settings.themeMode === 'auto' ? (detectNativeDark() ? 'dark' : 'light') : settings.themeMode;
+  }
+
+  function broadcastSandbox() {
+    const payload = {
+      type: 'RG_SANDBOX_SYNC',
+      enabled: Boolean(settings.enabled),
+      theme: resolveTheme(),
+      themeMode: settings.themeMode || 'auto',
+      fontSize: settings.fontSize || '16px'
+    };
+    const frames = new Set(document.querySelectorAll('iframe'));
+    for (const scf of document.querySelectorAll('safe-content-frame')) {
+      if (scf.shadowRoot) {
+        for (const f of scf.shadowRoot.querySelectorAll('iframe')) frames.add(f);
+      }
+    }
+    for (const f of frames) {
+      try { f.contentWindow && f.contentWindow.postMessage(payload, '*'); } catch (_) {}
+    }
   }
 
   function resetOuterChatScroll() {
@@ -136,9 +272,10 @@ const userScript = `// ==UserScript==
       root.style.removeProperty('--rg-chat-max-width');
       root.style.removeProperty('--rg-font-size');
       root.style.removeProperty('--rg-indent-scale');
+      broadcastSandbox();
       return;
     }
-    const theme = settings.themeMode === 'auto' ? (detectNativeDark() ? 'dark' : 'light') : settings.themeMode;
+    const theme = resolveTheme();
     const indentScale = settings.indentScale || DEFAULTS.indentScale;
     root.setAttribute('data-rg-enabled', 'true');
     root.setAttribute('data-rg-theme', theme);
@@ -151,7 +288,12 @@ const userScript = `// ==UserScript==
     root.style.setProperty('--rg-font-size', settings.fontSize);
     root.style.setProperty('--rg-indent-scale', indentScale);
     resetOuterChatScroll();
+    broadcastSandbox();
   }
+
+  window.addEventListener('message', (e) => {
+    if (e && e.data && e.data.type === 'RG_SANDBOX_READY') broadcastSandbox();
+  });
 
   function isPromptEditorElement(target) {
     if (!(target instanceof Element)) return false;

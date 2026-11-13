@@ -152,23 +152,95 @@ html[data-rg-enabled="true"] body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  /* Generation 1 & 2: Material 3 / Gem / Bard Surface & Accent Tokens */
   --gem-sys-color--surface: var(--rg-bg-canvas) !important;
   --gem-sys-color--surface-dim: var(--rg-bg-sidebar) !important;
   --gem-sys-color--surface-bright: var(--rg-bg-canvas) !important;
   --gem-sys-color--surface-container-lowest: var(--rg-bg-canvas) !important;
   --gem-sys-color--surface-container-low: var(--rg-bg-sidebar) !important;
   --gem-sys-color--surface-container: var(--rg-bg-sidebar) !important;
-  --gem-sys-color--surface-container-high: var(--rg-bg-active) !important;
+  --gem-sys-color--surface-container-high: var(--rg-bg-code-card) !important;
   --gem-sys-color--surface-container-highest: var(--rg-bg-active) !important;
   --gem-sys-color--on-surface: var(--rg-text-primary) !important;
   --gem-sys-color--on-surface-variant: var(--rg-text-secondary) !important;
+  --gem-sys-color--primary: var(--rg-accent-bg) !important;
+  --gem-sys-color--primary-container: var(--rg-bg-user-bubble) !important;
+  --gem-sys-color--on-primary-container: var(--rg-text-primary) !important;
+  --gem-sys-color--secondary-container: var(--rg-bg-active) !important;
   --gem-sys-color--outline: var(--rg-border-default) !important;
   --gem-sys-color--outline-variant: var(--rg-border-subtle) !important;
+  --bard-color-custom-primary-container: var(--rg-bg-user-bubble) !important;
+
+  /* Generation 3: Lumi Design System Tokens (also inherited by GenUI svgDocument) */
+  --lumi-sys-color--surface: var(--rg-bg-canvas) !important;
+  --lumi-sys-color--surface-dim: var(--rg-bg-sidebar) !important;
+  --lumi-sys-color--surface-bright: var(--rg-bg-canvas) !important;
+  --lumi-sys-color--on-surface: var(--rg-text-primary) !important;
+  --lumi-sys-color--on-surface-variant: var(--rg-text-secondary) !important;
+  --lumi-sys-color--on-surface-low: var(--rg-border-default) !important;
+  --lumi-sys-color--surface-accent: var(--rg-accent-bg) !important;
+  --lumi-sys-color-acc-color--accent: var(--rg-accent-bg) !important;
+  --lumi-sys-color-acc-color--accent-container: var(--rg-bg-user-bubble) !important;
+  --lumi-sys-color-acc-color--accent-fixed: var(--rg-accent-bg) !important;
+  --lumi-text-muted: var(--rg-text-secondary) !important;
+
+  /* Underlying Gemini Typography Scales (strictly excluding icon-scale!) */
+  --gem-sys-typography-markdown-type-scale--p-font-name: var(--rg-font-sans) !important;
+  --gem-sys-typography-markdown-type-scale--p-font-size: var(--rg-font-size, 16px) !important;
+  --gem-sys-typography-markdown-type-scale--h-1-font-name: var(--rg-font-sans) !important;
+  --gem-sys-typography-markdown-type-scale--h-1-font-size: var(--rg-font-size, 16px) !important;
+  --gem-sys-typography-markdown-type-scale--h-2-font-name: var(--rg-font-sans) !important;
+  --gem-sys-typography-markdown-type-scale--h-2-font-size: var(--rg-font-size, 16px) !important;
+  --gem-sys-typography-markdown-type-scale--h-3-font-name: var(--rg-font-sans) !important;
+  --gem-sys-typography-markdown-type-scale--h-3-font-size: var(--rg-font-size, 16px) !important;
+  --gem-sys-typography-markdown-type-scale--h-4-font-name: var(--rg-font-sans) !important;
+  --gem-sys-typography-markdown-type-scale--h-4-font-size: var(--rg-font-size, 16px) !important;
+  --gem-sys-typography-markdown-type-scale--h-5-font-name: var(--rg-font-sans) !important;
+  --gem-sys-typography-markdown-type-scale--h-5-font-size: var(--rg-font-size, 16px) !important;
+  --gem-sys-typography-markdown-type-scale--h-6-font-name: var(--rg-font-sans) !important;
+  --gem-sys-typography-markdown-type-scale--h-6-font-size: var(--rg-font-size, 16px) !important;
+  --gem-sys-typography-type-scale--body-l-font-name: var(--rg-font-sans) !important;
+  --gem-sys-typography-type-scale--body-l-font-size: var(--rg-font-size, 16px) !important;
+  --gem-sys-typography-type-scale--body-m-font-name: var(--rg-font-sans) !important;
+  --gem-sys-typography-type-scale--headline-s-font-name: var(--rg-font-sans) !important;
+  --gem-sys-typography-type-scale--title-l-font-name: var(--rg-font-sans) !important;
+  --gem-sys-typography-type-scale--title-m-font-name: var(--rg-font-sans) !important;
+
   --mdc-icon-button-icon-color: var(--rg-text-secondary) !important;
   --mat-icon-color: var(--rg-text-secondary) !important;
   --mat-sidenav-content-background-color: var(--rg-bg-canvas) !important;
   --mat-sidenav-container-background-color: var(--rg-bg-sidebar) !important;
   --mat-app-background-color: var(--rg-bg-canvas) !important;
+}
+
+/* React Islands (`bg3` / `Carbon`) StyleX root font & surface token remapping */
+html[data-rg-enabled="true"],
+html[data-rg-enabled="true"] .x1doifyo,
+html[data-rg-enabled="true"] .x1wv52q2 {
+  --xlq5u5o: var(--rg-font-sans) !important;
+  --xyokq58: var(--rg-font-sans) !important;
+  --xy7fywd: var(--rg-font-sans) !important;
+  --x11zim2j: var(--rg-font-mono) !important;
+  --xhrugro: var(--rg-bg-canvas) !important;
+  --xes8i4n: var(--rg-bg-sidebar) !important;
+  --x1lxru9b: var(--rg-bg-elevated) !important;
+  --x1diqisq: var(--rg-bg-sidebar) !important;
+  --x1oyaoqk: var(--rg-bg-active) !important;
+  --xr86lwc: var(--rg-bg-active) !important;
+  --xzkn3nr: var(--rg-bg-sidebar) !important;
+  --x13pcbat: var(--rg-text-primary) !important;
+  --xjzgp2m: var(--rg-text-primary) !important;
+  --xxvc16v: var(--rg-text-secondary) !important;
+  --x1uyhldl: var(--rg-accent-text) !important;
+  --x1nh6le8: var(--rg-bg-user-bubble) !important;
+  --xxg5d7c: var(--rg-accent-bg) !important;
+  --xfjemiy: var(--rg-accent-bg) !important;
+  --x1ei42bj: var(--rg-accent-bg) !important;
+  --x15344xe: var(--rg-bg-user-bubble) !important;
+  --xgzc4ba: var(--rg-accent-bg) !important;
+  --xizc69u: var(--rg-accent-bg) !important;
+  --x10pk9ts: var(--rg-border-default) !important;
+  --xzzcrc8: var(--rg-text-muted) !important;
 }
 
 /* Ensure wordmark, sidebar icons, & composer controls follow theme even when forcing Dark over Light */
@@ -940,11 +1012,14 @@ html[data-rg-enabled="true"] :is(
   .markdown th,
   .markdown blockquote,
   .gds-extended-blockquote,
+  model-response :is(h1, h2, h3, h4, h5, h6, p, .gds-body-l, .gds-headline-s, .gds-title-l, .gds-title-m, .no-md),
+  article.x1pxov78 :is(h1, h2, h3, h4, h5, h6, p),
   .query-text,
   .query-text-line,
   user-query .gds-body-l,
+  [data-testid="user-prompt-content"],
   rich-textarea .ql-editor
-) {
+):not(mat-icon):not(.mat-icon):not(.google-symbols):not(.material-icons) {
   font-family: var(--rg-font-sans) !important;
 }
 
@@ -960,6 +1035,33 @@ html[data-rg-enabled="true"] message-content {
   margin-left: 0 !important;
   margin-right: 0 !important;
   text-indent: 0 !important;
+}
+
+/* Catch non-.markdown Generative UI / React Islands intro, outro, & body-large blocks
+   (e.g., 17px–20px blocks before/after interactive diagrams) so prose font size never jumps! */
+html[data-rg-enabled="true"] :is(
+  model-response,
+  response-container,
+  .response-container,
+  structured-content-container,
+  article.x1pxov78
+) :is(
+  .gds-body-l,
+  .gds-headline-s,
+  .gds-title-l,
+  .gds-title-m,
+  .x19d36u7,
+  .xwsyq91,
+  .x1pvqxga,
+  .xneq65o,
+  .no-md,
+  p:not(model-thoughts *):not(.thoughts-container *):not([data-testid="items-container"] *)
+):not(mat-icon):not(.mat-icon):not(.google-symbols):not(.material-icons):not(user-query *) {
+  font-family: var(--rg-font-sans) !important;
+  font-size: var(--rg-font-size, 16px) !important;
+  line-height: var(--rg-line-height, 1.68) !important;
+  letter-spacing: normal !important;
+  color: var(--rg-text-primary) !important;
 }
 
 /* Enforce strict 0px horizontal offset on ALL top-level prose blocks, headings, tables, & code cards */
@@ -1014,13 +1116,13 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) p
 }
 
 /* Crisp 600 bold contrast in CJK + English mixed prose */
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, message-content) :is(strong, b) {
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, message-content, model-response, article.x1pxov78) :is(strong, b) {
   font-weight: 600 !important;
   color: var(--rg-text-strong) !important;
 }
 
 /* Links inside Markdown (OpenAI apps-sdk-ui #0169cc / #66b5ff) */
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) a {
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, article.x1pxov78) a:not([role="button"]) {
   color: var(--rg-link-color) !important;
   font-weight: 500 !important;
   text-decoration: underline !important;
@@ -1028,48 +1130,47 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) a {
   text-decoration-thickness: 1px !important;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) a:hover {
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, article.x1pxov78) a:not([role="button"]):hover {
   opacity: 0.84;
 }
 
-/* Headings (ChatGPT Web UI proportions & tight cohesive vertical rhythm) */
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) h1 {
-  font-size: 1.625em !important;
+/* Uniform Heading Scale: 100% identical font-size to body prose (`var(--rg-font-size, 16px)`),
+   distinguished strictly by 600 semibold weight & hierarchical vertical spacing! */
+html[data-rg-enabled="true"] :is(
+  .markdown,
+  .markdown-main-panel,
+  .md-content,
+  message-content,
+  model-response,
+  response-container,
+  article.x1pxov78
+) :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--rg-font-sans) !important;
+  font-size: var(--rg-font-size, 16px) !important;
   font-weight: 600 !important;
-  line-height: 1.25 !important;
-  margin-top: 1.5rem !important;
-  margin-bottom: 0.6rem !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0 !important;
   color: var(--rg-text-strong) !important;
-  letter-spacing: -0.015em;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) h2 {
-  font-size: 1.375em !important;
-  font-weight: 600 !important;
-  line-height: 1.28 !important;
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content, model-response, article.x1pxov78) h1 {
   margin-top: 1.35rem !important;
   margin-bottom: 0.5rem !important;
-  color: var(--rg-text-strong) !important;
-  letter-spacing: -0.01em;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) h3 {
-  font-size: 1.15em !important;
-  font-weight: 600 !important;
-  line-height: 1.35 !important;
-  margin-top: 1.05rem !important;
-  margin-bottom: 0.4rem !important;
-  color: var(--rg-text-strong) !important;
-  letter-spacing: -0.005em;
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content, model-response, article.x1pxov78) h2 {
+  margin-top: 1.2rem !important;
+  margin-bottom: 0.45rem !important;
 }
 
-html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) h4 {
-  font-size: 1em !important;
-  font-weight: 600 !important;
-  line-height: 1.45 !important;
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content, model-response, article.x1pxov78) h3 {
+  margin-top: 1rem !important;
+  margin-bottom: 0.35rem !important;
+}
+
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content, model-response, article.x1pxov78) :is(h4, h5, h6) {
   margin-top: 0.85rem !important;
   margin-bottom: 0.3rem !important;
-  color: var(--rg-text-strong) !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, .md-content) > :first-child {
@@ -1435,6 +1536,38 @@ html[data-rg-enabled="true"] :is(infinite-scroller.chat-history, #chat-history) 
   padding-bottom: 136px !important;
 }
 
+/* Align React Islands (`Carbon` ChatTranscript) column width with --rg-chat-max-width */
+html[data-rg-enabled="true"] article.x1pxov78 > div.xj3tjan:not(:has([data-testid="response-selection-panel"])) {
+  max-width: calc(var(--rg-chat-max-width, 800px) - 32px) !important;
+  width: 100% !important;
+}
+
+/* First-Message Anti-Disappearance Safeguard:
+   1. Defeat React Islands `content-visibility: auto` (`.xb5mbof` / `[data-turn-content-visibility="auto"]`)
+      which can fail to repaint Turn 0 (the first user message) inside nested flex scroll containers.
+   2. Defeat stuck `.animated-opacity` / `.generative-ui` opacity states on `<user-query>`. */
+html[data-rg-enabled="true"] [data-turn-content-visibility="auto"],
+html[data-rg-enabled="true"] section[data-turn-content-visibility],
+html[data-rg-enabled="true"] .xb5mbof {
+  content-visibility: visible !important;
+  contain-intrinsic-size: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  user-query,
+  user-query.generative-ui,
+  .conversation-container.generative-ui user-query,
+  user-query .user-query-container,
+  user-query .animated-opacity,
+  .user-query-bubble-with-background,
+  [data-testid="user-prompt-bubble"]
+) {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
 /* Multi-turn vertical rhythm matching ChatGPT */
 html[data-rg-enabled="true"] .conversation-container user-query {
   display: block !important;
@@ -1519,10 +1652,12 @@ html[data-rg-enabled="true"] user-query .luminous-actions-container button {
 }
 
 /* User message capsule: ChatGPT Blue-Accent soft light-blue (#E5F3FF Light / #1A3550 Dark)
-   with non-cyclic max-width (70% of full chat column) so short messages never wrap early! */
+   with non-cyclic max-width (70% of full chat column) so short messages never wrap early!
+   Covers BOTH Angular `.user-query-bubble-with-background` AND Islands `[data-testid="user-prompt-bubble"]`. */
 html[data-rg-enabled="true"] .user-query-bubble-with-background,
 html[data-rg-enabled="true"] user-query .query-content .user-query-bubble-with-background,
-html[data-rg-enabled="true"] .user-query-container .query-text-box {
+html[data-rg-enabled="true"] .user-query-container .query-text-box,
+html[data-rg-enabled="true"] [data-testid="user-prompt-bubble"] {
   position: relative !important;
   background-color: var(--rg-bg-user-bubble) !important;
   border: 1px solid var(--rg-border-user-bubble) !important;
@@ -1567,7 +1702,9 @@ html[data-rg-enabled="true"] .user-query-bubble-with-background :is(
   [class*="expand"],
   button
 ),
-html[data-rg-enabled="true"] .user-query-bubble-with-background button::before {
+html[data-rg-enabled="true"] .user-query-bubble-with-background button::before,
+html[data-rg-enabled="true"] [data-testid="user-prompt-collapse-toggle"],
+html[data-rg-enabled="true"] [data-testid="user-prompt-collapse-pill"] {
   transform: none !important;
   background: transparent !important;
   background-color: transparent !important;
@@ -1588,7 +1725,8 @@ html[data-rg-enabled="true"] .user-query-bubble-with-background :is(.luminous-to
   justify-content: center !important;
 }
 
-html[data-rg-enabled="true"] .user-query-bubble-with-background button:hover {
+html[data-rg-enabled="true"] .user-query-bubble-with-background button:hover,
+html[data-rg-enabled="true"] [data-testid="user-prompt-collapse-toggle"]:hover {
   background-color: var(--rg-bg-hover) !important;
   color: var(--rg-text-primary) !important;
 }
@@ -1603,7 +1741,10 @@ html[data-rg-enabled="true"] .user-query-bubble-with-background :is([class*="gra
 
 html[data-rg-enabled="true"] user-query .query-text,
 html[data-rg-enabled="true"] user-query .query-text-line,
-html[data-rg-enabled="true"] .user-query-bubble-with-background .gds-body-l {
+html[data-rg-enabled="true"] .user-query-bubble-with-background .gds-body-l,
+html[data-rg-enabled="true"] [data-testid="user-prompt-content"],
+html[data-rg-enabled="true"] [data-testid="user-prompt-content"] * {
+  font-family: var(--rg-font-sans) !important;
   font-size: var(--rg-font-size, 16px) !important;
   line-height: 1.55 !important;
   letter-spacing: normal !important;
@@ -2234,6 +2375,8 @@ html[data-rg-enabled="true"] sign-in-nudge .gem-banner-container {
 
 /* ==========================================================================
    10. Clean View Mode (Distraction-Free Noise Reduction)
+       NOTE: Follow-up suggestion cards remain visible by design and are
+       restyled in Section 11 into ChatGPT lightweight thin-bordered cards.
    ========================================================================== */
 
 html[data-rg-enabled="true"][data-rg-clean-view="true"] :is(
@@ -2241,6 +2384,7 @@ html[data-rg-enabled="true"][data-rg-clean-view="true"] :is(
   .hallucination-disclaimer,
   condensed-tos-disclaimer,
   .condensed-tos-disclaimer,
+  [data-test-id="condensed-tos-disclaimer"],
   zero-state-disclaimers,
   .human-review-disclosure-container,
   .capabilities-disclaimer,
@@ -2254,11 +2398,6 @@ html[data-rg-enabled="true"][data-rg-clean-view="true"] :is(
   [data-test-id="upsell-button"],
   .adv-upsell,
   sign-in-nudge,
-  suggestion-chips,
-  .suggestion-chips-container,
-  follow-up-suggestions,
-  smart-reply-chips,
-  [class*="suggestion-chip"],
   code-block .code-block-footer,
   .code-block .disclaimer-suffix,
   table-block .table-footer,
@@ -2268,7 +2407,285 @@ html[data-rg-enabled="true"][data-rg-clean-view="true"] :is(
 }
 
 /* ==========================================================================
-   11. Subtle Neutral Scrollbars
+   11. Follow-Up Cards, Generative UI Frames, Islands Controls & Global Overlays
+   ========================================================================== */
+
+/* 11.1 Follow-Up Suggestion Cards -> ChatGPT Lightweight Thin-Bordered Cards
+   Covers React Islands `[data-testid="elicitation"]` (3-column / 2-column / single),
+   `[data-test-id="interactive-content-block"]`, and Angular `suggestion-chips`. */
+html[data-rg-enabled="true"] [data-testid="elicitation"] {
+  margin: 14px 0 8px 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+html[data-rg-enabled="true"] [data-testid="elicitation"] > :is(h1, h2, h3, h4) {
+  font-family: var(--rg-font-sans) !important;
+  font-size: var(--rg-font-size, 16px) !important;
+  font-weight: 600 !important;
+  line-height: 1.55 !important;
+  color: var(--rg-text-strong) !important;
+  margin: 0 0 10px 0 !important;
+}
+
+html[data-rg-enabled="true"] [data-testid="elicitation"] > p {
+  font-family: var(--rg-font-sans) !important;
+  font-size: var(--rg-font-size, 16px) !important;
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  color: var(--rg-text-primary) !important;
+  margin: 0 0 10px 0 !important;
+}
+
+html[data-rg-enabled="true"] [data-testid="elicitation"] [data-testid="items-container"] {
+  gap: 10px !important;
+}
+
+html[data-rg-enabled="true"] [data-testid="elicitation"] [data-testid="items-container"] button {
+  background: var(--rg-bg-canvas) !important;
+  background-color: var(--rg-bg-canvas) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 12px !important;
+  padding: 12px 14px !important;
+  box-shadow: none !important;
+  transition: background-color 0.14s ease, border-color 0.14s ease !important;
+}
+
+html[data-rg-enabled="true"][data-rg-theme="dark"] [data-testid="elicitation"] [data-testid="items-container"] button {
+  background: rgba(255, 255, 255, 0.025) !important;
+  background-color: rgba(255, 255, 255, 0.025) !important;
+}
+
+html[data-rg-enabled="true"] [data-testid="elicitation"] [data-testid="items-container"] button:hover {
+  background: var(--rg-bg-sidebar) !important;
+  background-color: var(--rg-bg-sidebar) !important;
+  border-color: var(--rg-border-focus) !important;
+}
+
+html[data-rg-enabled="true"][data-rg-theme="dark"] [data-testid="elicitation"] [data-testid="items-container"] button:hover {
+  background: var(--rg-bg-active) !important;
+  background-color: var(--rg-bg-active) !important;
+}
+
+html[data-rg-enabled="true"] [data-testid="elicitation"] [data-testid="items-container"] button span:not([aria-hidden="true"]):not(.google-symbols) {
+  font-family: var(--rg-font-sans) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.48 !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] [data-testid="elicitation"] [data-testid="items-container"] button :is(svg, [aria-hidden="true"]) {
+  color: var(--rg-text-muted) !important;
+  transition: color 0.14s ease !important;
+}
+
+html[data-rg-enabled="true"] [data-testid="elicitation"] [data-testid="items-container"] button:hover :is(svg, [aria-hidden="true"]) {
+  color: var(--rg-accent-text) !important;
+}
+
+html[data-rg-enabled="true"] [data-testid="elicitation"][data-variant="single"] button {
+  background: var(--rg-bg-canvas) !important;
+  background-color: var(--rg-bg-canvas) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 999px !important;
+  color: var(--rg-text-primary) !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] [data-testid="elicitation"][data-variant="single"] button:hover {
+  background-color: var(--rg-bg-sidebar) !important;
+  border-color: var(--rg-border-focus) !important;
+}
+
+/* InteractiveContentBlock follow-up rows */
+html[data-rg-enabled="true"] [data-test-id="interactive-content-block"] {
+  margin: 12px 0 8px 0 !important;
+  padding: 0 !important;
+}
+
+html[data-rg-enabled="true"] [data-test-id="interactive-content-block-header"] {
+  font-family: var(--rg-font-sans) !important;
+  font-size: var(--rg-font-size, 16px) !important;
+  font-weight: 600 !important;
+  line-height: 1.55 !important;
+  margin: 0 0 8px 0 !important;
+  color: var(--rg-text-strong) !important;
+}
+
+html[data-rg-enabled="true"] [data-test-id="interactive-content-block"] ul {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+html[data-rg-enabled="true"] button[data-test-id="interactive-content-link"] {
+  width: 100% !important;
+  padding: 9px 13px !important;
+  background-color: var(--rg-bg-canvas) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  transition: background-color 0.14s ease, border-color 0.14s ease !important;
+}
+
+html[data-rg-enabled="true"] button[data-test-id="interactive-content-link"]:hover {
+  background-color: var(--rg-bg-sidebar) !important;
+  border-color: var(--rg-border-focus) !important;
+}
+
+html[data-rg-enabled="true"] [data-test-id="interactive-content-text"] {
+  font-family: var(--rg-font-sans) !important;
+  font-size: 14px !important;
+  line-height: 1.48 !important;
+  color: var(--rg-text-primary) !important;
+}
+
+/* Angular follow-up suggestion chips / cards */
+html[data-rg-enabled="true"] :is(
+  suggestion-chips,
+  follow-up-suggestions,
+  .suggestion-chips-container,
+  .deep-dive-suggestions-container
+) :is(button, a, [role="button"]) {
+  background: var(--rg-bg-canvas) !important;
+  background-color: var(--rg-bg-canvas) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 12px !important;
+  padding: 9px 14px !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+  color: var(--rg-text-primary) !important;
+  box-shadow: none !important;
+  transition: background-color 0.14s ease, border-color 0.14s ease !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  suggestion-chips,
+  follow-up-suggestions,
+  .suggestion-chips-container,
+  .deep-dive-suggestions-container
+) :is(button, a, [role="button"]):hover {
+  background-color: var(--rg-bg-sidebar) !important;
+  border-color: var(--rg-border-focus) !important;
+}
+
+/* 11.2 Generative UI Interactive Widget Frame & Stepper */
+html[data-rg-enabled="true"] [data-testid="gen-ui-html-node"] {
+  background-color: var(--rg-bg-canvas) !important;
+  border: 1px solid var(--rg-border-code) !important;
+  border-radius: 14px !important;
+  padding: 14px 16px !important;
+  margin: 12px 0 !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] safe-content-frame,
+html[data-rg-enabled="true"] safe-content-frame::part(shim-iframe),
+html[data-rg-enabled="true"] [data-testid="gen-ui-html-node"] iframe {
+  border: none !important;
+  background: transparent !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+html[data-rg-enabled="true"] button[data-test-id="stepper-expand-all-button"] {
+  background-color: var(--rg-bg-canvas) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 999px !important;
+  color: var(--rg-text-secondary) !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] button[data-test-id="stepper-expand-all-button"]:hover {
+  background-color: var(--rg-bg-sidebar) !important;
+  color: var(--rg-text-primary) !important;
+}
+
+/* 11.3 React Islands Action Bars & Thinking Cards */
+html[data-rg-enabled="true"] :is(
+  [data-testid="chat-response-action-bar"],
+  [data-testid="user-turn-actions"]
+) button {
+  border-radius: 8px !important;
+  color: var(--rg-text-secondary) !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  [data-testid="chat-response-action-bar"],
+  [data-testid="user-turn-actions"]
+) button:hover {
+  background-color: var(--rg-bg-active) !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  [data-testid="chat-thought-card"],
+  [data-testid="structured-thinking-card"]
+) {
+  background-color: transparent !important;
+  border: 1px solid var(--rg-border-subtle) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+/* 11.4 Global CDK Overlays, Menus, Dialogs, Canvas Split View, Source & File Cards */
+html[data-rg-enabled="true"] .cdk-overlay-container :is(
+  .mat-mdc-menu-panel,
+  .mat-mdc-select-panel,
+  [role="menu"],
+  [role="listbox"]
+) {
+  background-color: var(--rg-bg-elevated) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+html[data-rg-enabled="true"] .cdk-overlay-container .mat-mdc-menu-item {
+  border-radius: 8px !important;
+  margin: 2px 6px !important;
+  min-height: 36px !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 14px !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] .cdk-overlay-container .mat-mdc-menu-item:hover {
+  background-color: var(--rg-bg-hover) !important;
+}
+
+html[data-rg-enabled="true"] .cdk-overlay-container .mat-mdc-dialog-surface,
+html[data-rg-enabled="true"] [data-testid="chat-overlay-host"] [data-testid="overlay-body"] {
+  background-color: var(--rg-bg-elevated) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18) !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  immersive-panel,
+  sources-list .source-card,
+  source-card,
+  uploader-file-preview,
+  .file-preview-chip
+) {
+  background-color: var(--rg-bg-sidebar) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+/* ==========================================================================
+   12. Subtle Neutral Scrollbars
    ========================================================================== */
 
 html[data-rg-enabled="true"] ::-webkit-scrollbar {

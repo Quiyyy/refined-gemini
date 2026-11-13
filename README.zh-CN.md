@@ -6,18 +6,18 @@
 
 ---
 
-## 一、 核心改进概览（`v1.4.1`）
+## 一、 核心改进概览（`v1.5.0`）
 
 以 OpenAI 官方开源组件库（`openai/apps-sdk-ui`）的设计 Token 与排版规范为唯一基准，彻底解决原生 Gemini 网页端的阅读与交互痛点：
 
 | 维度 | Gemini 原生痛点 | `Refined Gemini` 对齐 ChatGPT 后的表现 |
 | :--- | :--- | :--- |
 | **画布、侧栏与强调色** | 泛冷蓝灰 Material 底色（`#f0f4f9`）、杂乱皇家蓝控件 | **浅色**：画布 `#FFFFFF`、侧栏 `#F9F9F9`、选中项 `#ECECEC`<br>**深色**：画布 `#212121`、侧栏 `#171717`、选中项 `#2F2F2F`<br>**品牌与强调色**：保留左上 Gemini 彩色极光星标，接入 ChatGPT **`#0285FF`** 蓝色圆形发送按钮与面板开关 |
-| **浅蓝用户气泡与防折行** | 嵌套弹性容器百分比回环导致 10 字短句被强行折成两行 | 采用 `--blue-50` **浅蓝用户气泡**（浅色 `#E5F3FF` / 深色 `#1A3550`，`20px` 圆角），按完整对话列宽 `70%` 计算上限；多轮间距紧凑收敛至 `~20px` |
-| **可配置列表缩进比例** | 多级列表层层叠加过深空白、`ol` 序号丢失、中文引用强制斜体 | **默认 1:1 对齐 OpenAI `Markdown.module.css`**（一级 `1.625em` / 子级 `1.5em` / `li` `0.375em` 外置悬挂标号 `• ◦ ▪` 与 `1. 2. 3.`），支持 **`0% / 65% / 标准 GPT / 125%`** 四档实时切换；一级标题/段落/表格/代码块严格 `0px` 共线 |
-| **无竖框 Markdown 表格** | 厚重外框、强制 `min-width: 173px` 触发假横向滚动条 | 极简 `14px` 无竖框横线表，表头 `600` 粗体，首列 `padding-left: 0` 与正文左边缘严格共线 |
-| **紧凑代码块卡片** | 浅色模式强套 `#141414` 黑底、顶栏 `46px` 虚高导致语言名距代码过远 | 一体化 `#F9F9F9` / `#171717` `12px` 圆角卡片，`32px` 紧凑顶栏 + OpenAI 官方语法高亮色板 |
-| **防透字底部输入舱** | 滚动时文字从输入框下方露头或在顶部渐变区半透明穿模 | 100% 纯色不透明画布底座遮罩，彻底消除输入框下方露字与上方残影 |
+| **浅蓝用户气泡与首条防丢** | 弹性收缩导致短句折行；`content-visibility: auto` 偶发吞掉首条用户消息 | 采用 `--blue-50` **浅蓝用户气泡**（浅色 `#E5F3FF` / 深色 `#1A3550`，`20px` 圆角，完整列宽 `70%` 上限），并锁定首轮消息可见性防止消失 |
+| **全局统一字号与可调缩进** | 标题与引导语字号跳变（`17px~22px`）、多级列表缩进过深、中文引用斜体 | **正文、各级标题（`h1`~`h6`）与引导段落 100% 统一字号（默认 `16px`）**，标题仅靠 `600` 加粗与段间距区分；列表默认 1:1 对齐 OpenAI `Markdown.module.css`，支持 **`0% / 65% / 标准 GPT / 125%`** 四档切换 |
+| **交互流程图与追问建议卡** | 沙盒流程图（`SafeContentFrame`）维持暖灰/亮蓝割裂配色，底部建议块厚重突兀 | 深入 `*.scf.usercontent.goog` 沙盒同步重绘交互式流程图（浅/深色自动联动、无损还原），并将底部追问建议重绘为 **ChatGPT 轻量 `1px` 细框 `12px` 圆角卡片** |
+| **无竖框表格与紧凑代码卡** | 厚重表格外框与假滚动条、浅色模式强套 `#141414` 黑底与 `46px` 虚高顶栏 | 极简 `14px` 无竖框横线表（首列 `0px` 共线）+ 一体化 `#F9F9F9` / `#171717` `12px` 圆角代码卡片（`32px` 顶栏 + OpenAI 语法高亮色板） |
+| **防透字与防上移底部输入舱** | 滚动时文字从输入框底部露头，切换会话偶发触发输入框上移 | 100% 纯色不透明底座遮罩 + 外层 `.chat-container` `overflow-y: clip` 防滚动锁死 |
 
 ---
 
@@ -26,14 +26,14 @@
 点击浏览器工具栏的 **Refined Gemini** 图标即可打开无冗余文字说明的精简设置面板，所有选项**实时生效，无需刷新页面**：
 
 - **界面语言（`中 / EN`）**：支持一键切换简体中文与英文界面（首次默认自动跟随浏览器语言）。
-- **总开关**：随时一键开启或暂停美化，即时对比原生 Gemini。
+- **总开关**：随时一键开启或暂停美化（主页面与沙盒交互式图表同步无损还原）。
 - **外观（`themeMode`）**：`跟随` / `浅色` / `深色`。
 - **列宽（`chatWidth`）**：`768px`（默认，1:1 对齐 ChatGPT `48rem` 正文列宽）/ `920px` / `1120px` / `90%`。
 - **字号（`fontSize`）**：`15px` / `16px`（默认，行高 `1.68`）/ `17px`。
 - **缩进（`indentScale`）**：`0%` / `65%` / **`标准 GPT`（默认）** / `125%`。
 - **隐藏 AI 头像（`hideAvatar`）**：正文、表格与代码块沿同一左基准线直排。
 - **紧凑侧边栏（`compactSidebar`）**：`260px` 侧栏宽度配紧凑圆角会话行。
-- **纯净模式（`cleanView`）**：隐藏底部免责声明、IP 定位栏、升级推广徽章与末尾追问建议气泡。
+- **纯净模式（`cleanView`）**：隐藏底部免责声明、IP 定位栏与升级推广徽章，同时保留轻量细框追问建议卡片。
 - **`Ctrl / ⌘ + Enter` 发送（`ctrlEnterSend`）**：单按 `Enter` 仅换行（兼容中文输入法候选上屏），防长 Prompt 误触发送。
 
 ---
@@ -69,7 +69,7 @@ npm run build
 # 检查所有扩展与油猴脚本 JS 语法
 npm run check
 
-# 一键打包符合 Edge / Chrome 扩展商店规范的纯净上传包 -> dist/refined-gemini-v1.4.1-extension.zip
+# 一键打包符合 Edge / Chrome 扩展商店规范的纯净上传包 -> dist/refined-gemini-v1.5.0-extension.zip
 npm run pack
 ```
 
@@ -79,20 +79,22 @@ npm run pack
 
 ```text
 refined-gemini/
-├── manifest.json                 # Chrome / Edge Manifest V3 扩展清单（最小权限仅 storage）
+├── manifest.json                 # Chrome / Edge Manifest V3 扩展清单（含 GenUI 沙盒帧支持）
 ├── package.json                  # 标准化构建、语法校验与商店 ZIP 打包脚本
 ├── _locales/                     # WebExtension 标准多语言包 (en, zh_CN)
 ├── icons/                        # SVG 矢量源文件与超采样抗锯齿图标 (16/32/48/128px)
 ├── src/
 │   ├── defaults.js               # 默认配置项单一数据源 (Single Source of Truth)
 │   ├── content.css               # 1:1 ChatGPT 视觉与排版核心样式表
-│   ├── content.js                # 首屏零闪烁缓存、主题跟随监听与 Ctrl+Enter 发送
+│   ├── content.js                # 首屏零闪烁缓存、沙盒跨帧同步与 Ctrl+Enter 发送
+│   ├── sandbox.css               # Generative UI 沙盒交互式图表对齐样式表
+│   ├── sandbox.js                # 沙盒内 SVG / CSS 色板动态同源映射与无损还原脚本
 │   └── popup/                    # 精简无冗余说明的中英双语 Popup 控制面板
 ├── userscript/
 │   └── refined-gemini.user.js    # 符合 Greasy Fork / ScriptCat 规范的双语油猴脚本
 ├── scripts/
 │   ├── generate-icons.mjs        # 零依赖 PNG 图标与 300x300 商店徽标生成脚本
-│   ├── build-userscript.mjs      # 从核心 CSS 自动同步构建油猴脚本
+│   ├── build-userscript.mjs      # 从主页面与沙盒 CSS 自动同步构建油猴脚本
 │   └── pack-extension.mjs        # 一键生成商店上传专用 ZIP 压缩包
 └── docs/
     ├── DESIGN_SPEC.zh-CN.md      # 视觉与排版设计规范（中文 / English）
