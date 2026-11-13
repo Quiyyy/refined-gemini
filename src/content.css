@@ -273,13 +273,24 @@ html[data-rg-enabled="true"] :is(
   opacity: 1 !important;
 }
 
+/* Suppress ugly browser auto-focus black rectangle when CDK focus-trap opens small-window drawer */
 html[data-rg-enabled="true"] :is(
-  bard-sidenav mat-icon,
-  bard-sidenav a:not(.mdc-button--unelevated):not([href*="ServiceLogin"]),
-  bard-sidenav button:not(.mdc-button--unelevated),
-  bard-sidenav :has(> a.action-link),
-  bard-sidenav [class*="disclaimer"],
-  bard-sidenav [class*="activity"],
+  side-nav-sparkle-button,
+  side-nav-sparkle-button a,
+  side-nav-sparkle-button button,
+  .toggle-search-container .sparkle-button
+):is(:focus, :focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) mat-icon,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) a:not(.mdc-button--unelevated):not([href*="ServiceLogin"]),
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) button:not(.mdc-button--unelevated),
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) :has(> a.action-link),
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) [class*="disclaimer"],
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) [class*="activity"],
   input-area-v2 button:not(.send-button):not(gem-icon-button.send-button button),
   input-area-v2 :not(.send-button) > gem-icon > mat-icon
 ) {
@@ -287,7 +298,7 @@ html[data-rg-enabled="true"] :is(
 }
 
 /* Clean sidebar activity note ("登录即可保存活动记录") — remove noisy dotted underline */
-html[data-rg-enabled="true"] bard-sidenav :is(
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) :is(
   a.action-link,
   [class*="activity"] a,
   [class*="disclaimer"] a
@@ -296,7 +307,7 @@ html[data-rg-enabled="true"] bard-sidenav :is(
   border-bottom: none !important;
 }
 
-/* ChatGPT Monochrome Primary CTA Pills ("登录" in Top Bar, OneGoogleBar & Sidebar) */
+/* ChatGPT Monochrome Primary CTA Pills ("登录" in Top Bar, OneGoogleBar & Desktop/Mobile Sidebar) */
 html[data-rg-enabled="true"] :is(
   top-bar-actions a[href*="ServiceLogin"],
   top-bar-actions .mdc-button--unelevated,
@@ -304,11 +315,11 @@ html[data-rg-enabled="true"] :is(
   top-bar-actions .gem-button-type-filled button,
   .boqOnegoogleliteOgbOneGoogleBar a[href*="ServiceLogin"],
   #gb a[href*="ServiceLogin"],
-  a[href*="accounts.google.com/ServiceLogin"]:not(bard-sidenav [class*="activity"] a),
-  bard-sidenav button.mdc-button--unelevated,
-  bard-sidenav a.mdc-button--unelevated,
-  bard-sidenav .gem-button-type-primary button,
-  bard-sidenav .gem-button-type-filled button
+  a[href*="accounts.google.com/ServiceLogin"]:not(:is(bard-sidenav, mat-sidenav, side-navigation-content) [class*="activity"] a),
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) button.mdc-button--unelevated,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) a.mdc-button--unelevated,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) .gem-button-type-primary button,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) .gem-button-type-filled button
 ) {
   background: var(--rg-cta-bg) !important;
   background-color: var(--rg-cta-bg) !important;
@@ -340,7 +351,7 @@ html[data-rg-enabled="true"] body:has(top-bar-actions .mdc-button--unelevated) .
   display: none !important;
 }
 
-html[data-rg-enabled="true"] bard-sidenav :is(
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) :is(
   button.mdc-button--unelevated,
   a.mdc-button--unelevated,
   .gem-button-type-primary button,
@@ -355,9 +366,11 @@ html[data-rg-enabled="true"] :is(
   top-bar-actions .mdc-button--unelevated,
   .boqOnegoogleliteOgbOneGoogleBar a[href*="ServiceLogin"],
   #gb a[href*="ServiceLogin"],
-  a[href*="accounts.google.com/ServiceLogin"]:not(bard-sidenav [class*="activity"] a),
-  bard-sidenav button.mdc-button--unelevated,
-  bard-sidenav a.mdc-button--unelevated
+  a[href*="accounts.google.com/ServiceLogin"]:not(:is(bard-sidenav, mat-sidenav, side-navigation-content) [class*="activity"] a),
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) button.mdc-button--unelevated,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) a.mdc-button--unelevated,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) .gem-button-type-primary button,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) .gem-button-type-filled button
 ) *:not(mat-icon):not(.mat-icon) {
   color: var(--rg-cta-fg) !important;
   font-family: var(--rg-font-sans) !important;
@@ -367,8 +380,10 @@ html[data-rg-enabled="true"] :is(
 html[data-rg-enabled="true"] :is(
   top-bar-actions a[href*="ServiceLogin"],
   top-bar-actions .mdc-button--unelevated,
-  bard-sidenav button.mdc-button--unelevated,
-  bard-sidenav a.mdc-button--unelevated
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) button.mdc-button--unelevated,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) a.mdc-button--unelevated,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) .gem-button-type-primary button,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) .gem-button-type-filled button
 ) mat-icon {
   color: var(--rg-cta-fg) !important;
 }
@@ -378,18 +393,20 @@ html[data-rg-enabled="true"] :is(
   top-bar-actions .mdc-button--unelevated,
   .boqOnegoogleliteOgbOneGoogleBar a[href*="ServiceLogin"],
   #gb a[href*="ServiceLogin"],
-  a[href*="accounts.google.com/ServiceLogin"]:not(bard-sidenav [class*="activity"] a),
-  bard-sidenav button.mdc-button--unelevated,
-  bard-sidenav a.mdc-button--unelevated
+  a[href*="accounts.google.com/ServiceLogin"]:not(:is(bard-sidenav, mat-sidenav, side-navigation-content) [class*="activity"] a),
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) button.mdc-button--unelevated,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) a.mdc-button--unelevated,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) .gem-button-type-primary button,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) .gem-button-type-filled button
 ):hover {
   background: var(--rg-cta-bg-hover) !important;
   background-color: var(--rg-cta-bg-hover) !important;
 }
 
-/* Secondary Outline Pills ("下载应用" in Top Bar & Sidebar) */
+/* Secondary Outline Pills ("下载应用" in Top Bar & Desktop/Mobile Sidebar) */
 html[data-rg-enabled="true"] :is(
-  bard-sidenav button.mat-tonal-button,
-  bard-sidenav .mavatar-get-app-button button,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) button.mat-tonal-button,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) .mavatar-get-app-button :is(button, a),
   top-bar-actions desktop-get-app-button button,
   top-bar-actions button.mat-tonal-button,
   top-bar-actions .gem-button-type-tonal button
@@ -408,8 +425,8 @@ html[data-rg-enabled="true"] :is(
 }
 
 html[data-rg-enabled="true"] :is(
-  bard-sidenav button.mat-tonal-button,
-  bard-sidenav .mavatar-get-app-button button,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) button.mat-tonal-button,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) .mavatar-get-app-button :is(button, a),
   top-bar-actions desktop-get-app-button button,
   top-bar-actions button.mat-tonal-button,
   top-bar-actions .gem-button-type-tonal button
@@ -418,8 +435,8 @@ html[data-rg-enabled="true"] :is(
 }
 
 html[data-rg-enabled="true"] :is(
-  bard-sidenav button.mat-tonal-button,
-  bard-sidenav .mavatar-get-app-button button,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) button.mat-tonal-button,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) .mavatar-get-app-button :is(button, a),
   top-bar-actions desktop-get-app-button button,
   top-bar-actions button.mat-tonal-button,
   top-bar-actions .gem-button-type-tonal button
@@ -429,8 +446,8 @@ html[data-rg-enabled="true"] :is(
 }
 
 html[data-rg-enabled="true"] :is(
-  bard-sidenav button.mat-tonal-button,
-  bard-sidenav .mavatar-get-app-button button,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) button.mat-tonal-button,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) .mavatar-get-app-button :is(button, a),
   top-bar-actions desktop-get-app-button button,
   top-bar-actions button.mat-tonal-button,
   top-bar-actions .gem-button-type-tonal button
@@ -471,24 +488,41 @@ html[data-rg-enabled="true"] top-bar-actions :is(
   background-color: var(--rg-bg-hover) !important;
 }
 
-/* Logged-in Top-Left Model Switcher (`Gemini 2.5 Pro ▾` -> ChatGPT `ChatGPT 4o ⌄` ghost pill) */
-html[data-rg-enabled="true"] bard-sidenav-content > bard-mode-switcher button,
-html[data-rg-enabled="true"] header bard-mode-switcher button {
+/* Top-Left Model Switcher (`Gemini 2.5 Pro ▾` / `Gemini 快速解答 ▾` -> ChatGPT `ChatGPT 4o ⌄` ghost pill;
+   covers both desktop `bard-sidenav-content > bard-mode-switcher` and small-window `.side-nav-menu-button bard-mode-switcher`) */
+html[data-rg-enabled="true"] :is(
+  bard-sidenav-content > bard-mode-switcher,
+  header bard-mode-switcher,
+  .side-nav-menu-button bard-mode-switcher,
+  bard-mode-switcher.mode-picker-in-header
+) button {
   background: transparent !important;
   border: none !important;
   border-radius: 10px !important;
   padding: 6px 10px !important;
+  width: auto !important;
+  min-width: 0 !important;
   height: 36px !important;
   font-family: var(--rg-font-sans) !important;
-  font-size: 16px !important;
+  font-size: 15.5px !important;
   font-weight: 600 !important;
   color: var(--rg-text-primary) !important;
   box-shadow: none !important;
+  white-space: nowrap !important;
 }
 
-html[data-rg-enabled="true"] bard-sidenav-content > bard-mode-switcher button:hover,
-html[data-rg-enabled="true"] header bard-mode-switcher button:hover {
+html[data-rg-enabled="true"] :is(
+  bard-sidenav-content > bard-mode-switcher,
+  header bard-mode-switcher,
+  .side-nav-menu-button bard-mode-switcher,
+  bard-mode-switcher.mode-picker-in-header
+) button:hover {
   background-color: var(--rg-bg-hover) !important;
+}
+
+html[data-rg-enabled="true"] .side-nav-menu-button {
+  gap: 4px !important;
+  align-items: center !important;
 }
 
 /* Zero-State Greeting ("嗨，我是 Gemini..." -> ChatGPT 28px 600 Semibold Monochrome Heading) */
@@ -568,22 +602,122 @@ html[data-rg-enabled="true"] header {
 }
 
 /* ==========================================================================
-   3. Sidebar: ChatGPT #F9F9F9 Surface, Tight Row Spacing & Unclipped Controls
+   3. Sidebar & Small-Window Drawer (<960px <mat-sidenav> + >=960px <bard-sidenav>):
+      ChatGPT #F9F9F9 / #171717 Surface, Tight Row Spacing & Unclipped Controls
    ========================================================================== */
 
 html[data-rg-enabled="true"] bard-sidenav,
+html[data-rg-enabled="true"] mat-sidenav.mat-drawer.mat-sidenav,
+html[data-rg-enabled="true"] mat-sidenav .mat-drawer-inner-container,
 html[data-rg-enabled="true"] side-navigation-v2,
 html[data-rg-enabled="true"] side-navigation-content,
 html[data-rg-enabled="true"] .side-navigation-content,
-html[data-rg-enabled="true"] .sidenav-with-history-container,
-html[data-rg-enabled="true"] mat-sidenav {
+html[data-rg-enabled="true"] .sidenav-with-history-container {
   background-color: var(--rg-bg-sidebar) !important;
   color: var(--rg-text-primary) !important;
-  box-shadow: none !important;
 }
 
 html[data-rg-enabled="true"] bard-sidenav {
   border-right: 1px solid var(--rg-border-hairline) !important;
+  box-shadow: none !important;
+}
+
+/* Small-window (<960px) <mat-sidenav> overlay drawer: crisp 0px right corners, hairline edge & subtle shadow */
+html[data-rg-enabled="true"] mat-sidenav.mat-drawer.mat-sidenav {
+  border-right: 1px solid var(--rg-border-hairline) !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  overflow-x: hidden !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] mat-sidenav.mat-drawer.mat-sidenav.mat-drawer-opened {
+  box-shadow: 8px 0 24px rgba(0, 0, 0, 0.08) !important;
+}
+
+html[data-rg-enabled="true"][data-rg-theme="dark"] mat-sidenav.mat-drawer.mat-sidenav.mat-drawer-opened {
+  box-shadow: 8px 0 28px rgba(0, 0, 0, 0.45) !important;
+}
+
+html[data-rg-enabled="true"] mat-sidenav .mat-drawer-inner-container {
+  overflow: hidden !important;
+}
+
+html[data-rg-enabled="true"] .mat-drawer-backdrop.mat-drawer-shown {
+  background-color: rgba(0, 0, 0, 0.24) !important;
+}
+
+html[data-rg-enabled="true"][data-rg-theme="dark"] .mat-drawer-backdrop.mat-drawer-shown {
+  background-color: rgba(0, 0, 0, 0.52) !important;
+}
+
+/* Normalize small-window drawer internal padding & remove asymmetric 8px left offset seam */
+html[data-rg-enabled="true"] .sidenav-with-history-container.mobile {
+  margin-inline: 0 !important;
+  padding-inline: 8px !important;
+  padding-bottom: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+html[data-rg-enabled="true"] .sidenav-with-history-container.mobile :is(
+  .top-action-list,
+  .chat-history,
+  .top-action-list-scrollable,
+  project-sidenav-list,
+  .mobile-controls,
+  .mobile-controls-list,
+  sidenav-mavatar-footer
+) {
+  margin-inline: 0 !important;
+}
+
+html[data-rg-enabled="true"] .sidenav-with-history-container.mobile .toggle-search-container {
+  height: 44px !important;
+  min-height: 44px !important;
+  margin-block-start: 6px !important;
+  padding-inline: 4px 2px !important;
+}
+
+html[data-rg-enabled="true"] .sidenav-header-buttons-mobile {
+  gap: 2px !important;
+  align-items: center !important;
+}
+
+html[data-rg-enabled="true"] .sidenav-with-history-container.mobile .toggle-search-container .search-button {
+  margin-inline-end: 0 !important;
+}
+
+html[data-rg-enabled="true"] .sidenav-with-history-container.mobile .mobile-controls .label-and-badge-container {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+}
+
+html[data-rg-enabled="true"] .sidenav-with-history-container.mobile .mavatar-footer-left {
+  margin-inline-start: 2px !important;
+}
+
+html[data-rg-enabled="true"] .sidenav-with-history-container.mobile .mavatar-footer-right {
+  align-self: center !important;
+}
+
+/* Match sidebar scroll-fade gradient variables to --rg-bg-sidebar instead of pure white */
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) infinite-scroller {
+  --top-gradient-color: var(--rg-bg-sidebar) !important;
+  --bottom-gradient-color: var(--rg-bg-sidebar) !important;
+}
+
+/* Clean bottom profile footer divider so conversation rows never collide visually with user avatar / settings */
+html[data-rg-enabled="true"] :is(
+  .sidenav-with-history-container.expanded .mobile-controls,
+  .sidenav-with-history-container.expanded > sidenav-mavatar-footer,
+  .sidenav-with-history-container.mobile .mobile-controls
+) {
+  border-top: 1px solid var(--rg-border-hairline) !important;
+  padding-top: 6px !important;
+  margin-top: 4px !important;
+  background-color: var(--rg-bg-sidebar) !important;
 }
 
 /* Compact Sidebar: propagate 260px variable across ALL Gemini layout hosts so
@@ -602,12 +736,17 @@ html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] top-bar-actions {
   --bard-sidenav-open-width: 260px !important;
   --bard-sidenav-open-closed-width-diff: max(
     0px,
-    calc(260px - var(--bard-sidenav-closed-width, 72px))
+    calc(260px - var(--bard-sidenav-closed-width, 52px))
   ) !important;
   --rg-sidenav-shift: max(
     0px,
-    calc(260px - var(--bard-sidenav-closed-width, 72px))
+    calc(260px - var(--bard-sidenav-closed-width, 52px))
   );
+}
+
+html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] mat-sidenav.mat-drawer.mat-sidenav {
+  width: min(260px, 85vw) !important;
+  max-width: min(260px, 85vw) !important;
 }
 
 html[data-rg-enabled="true"][data-rg-compact-sidebar="true"]
@@ -633,16 +772,17 @@ html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] top-bar-actions :is
   [tabindex]:not([tabindex="-1"]),
   search-nav-button,
   side-nav-sparkle-button,
-  side-nav-menu-button
+  side-nav-menu-button,
+  bard-mode-switcher
 ),
 html[data-rg-enabled="true"][data-rg-compact-sidebar="true"]
   chat-app-side-nav-menu-button
-  side-nav-sparkle-button
+  :is(side-nav-sparkle-button, bard-mode-switcher)
   :is(a, button, [role="button"]) {
   pointer-events: auto !important;
 }
 
-html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] bard-sidenav {
+html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] :is(bard-sidenav, mat-sidenav) {
   --mdc-list-list-item-one-line-container-height: 34px !important;
   --mdc-list-list-item-two-line-container-height: 36px !important;
   --mat-list-list-item-one-line-container-height: 34px !important;
@@ -650,7 +790,7 @@ html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] bard-sidenav {
 }
 
 /* Compress vertical gaps across ALL sidebar lists, nav entries, and conversation items (1:1 ChatGPT density) */
-html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] bard-sidenav :is(
+html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] :is(bard-sidenav, mat-sidenav) :is(
   mat-nav-list,
   mat-action-list,
   .mdc-evolution-list,
@@ -659,6 +799,7 @@ html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] bard-sidenav :is(
   .chat-history-list,
   conversations-list,
   .conversation-items-container,
+  .mobile-controls-list,
   [data-test-id="all-conversations"],
   [data-test-id="your-gems-list"]
 ) {
@@ -669,55 +810,67 @@ html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] bard-sidenav :is(
   gap: 1px !important;
 }
 
-html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] bard-sidenav expandable-section {
+html[data-rg-enabled="true"][data-rg-compact-sidebar="true"] :is(bard-sidenav, mat-sidenav) expandable-section {
   margin-top: 6px !important;
   margin-bottom: 2px !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
 
-/* Top nav entries ("发起新对话", "库", "已安排", "自定义", "视频", "+ 新建笔记本") & chat rows — ONLY when expanded */
+/* Top nav entries ("发起新对话", "库", "已安排", "学生", "更多", "+ 新建笔记本") & chat rows —
+   Desktop <bard-sidenav> when expanded + Small-window <mat-sidenav> drawer */
 html[data-rg-enabled="true"][data-rg-compact-sidebar="true"]
-  bard-sidenav:not(:has(side-navigation-content > div.collapsed))
+  :is(
+    bard-sidenav:not(.collapsed):not(:has(side-navigation-content > div.collapsed)),
+    mat-sidenav
+  )
   :is(
     gem-nav-list-item,
+    .mobile-controls-list > li,
     [data-test-id="conversation"],
     .conversation-items-container,
     side-nav-entry-button,
     side-nav-action-button,
     bot-list-side-nav-entry-button,
-    mat-list-item
+    mat-list-item,
+    .mobile-controls > *:not(:empty):not(sidenav-mavatar-footer)
   ) {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
-  min-height: 34px !important;
+  height: auto !important;
+  min-height: 0 !important;
 }
 
 html[data-rg-enabled="true"][data-rg-compact-sidebar="true"]
-  bard-sidenav:not(:has(side-navigation-content > div.collapsed))
+  :is(
+    bard-sidenav:not(.collapsed):not(:has(side-navigation-content > div.collapsed)),
+    mat-sidenav
+  )
   :is(
     gem-nav-list-item > a,
+    gem-nav-list-item > button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
     [data-test-id="conversation"] > a,
     a[data-test-id="conversation"],
     a[href*="/app/"],
     a[href*="/gem/"],
     a[href*="/gems/"],
     [data-test-id="new-chat-button"] a,
-    [data-test-id="new-chat-button"] button,
+    [data-test-id="new-chat-button"] button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
     a[data-test-id="gems-side-nav-entry-button"],
     mat-nav-list > a,
-    mat-nav-list > button,
+    mat-nav-list > button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
     mat-nav-list .mat-mdc-list-item,
     mat-action-list > a,
-    mat-action-list > button,
+    mat-action-list > button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
     mat-action-list .mat-mdc-list-item,
-    side-nav-entry-button button,
+    .mobile-controls-list .sidebard-mobile-menu-item,
+    side-nav-entry-button button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
     side-nav-entry-button a,
-    bot-list-side-nav-entry-button button,
+    bot-list-side-nav-entry-button button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
     bot-list-side-nav-entry-button a,
-    side-nav-action-button button,
+    side-nav-action-button button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
     side-nav-action-button a,
     .side-nav-action-button
   ) {
@@ -735,9 +888,29 @@ html[data-rg-enabled="true"][data-rg-compact-sidebar="true"]
   align-items: center !important;
 }
 
+/* Signed-out sidebar activity note (<sidenav-error-message> "ⓘ 登录即可保存活动记录") */
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) sidenav-error-message .container {
+  min-height: 34px !important;
+  padding: 4px 10px !important;
+  margin: 2px 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) sidenav-error-message a.action-link {
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  color: var(--rg-text-primary) !important;
+}
+
 /* Compact sidebar section headers ("笔记本", "全部", "Recents") */
 html[data-rg-enabled="true"][data-rg-compact-sidebar="true"]
-  bard-sidenav:not(:has(side-navigation-content > div.collapsed))
+  :is(
+    bard-sidenav:not(.collapsed):not(:has(side-navigation-content > div.collapsed)),
+    mat-sidenav
+  )
   :is(
     expandable-section .header,
     expandable-section > button,
@@ -751,15 +924,17 @@ html[data-rg-enabled="true"][data-rg-compact-sidebar="true"]
   margin-bottom: 2px !important;
 }
 
-/* Sidebar typography (1:1 ChatGPT crisp 13.5px normal-weight titles, excluding icons) */
-html[data-rg-enabled="true"] bard-sidenav :is(
+/* Sidebar typography (1:1 ChatGPT crisp 13.5px normal-weight titles across desktop & mobile drawer, excluding icons) */
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) :is(
   .title-text,
   .conversation-title,
   .conversation-title-text,
   [data-test-id="conversation-title"],
   .mdc-list-item__primary-text,
+  .sidebard-mobile-menu-item span,
   .gds-label-l,
-  .gds-body-m
+  .gds-body-m,
+  .gds-body-l
 ):not(mat-icon):not(.mat-icon):not(.google-symbols):not(.material-icons) {
   font-family: var(--rg-font-sans) !important;
   font-size: 13.5px !important;
@@ -768,8 +943,24 @@ html[data-rg-enabled="true"] bard-sidenav :is(
   color: var(--rg-text-primary) !important;
 }
 
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) .mavatar-user-name {
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) :is(
+  .mavatar-tier-label,
+  .mavatar-enterprise-label
+) {
+  font-family: var(--rg-font-sans) !important;
+  font-size: 12px !important;
+  color: var(--rg-text-muted) !important;
+}
+
 /* Sidebar section headers ("笔记本", "全部", "Recents") */
-html[data-rg-enabled="true"] bard-sidenav :is(
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) :is(
   expandable-section .header,
   .title-container,
   .gds-label-m
@@ -780,42 +971,141 @@ html[data-rg-enabled="true"] bard-sidenav :is(
   color: var(--rg-text-muted) !important;
 }
 
-/* Hover & Active states in Sidebar (ChatGPT #ECECEC / #2F2F2F capsule) */
-html[data-rg-enabled="true"] bard-sidenav :is(
+/* Normalize leading icons inside expanded sidebar & small-window drawer rows to crisp 18px
+   (Overrides mobile drawer's oversized 28px `lm-icon-xl` row icons) */
+html[data-rg-enabled="true"]
+  :is(
+    bard-sidenav:not(.collapsed):not(:has(side-navigation-content > div.collapsed)),
+    mat-sidenav
+  )
+  :is(
+    gem-nav-list-item,
+    mat-list-item,
+    sidenav-error-message,
+    [data-test-id="conversation"],
+    side-nav-entry-button,
+    side-nav-action-button,
+    bot-list-side-nav-entry-button,
+    .sidebard-mobile-menu-item
+  )
+  mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
+}
+
+html[data-rg-enabled="true"]
+  :is(
+    bard-sidenav:not(.collapsed):not(:has(side-navigation-content > div.collapsed)),
+    mat-sidenav
+  )
+  :is(
+    gem-nav-list-item .gem-nav-list-item-icon,
+    sidenav-error-message .icon
+  ) {
+  width: 20px !important;
+  height: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Hover & Active states in Sidebar (ChatGPT #ECECEC / #2F2F2F 8px capsule, never 9999px stadium pill) */
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) :is(
   gem-nav-list-item > a,
+  gem-nav-list-item > button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
   [data-test-id="conversation"],
   [data-test-id="conversation"] > a,
   mat-nav-list > a,
-  mat-nav-list > button,
+  mat-nav-list > button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
   mat-nav-list .mat-mdc-list-item,
   mat-action-list > a,
-  mat-action-list > button,
-  side-nav-entry-button button,
+  mat-action-list > button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
+  .mobile-controls-list .sidebard-mobile-menu-item,
+  side-nav-entry-button button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
   side-nav-entry-button a,
-  bot-list-side-nav-entry-button button,
+  bot-list-side-nav-entry-button button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
   bot-list-side-nav-entry-button a,
-  side-nav-action-button button,
+  side-nav-action-button button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
+  .side-nav-action-button
+) {
+  border-radius: 8px !important;
+}
+
+/* Flatten zero-state disabled "发起新对话" tonal pill fill so it matches ChatGPT's clean "New chat" row */
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content)
+  .top-action-list
+  gem-nav-list-item
+  > a.mdc-list-item--disabled {
+  background-color: transparent !important;
+  opacity: 0.72 !important;
+}
+
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) :is(
+  gem-nav-list-item > a:not(.mdc-list-item--disabled),
+  gem-nav-list-item > button:not(.mdc-icon-button):not(.mat-mdc-icon-button):not(.mdc-list-item--disabled),
+  [data-test-id="conversation"],
+  [data-test-id="conversation"] > a,
+  mat-nav-list > a:not(.mdc-list-item--disabled),
+  mat-nav-list > button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
+  mat-nav-list .mat-mdc-list-item:not(.mdc-list-item--disabled),
+  mat-action-list > a,
+  mat-action-list > button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
+  .mobile-controls-list .sidebard-mobile-menu-item,
+  side-nav-entry-button button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
+  side-nav-entry-button a,
+  bot-list-side-nav-entry-button button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
+  bot-list-side-nav-entry-button a,
+  side-nav-action-button button:not(.mdc-icon-button):not(.mat-mdc-icon-button),
   .side-nav-action-button
 ):hover {
   background-color: var(--rg-bg-hover) !important;
   border-radius: 8px !important;
 }
 
-html[data-rg-enabled="true"] bard-sidenav :is(
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) :is(
   .conversation.selected,
   .conversation.active,
   [data-test-id="conversation"].selected,
   [data-test-id="conversation"][aria-selected="true"],
-  gem-nav-list-item:has(a[aria-current="page"]) > a,
+  gem-nav-list-item:has(a[aria-current="page"]) > a:not(.mdc-list-item--disabled),
   conversations-list a[aria-current="page"],
-  .mat-mdc-list-item.mdc-list-item--activated
+  .mat-mdc-list-item.mdc-list-item--activated:not(.mdc-list-item--disabled)
 ) {
   background-color: var(--rg-bg-active) !important;
   color: var(--rg-text-primary) !important;
   border-radius: 8px !important;
 }
 
-/* Ensure conversation text sections never spill into the 53px collapsed icon rail */
+/* Compact trailing "⋮" & filter icon buttons inside sidebar rows so they never stretch 34px items */
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) :is(
+  gem-nav-list-item,
+  [data-test-id="conversation"],
+  conversations-list,
+  .chat-history,
+  expandable-section
+) button:is(.mdc-icon-button, .mat-mdc-icon-button) {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  padding: 4px !important;
+  border-radius: 6px !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) :is(
+  gem-nav-list-item,
+  [data-test-id="conversation"],
+  conversations-list,
+  .chat-history,
+  expandable-section
+) button:is(.mdc-icon-button, .mat-mdc-icon-button):hover {
+  background-color: var(--rg-bg-active) !important;
+}
+
+/* Ensure conversation text sections never spill into the 53px collapsed desktop icon rail */
 html[data-rg-enabled="true"] bard-sidenav:has(side-navigation-content > div.collapsed) :is(
   expandable-section,
   conversations-list,
@@ -835,8 +1125,11 @@ html[data-rg-enabled="true"] bard-sidenav:has(side-navigation-content > div.coll
    ========================================================================== */
 
 /* Clean ChatGPT-style 32x32 8px-rounded icon buttons (replaces bulky Material circles)
-   IMPORTANT: Never set `display: inline-flex !important` here, or Gemini's hidden
-   collapsed-state `side-nav-sparkle-button button` (`display: none`) becomes visible! */
+   IMPORTANT:
+   1. Never set `display: inline-flex !important` here, or Gemini's hidden
+      collapsed-state `side-nav-sparkle-button button` (`display: none`) becomes visible!
+   2. Exclude `bard-mode-switcher button` because below 960px Gemini places
+      `<bard-mode-switcher>` inside `div.side-nav-menu-button`! */
 html[data-rg-enabled="true"] :is(
   message-actions button,
   .message-actions button,
@@ -851,20 +1144,38 @@ html[data-rg-enabled="true"] :is(
   code-block .code-block-decoration button,
   .code-block .code-block-decoration button,
   side-nav-menu-button button,
-  .side-nav-menu-button button:not(side-nav-sparkle-button button),
+  .side-nav-menu-button button:not(side-nav-sparkle-button button):not(bard-mode-switcher button),
   button[data-test-id="side-nav-menu-button"],
-  bard-sidenav .close-sidenav-button button,
-  bard-sidenav button.close-sidenav-button,
-  bard-sidenav button[aria-label*="sidebar" i],
-  bard-sidenav button[aria-label*="菜单"],
-  bard-sidenav button[aria-label*="边栏"],
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) :is(
+    .close-sidenav-button,
+    .close-sidenav-button button,
+    button.close-sidenav-button,
+    .search-button,
+    .search-button button,
+    .mavatar-settings-button,
+    .mavatar-settings-button button,
+    .mavatar-gem-settings-button,
+    .mavatar-gem-settings-button button,
+    .mavatar-download-button,
+    .mavatar-download-button button,
+    .mavatar-sign-in-icon-button,
+    .mavatar-sign-in-icon-button button,
+    button[aria-label*="sidebar" i],
+    button[aria-label*="菜单"],
+    button[aria-label*="边栏"]
+  ),
+  top-bar-actions button:is(.mdc-icon-button, .mat-mdc-icon-button):not(.tts-button),
   search-nav-button button
 ):not([hidden]) {
   --mdc-icon-button-state-layer-size: 32px !important;
   --mdc-icon-button-icon-size: 18px !important;
+  --mat-icon-button-state-layer-size: 32px !important;
   width: 32px !important;
   height: 32px !important;
   min-width: 32px !important;
+  min-height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
   padding: 6px !important;
   border-radius: 8px !important;
   background-color: transparent !important;
@@ -890,13 +1201,25 @@ html[data-rg-enabled="true"] :is(
   code-block .code-block-decoration button,
   .code-block .code-block-decoration button,
   side-nav-menu-button button,
-  .side-nav-menu-button button:not(side-nav-sparkle-button button),
+  .side-nav-menu-button button:not(side-nav-sparkle-button button):not(bard-mode-switcher button),
   button[data-test-id="side-nav-menu-button"],
-  bard-sidenav .close-sidenav-button button,
-  bard-sidenav button.close-sidenav-button,
-  bard-sidenav button[aria-label*="sidebar" i],
-  bard-sidenav button[aria-label*="菜单"],
-  bard-sidenav button[aria-label*="边栏"],
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) :is(
+    .close-sidenav-button button,
+    button.close-sidenav-button,
+    .search-button button,
+    button.search-button,
+    button.mavatar-settings-button,
+    .mavatar-settings-button button,
+    .mavatar-gem-settings-button button,
+    button.mavatar-download-button,
+    .mavatar-download-button button,
+    button.mavatar-sign-in-icon-button,
+    .mavatar-sign-in-icon-button button,
+    button[aria-label*="sidebar" i],
+    button[aria-label*="菜单"],
+    button[aria-label*="边栏"]
+  ),
+  top-bar-actions button:is(.mdc-icon-button, .mat-mdc-icon-button):not(.tts-button),
   search-nav-button button
 ):hover {
   background-color: var(--rg-bg-active) !important;
@@ -912,9 +1235,12 @@ html[data-rg-enabled="true"] :is(
   copy-button,
   code-block .code-block-decoration,
   side-nav-menu-button,
-  .side-nav-menu-button,
-  bard-sidenav
-) :is(.mat-mdc-button-persistent-ripple, .mdc-icon-button__ripple, .mat-mdc-focus-indicator) {
+  .side-nav-menu-button > :not(bard-mode-switcher),
+  top-bar-actions,
+  bard-sidenav,
+  mat-sidenav,
+  side-navigation-content
+) :is(.mat-mdc-button-persistent-ripple, .mdc-icon-button__ripple, .mat-mdc-focus-indicator, .mat-focus-indicator) {
   display: none !important;
 }
 
@@ -926,13 +1252,23 @@ html[data-rg-enabled="true"] :is(
   copy-button,
   code-block .code-block-decoration,
   side-nav-menu-button,
-  .side-nav-menu-button
+  .side-nav-menu-button > :not(bard-mode-switcher),
+  top-bar-actions button:is(.mdc-icon-button, .mat-mdc-icon-button),
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) :is(
+    .close-sidenav-button,
+    .search-button,
+    .mavatar-settings-button,
+    .mavatar-gem-settings-button,
+    .mavatar-download-button,
+    .mavatar-sign-in-icon-button
+  ),
+  search-nav-button
 ) .mat-mdc-button-touch-target {
   width: 32px !important;
   height: 32px !important;
 }
 
-/* Refine icon scale inside message action bar, copy button, & sidebar toggle to crisp 18px */
+/* Refine icon scale inside message action bar, copy button, & sidebar/drawer controls to crisp 18px */
 html[data-rg-enabled="true"] :is(
   message-actions button mat-icon,
   .buttons-container-v2 button mat-icon,
@@ -941,8 +1277,16 @@ html[data-rg-enabled="true"] :is(
   button[data-test-id="copy-button"] mat-icon,
   code-block .code-block-decoration button mat-icon,
   side-nav-menu-button button mat-icon,
-  .side-nav-menu-button button:not(side-nav-sparkle-button button) mat-icon,
-  bard-sidenav .close-sidenav-button mat-icon,
+  .side-nav-menu-button button:not(side-nav-sparkle-button button):not(bard-mode-switcher button) mat-icon,
+  top-bar-actions button:is(.mdc-icon-button, .mat-mdc-icon-button):not(.tts-button) mat-icon,
+  :is(bard-sidenav, mat-sidenav, side-navigation-content) :is(
+    .close-sidenav-button,
+    .search-button,
+    .mavatar-settings-button,
+    .mavatar-gem-settings-button,
+    .mavatar-download-button,
+    .mavatar-sign-in-icon-button
+  ) mat-icon,
   search-nav-button button mat-icon
 ) {
   font-size: 18px !important;
@@ -960,7 +1304,7 @@ html[data-rg-enabled="true"] :is(
   copy-button button svg,
   code-block .code-block-decoration button svg,
   side-nav-menu-button button svg,
-  .side-nav-menu-button button:not(side-nav-sparkle-button button) svg
+  .side-nav-menu-button button:not(side-nav-sparkle-button button):not(bard-mode-switcher button) svg
 ) {
   width: 18px !important;
   height: 18px !important;
@@ -3727,21 +4071,27 @@ html[data-rg-enabled="true"] :is(
    12. Subtle Neutral Scrollbars
    ========================================================================== */
 
+html[data-rg-enabled="true"] :is(bard-sidenav, mat-sidenav, side-navigation-content) infinite-scroller {
+  scrollbar-gutter: auto !important;
+  scrollbar-width: unset !important;
+  scrollbar-color: unset !important;
+}
+
 html[data-rg-enabled="true"] ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px !important;
+  height: 5px !important;
 }
 
 html[data-rg-enabled="true"] ::-webkit-scrollbar-track {
-  background: transparent;
+  background: transparent !important;
 }
 
 html[data-rg-enabled="true"] ::-webkit-scrollbar-thumb {
-  background-color: var(--rg-scrollbar-thumb);
-  border-radius: 999px;
+  background-color: var(--rg-scrollbar-thumb) !important;
+  border-radius: 999px !important;
 }
 
 html[data-rg-enabled="true"] ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--rg-scrollbar-thumb-hover);
+  background-color: var(--rg-scrollbar-thumb-hover) !important;
 }
 

@@ -500,6 +500,23 @@ const userScript = `// ==UserScript==
     if (e && e.data && e.data.type === 'RG_SANDBOX_READY') broadcastSandbox();
   });
 
+  window.addEventListener('popstate', () => requestAnimationFrame(resetOuterChatScroll), { passive: true });
+  window.addEventListener(
+    'click',
+    (e) => {
+      if (!settings.enabled || !(e.target instanceof Element)) return;
+      if (
+        e.target.closest(
+          'bard-sidenav, mat-sidenav, side-navigation-content, conversations-list, [data-test-id="conversation"], [data-test-id="new-chat-button"]'
+        )
+      ) {
+        requestAnimationFrame(resetOuterChatScroll);
+        setTimeout(resetOuterChatScroll, 180);
+      }
+    },
+    { passive: true }
+  );
+
   function isPromptEditorElement(target) {
     if (!(target instanceof Element)) return false;
     return Boolean(

@@ -1,4 +1,4 @@
-# Refined Gemini — 1:1 对齐 ChatGPT 网页端设计规范（`v1.6.0`）
+# Refined Gemini — 1:1 对齐 ChatGPT 网页端设计规范（`v1.6.1`）
 
 [English](./DESIGN_SPEC.md) · **简体中文**
 
@@ -13,7 +13,7 @@
 
 | 维度 | Gemini 原生痛点 | `Refined Gemini` 精确 Token 规范 |
 | :--- | :--- | :--- |
-| **画布、侧栏与强调色** | 泛冷蓝灰 Material 底色（`#f0f4f9`）、刺眼皇家蓝控件 | **浅色**：画布 `#FFFFFF`、侧栏 `#F9F9F9`、卡片 `#F7F7F8`、选中项 `#ECECEC`；**深色**：画布 `#212121`、侧栏 `#171717`、卡片 `#2A2A2A`、选中项 `#2F2F2F`<br>**强调色**：恢复左上 Gemini 原生彩色星标，采用 ChatGPT **`#0285FF`**（`--blue-400`，悬停 `#0169CC`）点亮发送圆钮、主操作胶囊与开关 |
+| **画布、响应式侧栏与强调色** | 泛冷蓝灰 Material 底色（`#f0f4f9`）、`< 960px` 小窗口切换至 `<mat-sidenav>` 抽屉后退回 `320px` 纯白大胶囊与焦点黑框、刺眼皇家蓝控件 | **浅色**：画布 `#FFFFFF`、桌面 `<bard-sidenav>` 与小窗 `<mat-sidenav>` 统一 `#F9F9F9`（`260px` 宽、`34px` 行高、`13.5px` 字号、`8px` 胶囊与底部分割线）、卡片 `#F7F7F8`、选中项 `#ECECEC`；**深色**：画布 `#212121`、侧栏/抽屉 `#171717`、卡片 `#2A2A2A`、选中项 `#2F2F2F`<br>**强调色**：恢复左上 Gemini 原生彩色星标，采用 ChatGPT **`#0285FF`**（`--blue-400`，悬停 `#0169CC`）点亮发送圆钮、主操作胶囊与开关 |
 | **浅蓝用户气泡与附件芯片** | 弹性父容器收缩导致短句折行；`content-visibility: auto` 偶发隐藏首轮消息；文件预览缩略图圆角不对称 | 采用 `--blue-50` **浅蓝气泡**（`#E5F3FF` / `#1A3550`，`20px` 圆角，完整列宽 `70%` 上限），气泡内附件重绘为纯白/深灰 `1px` 细框芯片，强制锁定首轮 `content-visibility: visible` |
 | **全局统一字号与缩进比例** | 标题、引导语与 `.gds-*` 组件字号跳变（`17px~28px`）、多级列表缩进过深、`ol` 序号置空 | 默认容器 `800px` = **正文列宽 `768px`（`48rem`）**；**各级标题（`h1`~`h6`）、正文、引导段落与对话流全部自定义组件标题严格统一字号（`var(--rg-font-size, 16px)`）**，标题仅靠 `600` 加粗区分；列表提供 `0% / 65% / 标准 GPT / 125%` 四档切换 |
 | **80+ 原生组件与沙盒图表三层接管** | `<genui-sandbox>` `about:srcdoc`、`<svg-code-block>`、Deep Research 方案卡、Canvas 入口卡、Python 执行块、音频概览（`32px` 臃肿圆角）与深色反相 Snackbar 观感割裂 | **Layer 1** 全局 `response-element` 字体与字号收束；**Layer 2** 统一 `1px` 细框 `12px~14px` 圆角重绘 Canvas 分屏与入口卡、Deep Research / Agent 计划卡、`.code-execution-block`、引用轮播、问卷、音频概览与轻量 Toast；**Layer 3** 穿透沙盒与行内 SVG 同步色板，同时**白名单隔离 `<web-preview>` 保护用户自建前端应用原始配色** |

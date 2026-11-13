@@ -10,11 +10,11 @@
 
 **Refined Gemini** replaces Google Gemini's bluish-gray Material surfaces, oversized spacing, cramped/deeply indented lists, and inconsistent dark code shells with a calm, high-contrast reading and writing interface modeled **1:1 on the official ChatGPT Web UI** (`openai/apps-sdk-ui` design tokens).
 
-### Key Improvements (`v1.6.0`)
+### Key Improvements (`v1.6.1`)
 
 | Dimension | Native Gemini Issue | Refined Gemini (1:1 ChatGPT Alignment) |
 | :--- | :--- | :--- |
-| **Canvas, Sidebar & Accent** | Bluish-gray Material tint (`#f0f4f9`), visual clutter, harsh royal-blue links | **Light**: `#FFFFFF` canvas, `#F9F9F9` sidebar, `#F7F7F8` card, `#ECECEC` active pill<br>**Dark**: `#212121` canvas, `#171717` sidebar, `#2A2A2A` card, `#2F2F2F` active pill<br>**Brand & Accent**: Preserves colorful top-left Gemini sparkle + ChatGPT **`#0285FF`** circular Send button & primary CTA pills |
+| **Canvas, Responsive Sidebar & Accent** | Bluish-gray Material tint (`#f0f4f9`), unstyled `320px` `<mat-sidenav>` drawer & focus-ring box below `960px`, harsh royal-blue links | **Light**: `#FFFFFF` canvas, unified `260px` `#F9F9F9` desktop sidebar & small-window drawer (`34px` rows), `#F7F7F8` card, `#ECECEC` active pill<br>**Dark**: `#212121` canvas, `#171717` sidebar/drawer, `#2A2A2A` card, `#2F2F2F` active pill<br>**Brand & Accent**: Preserves colorful top-left Gemini sparkle + ChatGPT **`#0285FF`** circular Send button & primary CTA pills |
 | **User Bubbles & File Chips** | Shrink-wrapped flex containers wrap short prompts; `content-visibility: auto` can hide Turn 0; asymmetric file preview radii | Soft-blue **`#E5F3FF` / `#1A3550`** (`--blue-50`) rounded bubbles (`70%` column cap) with crisp `1px`-bordered file/email attachment chips and anti-collapse Turn 0 safeguards |
 | **Uniform Typography & Indentation** | Mixed `17px–28px` heading/widget jumps, deep nested list whitespace, forced italic CJK quotes | **100% uniform `16px` (`--rg-font-size`) across headings (`h1`–`h6`), prose, `.gds-*` scales, and custom widget titles** (`600` weight hierarchy); **OpenAI `Markdown.module.css`** list indentation (`0% / 65% / GPT / 125%`) |
 | **80+ Unified Widgets & Diagrams** | Unstyled sandboxed diagrams (`<genui-sandbox>` / `<svg-code-block>`), Deep Research plans, Canvas chips, Python execution blocks, audio bars & snackbars | **3-Layer Unified Component Management**: Harmonizes `about:srcdoc`, `*.scf.usercontent.goog` & inline SVG diagrams; unifies Canvas entry chips & split panel, Deep Research / Agent plan cards, `.code-execution-block`, Audio Overview, sources carousel, quizzes & toast snackbars—while **strictly preserving user-authored `<web-preview>` app styles** |
@@ -71,7 +71,7 @@ npm run build
 # Syntax-check all extension & UserScript JavaScript files
 npm run check
 
-# Build store-ready ZIP archive -> dist/refined-gemini-v1.6.0-extension.zip
+# Build store-ready ZIP archive -> dist/refined-gemini-v1.6.1-extension.zip
 npm run pack
 ```
 

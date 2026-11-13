@@ -1,4 +1,4 @@
-# Refined Gemini — 1:1 ChatGPT Web UI Design Specification (`v1.6.0`)
+# Refined Gemini — 1:1 ChatGPT Web UI Design Specification (`v1.6.1`)
 
 **English** · [简体中文](./DESIGN_SPEC.zh-CN.md)
 
@@ -13,7 +13,7 @@ All tokens are derived from OpenAI's official design system (`variables-primitiv
 
 | Layer | Native Gemini Pain Point | Refined Gemini Token & Layout Specification |
 | :--- | :--- | :--- |
-| **Surfaces & Accents** | Cool blue-gray Material background (`#f0f4f9`), scattered royal-blue buttons | **Light**: Canvas `#FFFFFF`, Sidebar `#F9F9F9`, Card `#F7F7F8`, Active `#ECECEC`<br>**Dark**: Canvas `#212121`, Sidebar `#171717`, Card `#2A2A2A`, Active `#2F2F2F`<br>**Accent**: Keeps native colorful top-left Gemini sparkle; applies ChatGPT **`#0285FF`** (`--blue-400`, hover `#0169CC`) to the circular Send button, primary CTA pills & switches |
+| **Surfaces, Responsive Sidebar & Accents** | Cool blue-gray Material background (`#f0f4f9`), unstyled `320px` `<mat-sidenav>` drawer & CDK focus box below `960px`, scattered royal-blue buttons | **Light**: Canvas `#FFFFFF`, unified `260px` `#F9F9F9` desktop `<bard-sidenav>` & small-window `<mat-sidenav>` drawer (`34px` rows, `13.5px` text, `8px` capsules & hairline footer divider), Card `#F7F7F8`, Active `#ECECEC`<br>**Dark**: Canvas `#212121`, Sidebar/Drawer `#171717`, Card `#2A2A2A`, Active `#2F2F2F`<br>**Accent**: Keeps native colorful top-left Gemini sparkle; applies ChatGPT **`#0285FF`** (`--blue-400`, hover `#0169CC`) to the circular Send button, primary CTA pills & switches |
 | **User Bubbles & File Chips** | Shrink-to-fit flex parents wrap short prompts; `content-visibility: auto` can hide Turn 0; asymmetric file thumbnail radii | Soft-blue **`#E5F3FF` / `#1A3550`** (`--blue-50`), `20px` radius, `70%` column width cap, crisp `1px`-bordered file/email attachment chips, and `content-visibility: visible` safeguard on Turn 0 |
 | **Uniform `16px` Prose & Headings** | Mixed `17px–28px` heading/`.gds-*`/widget jumps, deep nested list whitespace, blanked `ol` markers | `800px` container = **`768px` (`48rem`)** prose width; **`h1`–`h6`, prose, GenUI intros, and `.gds-*` turn widget titles strictly share `var(--rg-font-size, 16px)`** (`600` weight hierarchy); `0% / 65% / GPT / 125%` list indentation presets |
 | **80+ Unified Widgets & Sandboxes** | Opaque `about:srcdoc` `<genui-sandbox>`, `<svg-code-block>`, Deep Research cards, Canvas chips, Python `.code-execution-block`, `32px` audio player & inverse snackbars | **3-Layer Management**: (1) Universal `response-element` font & `16px` cap; (2) `1px` `12px–14px` cards across Canvas chips/split panel, Deep Research & Agent plans, `.code-execution-block`, sources carousel, quizzes, Audio Overview & toast snackbars; (3) Sandbox + inline SVG harmonization with **explicit `<web-preview>` whitelist preserving user-authored web apps** |

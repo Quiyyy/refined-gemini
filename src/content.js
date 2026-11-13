@@ -549,7 +549,11 @@
       'click',
       (e) => {
         if (!currentSettings.enabled || !(e.target instanceof Element)) return;
-        if (e.target.closest('bard-sidenav, conversations-list, [data-test-id="conversation"], [data-test-id="new-chat-button"]')) {
+        if (
+          e.target.closest(
+            'bard-sidenav, mat-sidenav, side-navigation-content, conversations-list, [data-test-id="conversation"], [data-test-id="new-chat-button"]'
+          )
+        ) {
           requestAnimationFrame(resetOuterChatScroll);
           setTimeout(resetOuterChatScroll, 180);
         }

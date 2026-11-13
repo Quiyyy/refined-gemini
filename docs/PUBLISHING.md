@@ -27,13 +27,13 @@ npm run pack
 ```
 
 This generates:
-- **Extension Store Package**: `dist/refined-gemini-v1.6.0-extension.zip`
+- **Extension Store Package**: `dist/refined-gemini-v1.6.1-extension.zip`
 - **300×300 Store Logo**: `docs/assets/store-logo-300.png`
 
 ### Step 3: Upload Package & Configure Properties
 
 1. In Partner Center, navigate to **Microsoft Edge -> Overview -> Create new extension**.
-2. Under **Packages**, upload `dist/refined-gemini-v1.6.0-extension.zip`. Partner Center automatically detects `English` (default) and `Chinese (Simplified)` from `_locales/`.
+2. Under **Packages**, upload `dist/refined-gemini-v1.6.1-extension.zip`. Partner Center automatically detects `English` (default) and `Chinese (Simplified)` from `_locales/`.
 3. Under **Availability**, select **Public** and enable all markets.
 4. Under **Properties**:
    - **Category**: `Productivity`
