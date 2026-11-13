@@ -122,17 +122,156 @@
     }
   }
 
-  /**
-   * Broadcast active theme, enable state, and font-size to any embedded Generative UI
-   * sandbox iframes (`*.scf.usercontent.goog` / `*.googleusercontent.com`, including
-   * inside open `<safe-content-frame>` Shadow DOM roots).
-   */
-  function getSandboxSyncPayload() {
+  // Curated Google M3 / Luminous (Cgk) diagram hex -> ChatGPT Light & Dark hex maps
+  // Strictly used on inline diagram/chart SVGs inside svg-code-block / vega-lite-chart / google-chart / gen-ui-html
+  const INLINE_SVG_LIGHT_HEX = {
+    '#3186ff': '#0285ff', '#1a73e8': '#0285ff', '#4285f4': '#0285ff', '#3b82f6': '#0285ff',
+    '#0b57d0': '#0169cc', '#0e57d0': '#0169cc', '#1967d2': '#0169cc', '#174ea6': '#0169cc', '#2563eb': '#0169cc',
+    '#041e49': '#0d0d0d', '#001d35': '#0d0d0d',
+    '#dcf1ff': '#e5f3ff', '#d3e3fd': '#e5f3ff', '#e8f0fe': '#e5f3ff', '#d2e3fc': '#e5f3ff', '#dbeafe': '#e5f3ff', '#eff6ff': '#e5f3ff',
+    '#9dd2ff': '#99ceff', '#a8c7fa': '#99ceff',
+    '#fdfcfc': '#ffffff', '#f2f0f0': '#f7f7f8', '#f4f3f2': '#f7f7f8', '#f4f3f0': '#f7f7f8', '#f7f6f6': '#f7f7f8',
+    '#faf9f9': '#f9f9f9', '#f0f4f9': '#f7f7f8', '#e8eef6': '#f4f4f4', '#dde3e9': '#ececec', '#f1f3f4': '#f4f4f4', '#f8f9fa': '#f7f7f8',
+    '#1f1f1f': '#0d0d0d', '#3c4043': '#0d0d0d', '#444746': '#5d5d5d', '#5f6368': '#5d5d5d', '#747775': '#8f8f8f'
+  };
+
+  const INLINE_SVG_DARK_HEX = {
+    '#3186ff': '#0285ff', '#1a73e8': '#0285ff', '#4285f4': '#0285ff', '#3b82f6': '#0285ff',
+    '#0b57d0': '#66b5ff', '#0e57d0': '#66b5ff', '#1967d2': '#66b5ff', '#174ea6': '#66b5ff', '#2563eb': '#66b5ff',
+    '#a8c7fa': '#66b5ff', '#a7c7fa': '#66b5ff', '#8ab4f8': '#66b5ff', '#93c5fd': '#66b5ff',
+    '#dcf1ff': '#1a3550', '#d3e3fd': '#1a3550', '#e8f0fe': '#1a3550', '#d2e3fc': '#1a3550', '#dbeafe': '#1a3550', '#eff6ff': '#1a3550',
+    '#0842a0': '#1a3550', '#0842a1': '#1a3550', '#192967': '#1a3550', '#1e3a8a': '#1a3550',
+    '#fdfcfc': '#212121', '#0f0f0f': '#212121', '#1b1b1b': '#212121',
+    '#f2f0f0': '#2a2a2a', '#f4f3f2': '#2a2a2a', '#f4f3f0': '#2a2a2a', '#f7f6f6': '#2a2a2a',
+    '#faf9f9': '#262626', '#fafafa': '#262626', '#f0f4f9': '#2a2a2a', '#f8f9fa': '#262626',
+    '#f1f3f4': '#2f2f2f', '#e8eef6': '#2f2f2f', '#dde3e9': '#383838', '#dadce0': '#3c3c3c', '#e0e0e0': '#3c3c3c', '#cccccc': '#3c3c3c',
+    '#282a2c': '#2a2a2a', '#202021': '#171717', '#2a2b2c': '#2f2f2f',
+    '#041e49': '#ececec', '#001d35': '#ececec', '#1f1f1f': '#ececec', '#202124': '#ececec',
+    '#111827': '#ececec', '#1f2937': '#ececec', '#374151': '#ececec', '#3c4043': '#ececec',
+    '#e3e3e3': '#ececec', '#e6e6e6': '#ececec', '#444746': '#b4b4b4', '#4b5563': '#b4b4b4',
+    '#5f6368': '#b4b4b4', '#6b7280': '#b4b4b4', '#c4c7c5': '#b4b4b4', '#747775': '#8e8ea0'
+  };
+
+  const INLINE_DIAGRAM_ROOT_SEL =
+    ':is(svg-code-block, .svg-preview, vega-lite-chart, google-chart, deep-zoom, gen-ui-html):not(web-preview *)';
+
+  let isInlineSvgMutating = false;
+
+  function harmonizeInlineDiagrams() {
+    if (!document.body) return;
     const enabled = Boolean(currentSettings.enabled);
+    const theme = resolveEffectiveTheme(currentSettings.themeMode);
+    const map = theme === 'dark' ? INLINE_SVG_DARK_HEX : INLINE_SVG_LIGHT_HEX;
+
+    isInlineSvgMutating = true;
+    try {
+      const svgs = document.body.querySelectorAll(`${INLINE_DIAGRAM_ROOT_SEL} svg`);
+      for (const svg of svgs) {
+        if (svg.closest('web-preview')) continue;
+
+        for (const styleEl of svg.querySelectorAll('style')) {
+          const cur = styleEl.textContent || '';
+          if (styleEl.__rgOrigCss === undefined || (!enabled && styleEl.__rgLastOut !== cur)) {
+            styleEl.__rgOrigCss = cur;
+          } else if (enabled && styleEl.__rgLastOut !== undefined && styleEl.__rgLastOut !== cur) {
+            styleEl.__rgOrigCss = cur;
+          }
+          if (!enabled) {
+            if (styleEl.__rgOrigCss !== undefined && cur !== styleEl.__rgOrigCss) {
+              styleEl.textContent = styleEl.__rgOrigCss;
+            }
+            styleEl.__rgLastOut = undefined;
+          } else {
+            const nextCss = styleEl.__rgOrigCss.replace(/#[0-9a-fA-F]{6}\b/g, (hex) => {
+              const lower = hex.toLowerCase();
+              return map[lower] || hex;
+            });
+            if (cur !== nextCss) styleEl.textContent = nextCss;
+            styleEl.__rgLastOut = nextCss;
+          }
+        }
+
+        const nodes = svg.querySelectorAll('[fill], [stroke]');
+        for (const el of nodes) {
+          const tag = (el.tagName || '').toLowerCase();
+          const isText = tag === 'text' || tag === 'tspan';
+          for (const attr of ['fill', 'stroke']) {
+            if (!el.hasAttribute(attr)) continue;
+            const backupAttr = `data-rg-orig-${attr}`;
+            const lastProp = attr === 'fill' ? '__rgLastFill' : '__rgLastStroke';
+            const val = (el.getAttribute(attr) || '').trim();
+            if (!enabled) {
+              if (el.hasAttribute(backupAttr)) {
+                el.setAttribute(attr, el.getAttribute(backupAttr) || val);
+                el.removeAttribute(backupAttr);
+              }
+              el[lastProp] = undefined;
+              continue;
+            }
+            if (el[lastProp] !== undefined && val !== el[lastProp]) {
+              el.setAttribute(backupAttr, val);
+            }
+            const orig = el.hasAttribute(backupAttr) ? el.getAttribute(backupAttr) || val : val;
+            let mapped = map[orig.toLowerCase()];
+            if (!mapped && theme === 'dark') {
+              if (attr === 'fill' && /^#(?:ffffff|fff)$/i.test(orig) && !isText) {
+                mapped = '#262626';
+              } else if ((isText || attr === 'stroke') && /^#(?:000000|000)$/i.test(orig)) {
+                mapped = '#ececec';
+              }
+            }
+            if (mapped && val.toLowerCase() !== mapped) {
+              if (!el.hasAttribute(backupAttr)) {
+                el.setAttribute(backupAttr, orig);
+              }
+              el.setAttribute(attr, mapped);
+              el[lastProp] = mapped;
+            } else {
+              el[lastProp] = val;
+            }
+          }
+        }
+      }
+    } finally {
+      queueMicrotask(() => {
+        isInlineSvgMutating = false;
+      });
+    }
+  }
+
+  /**
+   * Detect whether an iframe belongs to user-authored Canvas / <web-preview>
+   * (Layer 3 whitelist: never alter user-created web app colors or typography).
+   */
+  function isUserPreviewFrame(frame) {
+    let cur = frame;
+    while (cur && cur.nodeType === 1) {
+      if (
+        typeof cur.matches === 'function' &&
+        cur.matches(
+          'web-preview, [data-testid*="web-preview"], immersive-panel:not(:has(deep-research-immersive-panel))'
+        )
+      ) {
+        return true;
+      }
+      const root = typeof cur.getRootNode === 'function' ? cur.getRootNode() : null;
+      cur = cur.parentElement || (root && root.host ? root.host : null);
+    }
+    return false;
+  }
+
+  /**
+   * Broadcast active theme, enable state, and font-size to embedded Generative UI
+   * sandbox iframes (`about:srcdoc`, `*.scf.usercontent.goog`, `*.googleusercontent.com`),
+   * while passing `enabled: false, isUserPreview: true` to `<web-preview>` frames.
+   */
+  function getSandboxSyncPayload(isUserPreview = false) {
+    const enabled = Boolean(currentSettings.enabled) && !isUserPreview;
     const theme = resolveEffectiveTheme(currentSettings.themeMode);
     return {
       type: 'RG_SANDBOX_SYNC',
       enabled,
+      isUserPreview: Boolean(isUserPreview),
       theme,
       themeMode: currentSettings.themeMode || 'auto',
       fontSize: currentSettings.fontSize || DEFAULTS.fontSize
@@ -140,10 +279,12 @@
   }
 
   const boundFrames = new WeakSet();
+  const SHADOW_FRAME_HOSTS =
+    'safe-content-frame, sandbox-frame, generative-ui-frame, mcp-tool-ui-frame, deep-zoom, mini-app, web-preview';
 
   function collectSandboxFrames() {
     const frames = new Set(document.querySelectorAll('iframe'));
-    const shadowHosts = document.querySelectorAll('safe-content-frame, sandbox-frame');
+    const shadowHosts = document.querySelectorAll(SHADOW_FRAME_HOSTS);
     for (const hostEl of shadowHosts) {
       if (hostEl.shadowRoot) {
         for (const innerFrame of hostEl.shadowRoot.querySelectorAll('iframe')) {
@@ -157,7 +298,7 @@
         frame.addEventListener('load', () => {
           try {
             if (frame.contentWindow) {
-              frame.contentWindow.postMessage(getSandboxSyncPayload(), '*');
+              frame.contentWindow.postMessage(getSandboxSyncPayload(isUserPreviewFrame(frame)), '*');
             }
           } catch (_) {}
         });
@@ -168,11 +309,10 @@
 
   function broadcastToSandboxFrames() {
     if (!document.documentElement) return;
-    const payload = getSandboxSyncPayload();
     for (const frame of collectSandboxFrames()) {
       try {
         if (frame.contentWindow) {
-          frame.contentWindow.postMessage(payload, '*');
+          frame.contentWindow.postMessage(getSandboxSyncPayload(isUserPreviewFrame(frame)), '*');
         }
       } catch (_) {}
     }
@@ -192,6 +332,7 @@
       root.style.removeProperty('--rg-chat-max-width');
       root.style.removeProperty('--rg-font-size');
       root.style.removeProperty('--rg-indent-scale');
+      harmonizeInlineDiagrams();
       broadcastToSandboxFrames();
       return;
     }
@@ -211,6 +352,7 @@
     root.style.setProperty('--rg-font-size', currentSettings.fontSize || DEFAULTS.fontSize);
     root.style.setProperty('--rg-indent-scale', indentScale);
     resetOuterChatScroll();
+    harmonizeInlineDiagrams();
     broadcastToSandboxFrames();
   }
 
@@ -231,6 +373,7 @@
         const nextTheme = resolveEffectiveTheme('auto');
         if (root.getAttribute('data-rg-theme') !== nextTheme) {
           root.setAttribute('data-rg-theme', nextTheme);
+          harmonizeInlineDiagrams();
           broadcastToSandboxFrames();
         }
       });
@@ -419,28 +562,46 @@
     window.addEventListener('message', (event) => {
       const data = event && event.data;
       if (!data || typeof data !== 'object' || data.type !== 'RG_SANDBOX_READY') return;
-      try {
-        if (event.source && typeof event.source.postMessage === 'function') {
-          event.source.postMessage(getSandboxSyncPayload(), '*');
-        }
-      } catch (_) {}
+      let matched = false;
+      for (const frame of collectSandboxFrames()) {
+        try {
+          if (frame.contentWindow === event.source) {
+            matched = true;
+            frame.contentWindow.postMessage(getSandboxSyncPayload(isUserPreviewFrame(frame)), '*');
+            break;
+          }
+        } catch (_) {}
+      }
+      if (!matched) {
+        try {
+          if (event.source && typeof event.source.postMessage === 'function') {
+            event.source.postMessage(getSandboxSyncPayload(false), '*');
+          }
+        } catch (_) {}
+      }
       broadcastToSandboxFrames();
     });
 
     let frameScanPending = false;
     const scheduleFrameSync = () => {
-      if (frameScanPending) return;
+      if (isInlineSvgMutating || frameScanPending) return;
       frameScanPending = true;
       requestAnimationFrame(() => {
         frameScanPending = false;
+        harmonizeInlineDiagrams();
         broadcastToSandboxFrames();
       });
     };
 
+    const DYNAMIC_WIDGET_SEL =
+      'iframe, genui-sandbox, gen-ui-html, sandbox-frame, safe-content-frame, generative-ui-frame, mcp-tool-ui-frame, deep-zoom, mini-app, web-preview, svg-code-block, vega-lite-chart, google-chart';
+
     const attachFrameObserver = () => {
       if (!document.body) return;
+      harmonizeInlineDiagrams();
       broadcastToSandboxFrames();
       const frameObserver = new MutationObserver((mutations) => {
+        if (isInlineSvgMutating) return;
         for (const m of mutations) {
           for (const node of m.addedNodes) {
             if (node.nodeType !== Node.ELEMENT_NODE) continue;
@@ -448,12 +609,20 @@
             const tag = el.tagName;
             if (
               tag === 'IFRAME' ||
+              tag === 'SVG' ||
               tag === 'GEN-UI-HTML' ||
               tag === 'GENUI-SANDBOX' ||
               tag === 'SANDBOX-FRAME' ||
               tag === 'SAFE-CONTENT-FRAME' ||
-              (el.querySelector &&
-                el.querySelector('iframe, genui-sandbox, gen-ui-html, sandbox-frame, safe-content-frame'))
+              tag === 'SVG-CODE-BLOCK' ||
+              tag === 'VEGA-LITE-CHART' ||
+              tag === 'GOOGLE-CHART' ||
+              tag === 'GENERATIVE-UI-FRAME' ||
+              tag === 'MCP-TOOL-UI-FRAME' ||
+              tag === 'DEEP-ZOOM' ||
+              tag === 'MINI-APP' ||
+              tag === 'WEB-PREVIEW' ||
+              (el.querySelector && el.querySelector(DYNAMIC_WIDGET_SEL))
             ) {
               scheduleFrameSync();
               return;

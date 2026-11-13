@@ -23,9 +23,9 @@ const userScript = `// ==UserScript==
 // @name:zh-TW         Refined Gemini — 1:1 對齊 ChatGPT 網頁端介面
 // @namespace          https://github.com/Quiyyy/refined-gemini
 // @version            ${pkg.version}
-// @description        Align Google Gemini Web UI 1:1 with ChatGPT: uniform typography, clean white/dark surfaces, soft-blue user bubbles, #0285FF accents, ChatGPT follow-up cards & Generative UI diagram alignment.
-// @description:zh-CN  1:1 对齐 ChatGPT 网页端视觉与排版：全局统一字号、纯白/深灰画布、浅蓝用户气泡与 #0285FF 强调色、轻量细框追问建议卡片与交互式流程图同源对齐。
-// @description:zh-TW  1:1 對齊 ChatGPT 網頁端視覺與排版：全域統一字級、純白/深灰畫布、淺藍用戶氣泡與 #0285FF 強調色、輕量細框追問建議卡片與互動式流程圖同源對齊。
+// @description        Align Google Gemini Web UI 1:1 with ChatGPT: uniform typography, clean white/dark surfaces, soft-blue user bubbles, #0285FF accents, and unified management of all 80+ Gemini widgets & diagrams.
+// @description:zh-CN  1:1 对齐 ChatGPT 网页端视觉与排版：全局统一字号、纯白/深灰画布、浅蓝用户气泡与 #0285FF 强调色、80+ 原生组件卡片与交互式图表同源管理。
+// @description:zh-TW  1:1 對齊 ChatGPT 網頁端視覺與排版：全域統一字級、純白/深灰畫布、淺藍用戶氣泡與 #0285FF 強調色、80+ 原生組件卡片與互動式圖表同源管理。
 // @author             Quiyyy
 // @license            MIT
 // @homepageURL        https://github.com/Quiyyy/refined-gemini
@@ -61,6 +61,46 @@ const userScript = `// ==UserScript==
   const VALID_LANGS = new Set(['auto', 'zh', 'en']);
   const CSS = ${JSON.stringify(cssContent)};
   const SANDBOX_CSS = ${JSON.stringify(sandboxCssContent)};
+
+  const LIGHT_MAP = {
+    '#3186ff': '#0285ff', '#1a73e8': '#0285ff', '#4285f4': '#0285ff', '#3b82f6': '#0285ff',
+    '#0b57d0': '#0169cc', '#0e57d0': '#0169cc', '#1967d2': '#0169cc', '#174ea6': '#0169cc', '#2563eb': '#0169cc',
+    '#041e49': '#0d0d0d', '#001d35': '#0d0d0d',
+    '#dcf1ff': '#e5f3ff', '#d3e3fd': '#e5f3ff', '#e8f0fe': '#e5f3ff', '#d2e3fc': '#e5f3ff', '#dbeafe': '#e5f3ff', '#eff6ff': '#e5f3ff',
+    '#9dd2ff': '#99ceff', '#a8c7fa': '#99ceff',
+    '#fdfcfc': '#ffffff', '#f2f0f0': '#f7f7f8', '#f4f3f2': '#f7f7f8', '#f4f3f0': '#f7f7f8', '#f7f6f6': '#f7f7f8',
+    '#faf9f9': '#f9f9f9', '#f0f4f9': '#f7f7f8', '#f8f9fa': '#f7f7f8',
+    '#e8eef6': '#f4f4f4', '#dde3e9': '#ececec', '#f1f3f4': '#f4f4f4',
+    '#1f1f1f': '#0d0d0d', '#3c4043': '#0d0d0d', '#444746': '#5d5d5d', '#5f6368': '#5d5d5d', '#747775': '#8f8f8f'
+  };
+  const DARK_MAP = {
+    '#3186ff': '#0285ff', '#1a73e8': '#0285ff', '#4285f4': '#0285ff', '#3b82f6': '#0285ff',
+    '#0b57d0': '#66b5ff', '#0e57d0': '#66b5ff', '#1967d2': '#66b5ff', '#174ea6': '#66b5ff', '#2563eb': '#66b5ff', '#a8c7fa': '#66b5ff', '#a7c7fa': '#66b5ff', '#8ab4f8': '#66b5ff', '#93c5fd': '#66b5ff',
+    '#dcf1ff': '#1a3550', '#d3e3fd': '#1a3550', '#e8f0fe': '#1a3550', '#d2e3fc': '#1a3550', '#dbeafe': '#1a3550', '#eff6ff': '#1a3550',
+    '#0842a0': '#1a3550', '#0842a1': '#1a3550', '#192967': '#1a3550', '#1e3a8a': '#1a3550',
+    '#fdfcfc': '#212121', '#0f0f0f': '#212121', '#1b1b1b': '#212121',
+    '#f2f0f0': '#2a2a2a', '#f4f3f2': '#2a2a2a', '#f4f3f0': '#2a2a2a', '#f7f6f6': '#2a2a2a',
+    '#faf9f9': '#262626', '#fafafa': '#262626', '#f0f4f9': '#2a2a2a',
+    '#f8f9fa': '#262626', '#f1f3f4': '#2f2f2f', '#e8eef6': '#2f2f2f', '#dde3e9': '#383838', '#dadce0': '#3c3c3c', '#e0e0e0': '#3c3c3c', '#cccccc': '#3c3c3c',
+    '#282a2c': '#2a2a2a', '#202021': '#171717', '#2a2b2c': '#2f2f2f',
+    '#041e49': '#ececec', '#001d35': '#ececec', '#1f1f1f': '#ececec', '#111827': '#ececec', '#1f2937': '#ececec', '#374151': '#ececec', '#3c4043': '#ececec',
+    '#202124': '#ececec', '#e3e3e3': '#ececec', '#e6e6e6': '#ececec', '#444746': '#b4b4b4', '#4b5563': '#b4b4b4', '#5f6368': '#b4b4b4', '#6b7280': '#b4b4b4', '#c4c7c5': '#b4b4b4', '#747775': '#8e8ea0'
+  };
+
+  function isUserPreviewEl(frame) {
+    let cur = frame;
+    while (cur && cur.nodeType === 1) {
+      if (
+        typeof cur.matches === 'function' &&
+        cur.matches('web-preview, [data-testid*="web-preview"], immersive-panel:not(:has(deep-research-immersive-panel))')
+      ) {
+        return true;
+      }
+      const root = typeof cur.getRootNode === 'function' ? cur.getRootNode() : null;
+      cur = cur.parentElement || (root && root.host ? root.host : null);
+    }
+    return false;
+  }
 
   function normalize(obj) {
     const merged = { ...DEFAULTS, ...(obj || {}) };
@@ -110,32 +150,10 @@ const userScript = `// ==UserScript==
     const isScf = host.endsWith('.scf.usercontent.goog') || host === 'scf.usercontent.goog';
     let sbState = {
       enabled: Boolean(settings.enabled),
+      isUserPreview: false,
       themeMode: settings.themeMode || 'auto',
       parentTheme: null,
       fontSize: settings.fontSize || '16px'
-    };
-
-    const LIGHT_MAP = {
-      '#3186ff': '#0285ff', '#1a73e8': '#0285ff', '#4285f4': '#0285ff', '#3b82f6': '#0285ff',
-      '#0b57d0': '#0169cc', '#0e57d0': '#0169cc', '#1967d2': '#0169cc', '#2563eb': '#0169cc',
-      '#041e49': '#0d0d0d', '#001d35': '#0d0d0d',
-      '#dcf1ff': '#e5f3ff', '#d3e3fd': '#e5f3ff', '#e8f0fe': '#e5f3ff', '#dbeafe': '#e5f3ff', '#eff6ff': '#e5f3ff',
-      '#fdfcfc': '#ffffff', '#f2f0f0': '#f7f7f8', '#f4f3f2': '#f7f7f8', '#f4f3f0': '#f7f7f8', '#f7f6f6': '#f7f7f8',
-      '#faf9f9': '#f9f9f9', '#f0f4f9': '#f7f7f8', '#f8f9fa': '#f7f7f8',
-      '#e8eef6': '#f4f4f4', '#dde3e9': '#ececec', '#f1f3f4': '#f4f4f4',
-      '#1f1f1f': '#0d0d0d', '#3c4043': '#0d0d0d', '#444746': '#5d5d5d', '#5f6368': '#5d5d5d', '#747775': '#8f8f8f'
-    };
-    const DARK_MAP = {
-      '#3186ff': '#0285ff', '#1a73e8': '#0285ff', '#4285f4': '#0285ff', '#3b82f6': '#0285ff',
-      '#0b57d0': '#66b5ff', '#0e57d0': '#66b5ff', '#1967d2': '#66b5ff', '#2563eb': '#66b5ff', '#a8c7fa': '#66b5ff', '#93c5fd': '#66b5ff',
-      '#dcf1ff': '#1a3550', '#d3e3fd': '#1a3550', '#e8f0fe': '#1a3550', '#dbeafe': '#1a3550', '#eff6ff': '#1a3550',
-      '#0842a0': '#1a3550', '#192967': '#1a3550', '#1e3a8a': '#1a3550',
-      '#fdfcfc': '#212121', '#0f0f0f': '#212121', '#1b1b1b': '#212121',
-      '#f2f0f0': '#2a2a2a', '#f4f3f2': '#2a2a2a', '#f4f3f0': '#2a2a2a', '#f7f6f6': '#2a2a2a',
-      '#faf9f9': '#262626', '#fafafa': '#262626', '#f0f4f9': '#2a2a2a',
-      '#f8f9fa': '#262626', '#f1f3f4': '#2f2f2f', '#e8eef6': '#2f2f2f', '#dadce0': '#3c3c3c', '#e0e0e0': '#3c3c3c', '#cccccc': '#3c3c3c',
-      '#282a2c': '#2a2a2a', '#041e49': '#ececec', '#1f1f1f': '#ececec', '#111827': '#ececec', '#1f2937': '#ececec', '#374151': '#ececec', '#3c4043': '#ececec',
-      '#202124': '#ececec', '#e3e3e3': '#ececec', '#e6e6e6': '#ececec', '#444746': '#b4b4b4', '#4b5563': '#b4b4b4', '#5f6368': '#b4b4b4', '#6b7280': '#b4b4b4', '#c4c7c5': '#b4b4b4'
     };
 
     function transformCss(cssText, theme) {
@@ -165,12 +183,24 @@ const userScript = `// ==UserScript==
     function applySandbox() {
       const root = document.documentElement;
       if (!root) return;
-      const isGenUi = isScf || Boolean(
+      let userPreview = sbState.isUserPreview;
+      if (!userPreview) {
+        try { userPreview = Boolean(window.frameElement && isUserPreviewEl(window.frameElement)); } catch (_) {}
+      }
+      let frameIsGenUi = false;
+      try {
+        frameIsGenUi = Boolean(
+          window.frameElement &&
+          (window.frameElement.getAttribute('title') === 'Model Generated UI Container' ||
+            window.frameElement.closest('genui-sandbox, gen-ui-html, sandbox-frame, generative-ui-frame, mcp-tool-ui-frame, deep-zoom, mini-app, vega-lite-chart, google-chart, [data-testid="gen-ui-html-node"]'))
+        );
+      } catch (_) {}
+      const isGenUi = !userPreview && (isScf || frameIsGenUi || Boolean(
         document.getElementById('app-root') ||
         document.getElementById('genui-host-injected-css') ||
-        document.querySelector('.bot-response, script[data-sandbox-runtime]') ||
+        document.querySelector('.bot-response, script[data-sandbox-runtime], .vega-embed, .google-visualization-container, svg.marks') ||
         (location.protocol === 'about:' && typeof window.genuiStreamingActive !== 'undefined')
-      );
+      ));
       sbMutating = true;
       try {
         if (!sbState.enabled || !isGenUi) {
@@ -282,6 +312,7 @@ const userScript = `// ==UserScript==
     window.addEventListener('message', (e) => {
       const d = e && e.data;
       if (!d || d.type !== 'RG_SANDBOX_SYNC') return;
+      if (typeof d.isUserPreview === 'boolean') sbState.isUserPreview = d.isUserPreview;
       if (typeof d.enabled === 'boolean') sbState.enabled = d.enabled;
       if (d.theme === 'light' || d.theme === 'dark') sbState.parentTheme = d.theme;
       if (typeof d.themeMode === 'string') sbState.themeMode = d.themeMode;
@@ -341,17 +372,74 @@ const userScript = `// ==UserScript==
     return settings.themeMode === 'auto' ? (detectNativeDark() ? 'dark' : 'light') : settings.themeMode;
   }
 
+  let isInlineSvgMutating = false;
+  function harmonizeInlineDiagrams() {
+    if (!document.body) return;
+    const enabled = Boolean(settings.enabled);
+    const theme = resolveTheme();
+    const map = theme === 'dark' ? DARK_MAP : LIGHT_MAP;
+    isInlineSvgMutating = true;
+    try {
+      const svgs = document.body.querySelectorAll(
+        ':is(svg-code-block, .svg-preview, vega-lite-chart, google-chart, deep-zoom, gen-ui-html):not(web-preview *) svg'
+      );
+      for (const svg of svgs) {
+        if (svg.closest('web-preview')) continue;
+        for (const el of svg.querySelectorAll('[fill], [stroke]')) {
+          const tag = (el.tagName || '').toLowerCase();
+          const isText = tag === 'text' || tag === 'tspan';
+          for (const attr of ['fill', 'stroke']) {
+            if (!el.hasAttribute(attr)) continue;
+            const bAttr = 'data-rg-orig-' + attr;
+            const lProp = attr === 'fill' ? '__rgLastFill' : '__rgLastStroke';
+            const val = (el.getAttribute(attr) || '').trim();
+            if (!enabled) {
+              if (el.hasAttribute(bAttr)) {
+                el.setAttribute(attr, el.getAttribute(bAttr) || val);
+                el.removeAttribute(bAttr);
+              }
+              el[lProp] = undefined;
+              continue;
+            }
+            if (el[lProp] !== undefined && val !== el[lProp]) el.setAttribute(bAttr, val);
+            const orig = el.hasAttribute(bAttr) ? (el.getAttribute(bAttr) || val) : val;
+            let mapped = map[orig.toLowerCase()];
+            if (!mapped && theme === 'dark') {
+              if (attr === 'fill' && /^#(?:ffffff|fff)$/i.test(orig) && !isText) mapped = '#262626';
+              else if ((isText || attr === 'stroke') && /^#(?:000000|000)$/i.test(orig)) mapped = '#ececec';
+            }
+            if (mapped && val.toLowerCase() !== mapped) {
+              if (!el.hasAttribute(bAttr)) el.setAttribute(bAttr, orig);
+              el.setAttribute(attr, mapped);
+              el[lProp] = mapped;
+            } else {
+              el[lProp] = val;
+            }
+          }
+        }
+      }
+    } finally {
+      queueMicrotask(() => {
+        isInlineSvgMutating = false;
+      });
+    }
+  }
+
   const boundFrames = new WeakSet();
-  function broadcastSandbox() {
-    const payload = {
+  function buildPayload(userPreview) {
+    return {
       type: 'RG_SANDBOX_SYNC',
-      enabled: Boolean(settings.enabled),
+      enabled: Boolean(settings.enabled) && !userPreview,
+      isUserPreview: Boolean(userPreview),
       theme: resolveTheme(),
       themeMode: settings.themeMode || 'auto',
       fontSize: settings.fontSize || '16px'
     };
+  }
+
+  function broadcastSandbox() {
     const frames = new Set(document.querySelectorAll('iframe'));
-    for (const scf of document.querySelectorAll('safe-content-frame, sandbox-frame')) {
+    for (const scf of document.querySelectorAll('safe-content-frame, sandbox-frame, generative-ui-frame, mcp-tool-ui-frame, deep-zoom, mini-app, web-preview')) {
       if (scf.shadowRoot) {
         for (const f of scf.shadowRoot.querySelectorAll('iframe')) frames.add(f);
       }
@@ -360,10 +448,10 @@ const userScript = `// ==UserScript==
       if (!boundFrames.has(f)) {
         boundFrames.add(f);
         f.addEventListener('load', () => {
-          try { f.contentWindow && f.contentWindow.postMessage(payload, '*'); } catch (_) {}
+          try { f.contentWindow && f.contentWindow.postMessage(buildPayload(isUserPreviewEl(f)), '*'); } catch (_) {}
         });
       }
-      try { f.contentWindow && f.contentWindow.postMessage(payload, '*'); } catch (_) {}
+      try { f.contentWindow && f.contentWindow.postMessage(buildPayload(isUserPreviewEl(f)), '*'); } catch (_) {}
     }
   }
 
@@ -387,6 +475,7 @@ const userScript = `// ==UserScript==
       root.style.removeProperty('--rg-chat-max-width');
       root.style.removeProperty('--rg-font-size');
       root.style.removeProperty('--rg-indent-scale');
+      harmonizeInlineDiagrams();
       broadcastSandbox();
       return;
     }
@@ -403,6 +492,7 @@ const userScript = `// ==UserScript==
     root.style.setProperty('--rg-font-size', settings.fontSize);
     root.style.setProperty('--rg-indent-scale', indentScale);
     resetOuterChatScroll();
+    harmonizeInlineDiagrams();
     broadcastSandbox();
   }
 
@@ -509,6 +599,13 @@ const userScript = `// ==UserScript==
     apply();
     if (document.body) {
       obs.observe(document.body, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+      new MutationObserver(() => {
+        if (isInlineSvgMutating) return;
+        requestAnimationFrame(() => {
+          harmonizeInlineDiagrams();
+          broadcastSandbox();
+        });
+      }).observe(document.body, { childList: true, subtree: true });
     }
   });
 

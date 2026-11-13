@@ -242,6 +242,17 @@ html[data-rg-sandbox="true"] table:not([data-type="comparison"]) tbody tr:last-c
   border-bottom: none !important;
 }
 
+/* Vega-Lite & Google Charts tooltips & action menus inside sandbox frames */
+html[data-rg-sandbox="true"] :is(#vg-tooltip-element, .vg-tooltip, .google-visualization-tooltip) {
+  background-color: var(--rg-sb-elevated) !important;
+  border: 1px solid var(--rg-sb-border) !important;
+  border-radius: 10px !important;
+  color: var(--rg-sb-text) !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 12.5px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+}
+
 /* Subtle 6px neutral scrollbars inside scrollable GenUI widgets */
 html[data-rg-sandbox="true"] ::-webkit-scrollbar {
   width: 6px;

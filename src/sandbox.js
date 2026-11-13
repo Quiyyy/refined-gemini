@@ -34,6 +34,7 @@
 
   let state = {
     enabled: Boolean(DEFAULTS.enabled),
+    isUserPreview: false,
     themeMode: DEFAULTS.themeMode || 'auto',
     parentTheme: null,
     fontSize: DEFAULTS.fontSize || '16px'
@@ -140,14 +141,37 @@
     '#747775': '#8e8ea0'
   };
 
+  function isUserPreviewContext() {
+    if (state.isUserPreview) return true;
+    try {
+      let cur = window.frameElement;
+      while (cur && cur.nodeType === 1) {
+        if (
+          typeof cur.matches === 'function' &&
+          cur.matches(
+            'web-preview, [data-testid*="web-preview"], immersive-panel:not(:has(deep-research-immersive-panel))'
+          )
+        ) {
+          return true;
+        }
+        const root = typeof cur.getRootNode === 'function' ? cur.getRootNode() : null;
+        cur = cur.parentElement || (root && root.host ? root.host : null);
+      }
+    } catch (_) {}
+    return false;
+  }
+
   function isGenUiDocument() {
+    if (isUserPreviewContext()) return false;
     if (isScfHost) return true;
-    // Matches Angular <genui-sandbox> srcdoc frames (#app-root.bot-response / #genui-host-injected-css)
-    // and SVG/SafeContentFrame runtimes, while ignoring unrelated analytics/GTM iframes.
+    // Matches Angular <genui-sandbox> srcdoc frames, chart runtimes, and GenUI containers
+    // while ignoring unrelated analytics/GTM iframes and user-authored <web-preview>.
     if (
       document.getElementById('app-root') ||
       document.getElementById('genui-host-injected-css') ||
-      document.querySelector('.bot-response, script[data-sandbox-runtime]')
+      document.querySelector(
+        '.bot-response, script[data-sandbox-runtime], .vega-embed, .google-visualization-container, svg.marks'
+      )
     ) {
       return true;
     }
@@ -158,7 +182,9 @@
       if (
         window.frameElement &&
         (window.frameElement.getAttribute('title') === 'Model Generated UI Container' ||
-          window.frameElement.closest('genui-sandbox, gen-ui-html, sandbox-frame, [data-testid="gen-ui-html-node"]'))
+          window.frameElement.closest(
+            'genui-sandbox, gen-ui-html, sandbox-frame, generative-ui-frame, mcp-tool-ui-frame, deep-zoom, mini-app, vega-lite-chart, google-chart, [data-testid="gen-ui-html-node"]'
+          ))
       ) {
         return true;
       }
@@ -413,6 +439,7 @@
   window.addEventListener('message', (event) => {
     const data = event && event.data;
     if (!data || typeof data !== 'object' || data.type !== 'RG_SANDBOX_SYNC') return;
+    if (typeof data.isUserPreview === 'boolean') state.isUserPreview = data.isUserPreview;
     if (typeof data.enabled === 'boolean') state.enabled = data.enabled;
     if (data.theme === 'light' || data.theme === 'dark') state.parentTheme = data.theme;
     if (typeof data.themeMode === 'string') state.themeMode = data.themeMode;

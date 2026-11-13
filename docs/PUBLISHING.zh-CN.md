@@ -27,13 +27,13 @@ npm run pack
 ```
 
 构建完成后，将自动生成：
-- **商店上传包**：`dist/refined-gemini-v1.5.1-extension.zip`
+- **商店上传包**：`dist/refined-gemini-v1.6.0-extension.zip`
 - **300×300 商店徽标**：`docs/assets/store-logo-300.png`（已自动预生成）
 
 ### 第 3 步：创建新扩展并上传包
 
 1. 在 Partner Center 左侧菜单点击 **Microsoft Edge -> Overview -> Create new extension**。
-2. 在 **Packages** 页面拖入 `dist/refined-gemini-v1.5.1-extension.zip` 上传，系统会自动解析 `_locales/en`（默认语言）与 `_locales/zh_CN`（简体中文）。
+2. 在 **Packages** 页面拖入 `dist/refined-gemini-v1.6.0-extension.zip` 上传，系统会自动解析 `_locales/en`（默认语言）与 `_locales/zh_CN`（简体中文）。
 
 ### 第 4 步：填写属性与隐私信息（Properties & Availability）
 

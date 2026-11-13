@@ -30,6 +30,7 @@ html[data-rg-enabled="true"] {
   --rg-bg-hover: rgba(13, 13, 13, 0.05);
   --rg-bg-user-bubble: #e5f3ff; /* OpenAI --blue-50 soft light-blue bubble */
   --rg-border-user-bubble: rgba(2, 133, 255, 0.12);
+  --rg-bg-card: #f7f7f8;
   --rg-bg-chip: #f4f4f4;
   --rg-bg-code-card: #f9f9f9;
   --rg-bg-inline-code: rgba(13, 13, 13, 0.048);
@@ -44,6 +45,7 @@ html[data-rg-enabled="true"] {
   --rg-link-color: #0169cc;
 
   /* ChatGPT Official Accent Blue (OpenAI --blue-400 #0285ff / --blue-500 #0169cc) */
+  --rg-accent: #0285ff;
   --rg-accent-bg: #0285ff;
   --rg-accent-bg-hover: #0169cc;
   --rg-accent-fg: #ffffff;
@@ -89,6 +91,7 @@ html[data-rg-enabled="true"][data-rg-theme="dark"] {
   --rg-bg-hover: rgba(255, 255, 255, 0.07);
   --rg-bg-user-bubble: #1a3550;
   --rg-border-user-bubble: rgba(102, 181, 255, 0.18);
+  --rg-bg-card: #2a2a2a;
   --rg-bg-chip: #2f2f2f;
   --rg-bg-code-card: #171717;
   --rg-bg-inline-code: rgba(255, 255, 255, 0.10);
@@ -103,6 +106,7 @@ html[data-rg-enabled="true"][data-rg-theme="dark"] {
   --rg-link-color: #66b5ff;
 
   /* ChatGPT Official Accent Blue (Dark) */
+  --rg-accent: #0285ff;
   --rg-accent-bg: #0285ff;
   --rg-accent-bg-hover: #1a94ff;
   --rg-accent-fg: #ffffff;
@@ -2395,9 +2399,17 @@ html[data-rg-enabled="true"][data-rg-clean-view="true"] :is(
   [data-test-id="location-info"],
   upsell-button,
   g1-upsell-button,
+  g1-dynamic-upsell-button,
+  referral-button,
   [data-test-id="upsell-button"],
   .adv-upsell,
   sign-in-nudge,
+  vsb-onboarding-card,
+  discovery-card,
+  canvas-discovery-card,
+  deep-research-discovery-card,
+  free-edu-data-protection-card,
+  .workspace-usage-disclaimer,
   code-block .code-block-footer,
   .code-block .disclaimer-suffix,
   table-block .table-footer,
@@ -2575,9 +2587,16 @@ html[data-rg-enabled="true"] :is(
   border-color: var(--rg-border-focus) !important;
 }
 
-/* 11.2 Generative UI Interactive Widget Frame & Stepper (Angular BardChatUi & React Islands) */
+/* 11.2 Generative UI, Charts, SVG Code Blocks & User <web-preview> Outer Frame */
 html[data-rg-enabled="true"] :is(
   gen-ui-html,
+  generative-ui-frame,
+  deep-zoom,
+  mini-app,
+  vega-lite-chart,
+  google-chart,
+  mcp-tool-ui-frame,
+  chessboard,
   [data-testid="gen-ui-html-node"],
   .rrc-card.shell-style-luminous:has(genui-sandbox),
   .svg-preview:has(genui-sandbox, sandbox-frame)
@@ -2593,6 +2612,71 @@ html[data-rg-enabled="true"] :is(
   overflow: hidden !important;
 }
 
+/* Prevent nested double borders when .rrc-card wraps gen-ui-html */
+html[data-rg-enabled="true"] .rrc-card :is(
+  gen-ui-html,
+  generative-ui-frame,
+  vega-lite-chart,
+  google-chart
+) {
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+/* <svg-code-block> container, header bar & inline SVG preview */
+html[data-rg-enabled="true"] svg-code-block {
+  display: block !important;
+  background-color: var(--rg-bg-canvas) !important;
+  border: 1px solid var(--rg-border-code) !important;
+  border-radius: 14px !important;
+  margin: 14px 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+html[data-rg-enabled="true"] svg-code-block :is(
+  .code-block-decoration,
+  .svg-code-block-header,
+  .header-container
+) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  min-height: 36px !important;
+  padding: 6px 14px !important;
+  background-color: var(--rg-bg-code-card) !important;
+  border-bottom: 1px solid var(--rg-border-subtle) !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  color: var(--rg-text-secondary) !important;
+}
+
+html[data-rg-enabled="true"] svg-code-block .svg-preview {
+  background-color: var(--rg-bg-canvas) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 16px 18px !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  svg-code-block,
+  .svg-preview,
+  vega-lite-chart,
+  google-chart,
+  deep-zoom,
+  gen-ui-html
+) svg :is(text, tspan) {
+  font-family: var(--rg-font-sans) !important;
+}
+
 html[data-rg-enabled="true"] :is(
   genui-sandbox,
   genui-sandbox .genui-sandbox-container,
@@ -2602,6 +2686,12 @@ html[data-rg-enabled="true"] :is(
   safe-content-frame::part(shim-iframe),
   genui-sandbox iframe,
   sandbox-frame iframe,
+  generative-ui-frame iframe,
+  mcp-tool-ui-frame iframe,
+  deep-zoom iframe,
+  mini-app iframe,
+  vega-lite-chart iframe,
+  google-chart iframe,
   [data-testid="gen-ui-html-node"] iframe
 ) {
   border: none !important;
@@ -2609,6 +2699,22 @@ html[data-rg-enabled="true"] :is(
   width: 100% !important;
   min-height: 0 !important;
   display: block !important;
+}
+
+/* Layer 3 Whitelist: Frame <web-preview> outer shell ONLY; never rewrite user app internals */
+html[data-rg-enabled="true"] web-preview {
+  display: block !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 12px !important;
+  margin: 14px 0 !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] web-preview > iframe {
+  border: none !important;
+  display: block !important;
+  width: 100% !important;
 }
 
 /* Direct non-iframe fallback inside <gen-ui-html> (.gen-ui-html-container) */
@@ -2628,7 +2734,7 @@ html[data-rg-enabled="true"] gen-ui-html .gen-ui-html-container :is(h1, h2, h3, 
 }
 
 html[data-rg-enabled="true"] gen-ui-html .gen-ui-html-container .card {
-  background-color: var(--rg-bg-sidebar) !important;
+  background-color: var(--rg-bg-card) !important;
   border: 1px solid var(--rg-border-subtle) !important;
   border-radius: 12px !important;
   box-shadow: none !important;
@@ -2661,7 +2767,7 @@ html[data-rg-enabled="true"] button[data-test-id="stepper-expand-all-button"] {
 }
 
 html[data-rg-enabled="true"] button[data-test-id="stepper-expand-all-button"]:hover {
-  background-color: var(--rg-bg-sidebar) !important;
+  background-color: var(--rg-bg-card) !important;
   color: var(--rg-text-primary) !important;
 }
 
@@ -2693,10 +2799,13 @@ html[data-rg-enabled="true"] :is(
   box-shadow: none !important;
 }
 
-/* 11.4 Global CDK Overlays, Menus, Dialogs, Canvas Split View, Source & File Cards */
+/* 11.4 Global CDK Overlays, Menus, Dialogs, Bottom Sheets & Compact Toast Snackbars */
 html[data-rg-enabled="true"] .cdk-overlay-container :is(
   .mat-mdc-menu-panel,
   .mat-mdc-select-panel,
+  gem-menu,
+  gem-popover-menu,
+  gem-popover,
   [role="menu"],
   [role="listbox"]
 ) {
@@ -2704,6 +2813,7 @@ html[data-rg-enabled="true"] .cdk-overlay-container :is(
   border: 1px solid var(--rg-border-default) !important;
   border-radius: 12px !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  color: var(--rg-text-primary) !important;
 }
 
 html[data-rg-enabled="true"] .cdk-overlay-container .mat-mdc-menu-item {
@@ -2719,7 +2829,13 @@ html[data-rg-enabled="true"] .cdk-overlay-container .mat-mdc-menu-item:hover {
   background-color: var(--rg-bg-hover) !important;
 }
 
-html[data-rg-enabled="true"] .cdk-overlay-container .mat-mdc-dialog-surface,
+html[data-rg-enabled="true"] .cdk-overlay-container :is(
+  .mat-mdc-dialog-surface,
+  gem-dialog,
+  cdk-dialog-container,
+  gem-bottom-sheet,
+  .mat-bottom-sheet-container
+),
 html[data-rg-enabled="true"] [data-testid="chat-overlay-host"] [data-testid="overlay-body"] {
   background-color: var(--rg-bg-elevated) !important;
   border: 1px solid var(--rg-border-default) !important;
@@ -2728,18 +2844,884 @@ html[data-rg-enabled="true"] [data-testid="chat-overlay-host"] [data-testid="ove
   color: var(--rg-text-primary) !important;
 }
 
+/* Compact ChatGPT-style Toast Snackbars (replaces inverse high-contrast Material bars) */
+html[data-rg-enabled="true"] :is(
+  mat-snack-bar-container .mdc-snackbar__surface,
+  .mat-mdc-snack-bar-container .mdc-snackbar__surface
+) {
+  background-color: var(--rg-bg-elevated) !important;
+  color: var(--rg-text-primary) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14) !important;
+  padding: 4px 10px !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  mat-snack-bar-container .mdc-snackbar__label,
+  bard-simple-snack-bar,
+  bard-multi-action-snack-bar,
+  simple-snack-bar,
+  extended-snackbar,
+  bard-simple-snack-bar .label,
+  bard-multi-action-snack-bar .label
+) {
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13.5px !important;
+  line-height: 1.45 !important;
+  color: var(--rg-text-primary) !important;
+  background: transparent !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  mat-snack-bar-container,
+  bard-simple-snack-bar,
+  bard-multi-action-snack-bar,
+  simple-snack-bar,
+  extended-snackbar
+) :is(button, .action-button, .mdc-snackbar__action) {
+  color: var(--rg-accent-text) !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  mat-snack-bar-container,
+  bard-simple-snack-bar,
+  bard-multi-action-snack-bar
+) :is(button, .action-button, .mdc-snackbar__action):hover {
+  background-color: var(--rg-bg-hover) !important;
+}
+
+/* ==========================================================================
+   11.5 Layer 1: Universal Turn Widget Typography & GDS Scale Normalization
+   Unifies font-family and caps oversized .gds-* / widget headings to
+   var(--rg-font-size, 16px) across all 80+ response-element widgets while
+   strictly protecting mat-icon, code/pre, KaTeX, 11.5px citations & <web-preview>.
+   ========================================================================== */
+
+html[data-rg-enabled="true"] response-element:not(:has(web-preview)) {
+  font-family: var(--rg-font-sans);
+  font-size: var(--rg-font-size, 16px);
+  color: var(--rg-text-primary);
+}
+
+html[data-rg-enabled="true"] :is(
+  .conversation-container,
+  model-response,
+  user-query,
+  response-element,
+  [data-testid="assistant-turn"],
+  [data-testid="user-turn"]
+) :is(
+  .gds-display-l,
+  .gds-display-m,
+  .gds-display-s,
+  .gds-headline-l,
+  .gds-headline-m,
+  .gds-headline-s,
+  .gds-title-l,
+  .gds-title-m,
+  .gds-title-s,
+  .gds-subhead-l,
+  .gds-subhead-m,
+  .rrc-title,
+  .artifact-title,
+  .immersive-title,
+  .audio-title,
+  .workspace-title,
+  .plan-title,
+  .widget-title,
+  [class*="-card-title"]
+):not(web-preview *):not(mat-icon):not(.google-symbols):not([class*="icon"]):not(code):not(pre):not(.katex):not(.katex *) {
+  font-family: var(--rg-font-sans) !important;
+  font-size: var(--rg-font-size, 16px) !important;
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  letter-spacing: 0 !important;
+  color: var(--rg-text-strong) !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  .conversation-container,
+  model-response,
+  response-element,
+  [data-testid="assistant-turn"]
+) :is(
+  .gds-body-l,
+  .gds-body-m
+):not(web-preview *):not(mat-icon):not(.google-symbols):not([class*="icon"]):not(code):not(pre):not(.katex):not(.katex *) {
+  font-family: var(--rg-font-sans) !important;
+  font-size: var(--rg-font-size, 16px) !important;
+  line-height: 1.6 !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  .conversation-container,
+  model-response,
+  user-query,
+  response-element,
+  [data-testid="assistant-turn"],
+  [data-testid="user-turn"]
+) :is(
+  .gds-body-s,
+  .gds-label-l,
+  .gds-label-m,
+  .gds-label-s,
+  .gds-caption,
+  .rrc-subtitle,
+  .artifact-subtitle,
+  .audio-subtitle
+):not(web-preview *):not(mat-icon):not(.google-symbols):not([class*="icon"]):not(code):not(pre):not(.katex):not(.katex *):not(.source-footnote):not(source-footnote) {
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  color: var(--rg-text-secondary) !important;
+}
+
+/* ==========================================================================
+   11.6 Canvas / Artifact Entry Cards & Right-Hand Immersive Split Panel
+   ========================================================================== */
+
+html[data-rg-enabled="true"] :is(
+  immersive-entry-chip,
+  base-artifact-entry-chip,
+  generated-file,
+  .artifact-entry-chip:not(:is(immersive-entry-chip, base-artifact-entry-chip, generated-file) *),
+  .artifact-card:not(:is(immersive-entry-chip, base-artifact-entry-chip, generated-file) *),
+  .rrc-card:not(:has(genui-sandbox))
+) {
+  display: block !important;
+  background-color: var(--rg-bg-card) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  margin: 10px 0 !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+  color: var(--rg-text-primary) !important;
+  transition: background-color 0.14s ease, border-color 0.14s ease !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  immersive-entry-chip,
+  base-artifact-entry-chip,
+  generated-file
+):hover {
+  background-color: var(--rg-bg-hover) !important;
+  border-color: var(--rg-border-focus) !important;
+}
+
+html[data-rg-enabled="true"][data-rg-theme="dark"] :is(
+  immersive-entry-chip,
+  base-artifact-entry-chip,
+  generated-file
+):hover {
+  background-color: var(--rg-bg-active) !important;
+}
+
+/* Flatten inner Material shells inside artifact entry custom elements */
+html[data-rg-enabled="true"] :is(
+  immersive-entry-chip,
+  base-artifact-entry-chip,
+  generated-file
+) > div,
+html[data-rg-enabled="true"] :is(
+  immersive-entry-chip,
+  base-artifact-entry-chip,
+  generated-file
+) :is(
+  .artifact-entry-chip,
+  .artifact-card,
+  .immersive-entry-chip,
+  .chip-container,
+  .card-container
+) {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  immersive-entry-chip,
+  base-artifact-entry-chip,
+  generated-file,
+  .artifact-entry-chip,
+  .artifact-card
+) :is(.icon-container, .artifact-icon, .file-icon, .leading-icon) {
+  background-color: var(--rg-bg-user-bubble) !important;
+  color: var(--rg-accent-text) !important;
+  border-radius: 10px !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  immersive-entry-chip,
+  base-artifact-entry-chip,
+  generated-file,
+  .artifact-entry-chip,
+  .artifact-card
+) :is(button, .open-button, .action-pill) {
+  background-color: var(--rg-bg-canvas) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 999px !important;
+  color: var(--rg-text-primary) !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  padding: 6px 14px !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  immersive-entry-chip,
+  base-artifact-entry-chip,
+  generated-file,
+  .artifact-entry-chip,
+  .artifact-card
+) :is(button, .open-button, .action-pill):hover {
+  background-color: var(--rg-bg-hover) !important;
+  border-color: var(--rg-border-focus) !important;
+}
+
+/* Right-hand Canvas & Deep Research Immersive Split Panel */
 html[data-rg-enabled="true"] :is(
   immersive-panel,
-  sources-list .source-card,
-  source-card,
-  uploader-file-preview,
-  .file-preview-chip
+  deep-research-immersive-panel,
+  .immersive-panel-container
 ) {
-  background-color: var(--rg-bg-sidebar) !important;
+  background-color: var(--rg-bg-canvas) !important;
+  border-left: 1px solid var(--rg-border-default) !important;
+  border-top: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  immersive-panel .immersive-header,
+  immersive-panel header,
+  deep-research-immersive-panel .immersive-header,
+  deep-research-immersive-panel header
+) {
+  background-color: var(--rg-bg-canvas) !important;
+  border-bottom: 1px solid var(--rg-border-subtle) !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  .immersive-editor,
+  xap-code-editor
+) {
+  background-color: var(--rg-bg-code-card) !important;
+  color: var(--rg-text-primary) !important;
+}
+
+/* ==========================================================================
+   11.7 Deep Research, Agentic Plan Cards, Remy Task Cards & Async Status Chips
+   ========================================================================== */
+
+html[data-rg-enabled="true"] :is(
+  deep-research-confirmation-widget,
+  agentic-plan-card,
+  automation-plan-card,
+  remy-confirmation-card,
+  remy-confirmation-card-v2,
+  remy-output-artifact-card,
+  remy-task-card,
+  task-outcome,
+  goal-card,
+  action-card,
+  conversation-summary,
+  collection-summary-card,
+  notebook-suggestion
+) {
+  display: block !important;
+  background-color: var(--rg-bg-canvas) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 14px !important;
+  padding: 16px 18px !important;
+  margin: 12px 0 !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  deep-research-confirmation-widget,
+  agentic-plan-card,
+  automation-plan-card,
+  remy-confirmation-card,
+  remy-confirmation-card-v2,
+  remy-output-artifact-card,
+  remy-task-card,
+  task-outcome,
+  goal-card,
+  action-card,
+  conversation-summary,
+  collection-summary-card,
+  notebook-suggestion
+) > :is(div, mat-card, .card, .widget-container, .plan-card-container, .confirmation-card) {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Primary CTA inside Deep Research & Agentic confirmation cards (#0285FF pill) */
+html[data-rg-enabled="true"] :is(
+  deep-research-confirmation-widget,
+  agentic-plan-card,
+  automation-plan-card,
+  remy-confirmation-card,
+  remy-confirmation-card-v2,
+  goal-card,
+  action-card
+) :is(
+  button.mat-mdc-unelevated-button,
+  button.mdc-button--unelevated,
+  button.mat-mdc-raised-button,
+  button[color="primary"],
+  button.confirm-button,
+  button.start-button,
+  button.primary-button
+) {
+  background-color: var(--rg-accent-bg) !important;
+  color: var(--rg-accent-fg) !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  padding: 7px 16px !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  deep-research-confirmation-widget,
+  agentic-plan-card,
+  automation-plan-card,
+  remy-confirmation-card,
+  remy-confirmation-card-v2,
+  goal-card,
+  action-card
+) :is(
+  button.mat-mdc-unelevated-button,
+  button.mdc-button--unelevated,
+  button.mat-mdc-raised-button,
+  button[color="primary"],
+  button.confirm-button,
+  button.start-button,
+  button.primary-button
+):hover {
+  background-color: var(--rg-accent-bg-hover) !important;
+}
+
+/* Secondary outline buttons inside Deep Research & Agentic cards */
+html[data-rg-enabled="true"] :is(
+  deep-research-confirmation-widget,
+  agentic-plan-card,
+  automation-plan-card,
+  remy-confirmation-card,
+  remy-confirmation-card-v2,
+  goal-card,
+  action-card
+) :is(
+  button.mat-mdc-outlined-button,
+  button.mdc-button--outlined,
+  button.edit-button,
+  button.secondary-button
+) {
+  background-color: var(--rg-bg-canvas) !important;
+  color: var(--rg-text-primary) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 999px !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  padding: 7px 16px !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  deep-research-confirmation-widget,
+  agentic-plan-card,
+  automation-plan-card,
+  remy-confirmation-card,
+  remy-confirmation-card-v2,
+  goal-card,
+  action-card
+) :is(
+  button.mat-mdc-outlined-button,
+  button.mdc-button--outlined,
+  button.edit-button,
+  button.secondary-button
+):hover {
+  background-color: var(--rg-bg-card) !important;
+  border-color: var(--rg-border-focus) !important;
+}
+
+/* Async / Agentic / Podcast status chips */
+html[data-rg-enabled="true"] :is(
+  async-processing-chip,
+  agentic-processing-chip,
+  podcast-processing-chip,
+  .deep-research-processing-indicator,
+  remy-plan-pill
+) {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background-color: var(--rg-bg-card) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 999px !important;
+  padding: 6px 14px !important;
+  margin: 6px 0 !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--rg-text-secondary) !important;
+  box-shadow: none !important;
+}
+
+/* ==========================================================================
+   11.8 Python Background Code Execution Block (.code-execution-block)
+   ========================================================================== */
+
+html[data-rg-enabled="true"] .code-execution-block {
+  background-color: var(--rg-bg-code-card) !important;
+  border: 1px solid var(--rg-border-code) !important;
+  border-radius: 12px !important;
+  margin: 12px 0 !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] .code-execution-block .code-execution-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  min-height: 36px !important;
+  padding: 6px 14px !important;
+  background-color: var(--rg-bg-code-card) !important;
+  border-bottom: 1px solid var(--rg-border-subtle) !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  color: var(--rg-text-secondary) !important;
+}
+
+html[data-rg-enabled="true"] .code-execution-block .code-execution-content {
+  background-color: var(--rg-bg-code-card) !important;
+  padding: 12px 16px !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  pre.code-execution-pre,
+  .code-execution-block pre,
+  .code-execution-block code
+) {
+  font-family: var(--rg-font-mono) !important;
+  font-size: 13.5px !important;
+  line-height: 1.55 !important;
+  color: var(--rg-syn-text) !important;
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+}
+
+html[data-rg-enabled="true"] .timeline-line {
+  background-color: var(--rg-border-default) !important;
+  border-color: var(--rg-border-default) !important;
+}
+
+/* ==========================================================================
+   11.9 File, Email & Workspace Attachments + Response Media Frames
+   ========================================================================== */
+
+html[data-rg-enabled="true"] :is(
+  uploader-file-preview,
+  .file-preview-chip:not(uploader-file-preview *),
+  .user-query-file-preview,
+  .attachment-chip,
+  .attachment-tile,
+  .attachment-in-query,
+  .attachment-notebook,
+  .email-attachment-in-query,
+  .email-channel-card,
+  .workspace-chip,
+  .workspace-inline-consent-card,
+  extension-container-link
+) {
+  background-color: var(--rg-bg-card) !important;
   border: 1px solid var(--rg-border-default) !important;
   border-radius: 12px !important;
   box-shadow: none !important;
+  color: var(--rg-text-primary) !important;
+  font-family: var(--rg-font-sans) !important;
 }
+
+/* Inside soft-blue user bubbles, render file chips on crisp canvas surface */
+html[data-rg-enabled="true"] .user-query-bubble-with-background :is(
+  .user-query-file-preview,
+  .attachment-in-query,
+  .attachment-chip,
+  .file-preview-chip,
+  uploader-file-preview
+) {
+  background-color: var(--rg-bg-canvas) !important;
+  border: 1px solid var(--rg-border-default) !important;
+}
+
+/* Fix asymmetric thumbnail border-radius quirk in native BardChatUi */
+html[data-rg-enabled="true"] :is(
+  .user-query-file-preview-thumbnail img,
+  .attachment-in-query img,
+  .attachment-tile img,
+  uploader-file-preview img
+) {
+  border-radius: 8px !important;
+  object-fit: cover !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  uploader-file-preview,
+  .file-preview-chip,
+  .user-query-file-preview,
+  .attachment-in-query,
+  .attachment-chip
+) :is(.file-name, .attachment-title, .title, .name):not(mat-icon):not(.google-symbols) {
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1.38 !important;
+  color: var(--rg-text-primary) !important;
+}
+
+/* Response media frames (images, grids, carousels, videos) */
+html[data-rg-enabled="true"] :is(
+  generated-image,
+  single-image,
+  inline-image,
+  full-width-image,
+  image-grid,
+  image-carousel,
+  masonry-grid
+) img,
+html[data-rg-enabled="true"] :is(
+  generated-video,
+  video-card
+) video {
+  border-radius: 12px !important;
+  border: 1px solid var(--rg-border-subtle) !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] :is(image-grid, masonry-grid) {
+  gap: 10px !important;
+}
+
+/* ==========================================================================
+   11.10 Sources Carousel, Questionnaires, Structured Cards, Audio/TTS & Maps
+   ========================================================================== */
+
+/* Grounding Sources Carousel & Citation Cards */
+html[data-rg-enabled="true"] :is(
+  sources-carousel,
+  sources-carousel-embedded,
+  .website-sources-container
+) {
+  background: transparent !important;
+  margin: 10px 0 !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  sources-list .source-card,
+  source-card,
+  .source-card:not(source-card *),
+  .source-card-container:not(source-card *),
+  .citation-card,
+  .citation-source-card,
+  .source-expanded-view
+) {
+  background-color: var(--rg-bg-card) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  color: var(--rg-text-primary) !important;
+  transition: background-color 0.14s ease, border-color 0.14s ease !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  sources-list .source-card,
+  source-card,
+  .citation-card,
+  .citation-source-card
+):hover {
+  background-color: var(--rg-bg-hover) !important;
+  border-color: var(--rg-border-focus) !important;
+}
+
+html[data-rg-enabled="true"][data-rg-theme="dark"] :is(
+  sources-list .source-card,
+  source-card,
+  .citation-card,
+  .citation-source-card
+):hover {
+  background-color: var(--rg-bg-active) !important;
+}
+
+html[data-rg-enabled="true"] .source-hovered-card {
+  background-color: var(--rg-bg-elevated) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] :is(domain-pill, sparkline-pill) {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background-color: var(--rg-bg-card) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 999px !important;
+  padding: 2px 9px !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 12px !important;
+  color: var(--rg-text-secondary) !important;
+  box-shadow: none !important;
+}
+
+/* Questionnaires, Quizzes, Guided Learning & Structured Information Cards */
+html[data-rg-enabled="true"] :is(
+  questionnaire,
+  quiz,
+  learning-collapsible,
+  bento-card,
+  facts-card,
+  base-tabgroup,
+  compare-table,
+  link-block,
+  live-prompt-card,
+  sport-score-card,
+  election-card
+) {
+  display: block !important;
+  background-color: var(--rg-bg-canvas) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 12px !important;
+  padding: 14px 16px !important;
+  margin: 12px 0 !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  response-element callout,
+  response-element text-box,
+  response-element > card
+) {
+  display: block !important;
+  background-color: var(--rg-bg-card) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  margin: 10px 0 !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] learning-highlight {
+  background-color: var(--rg-bg-user-bubble) !important;
+  color: var(--rg-text-primary) !important;
+  border-radius: 4px !important;
+  padding: 1px 4px !important;
+}
+
+html[data-rg-enabled="true"] :is(questionnaire, quiz) :is(
+  button,
+  [role="radio"],
+  [role="checkbox"],
+  .option-card,
+  .quiz-option
+) {
+  background-color: var(--rg-bg-card) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 10px !important;
+  color: var(--rg-text-primary) !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 14px !important;
+  box-shadow: none !important;
+  transition: background-color 0.14s ease, border-color 0.14s ease !important;
+}
+
+html[data-rg-enabled="true"] :is(questionnaire, quiz) :is(
+  button:hover,
+  [role="radio"]:hover,
+  [role="checkbox"]:hover,
+  .option-card:hover,
+  .quiz-option:hover
+) {
+  background-color: var(--rg-bg-hover) !important;
+  border-color: var(--rg-border-focus) !important;
+}
+
+html[data-rg-enabled="true"] :is(questionnaire, quiz) :is(
+  [aria-checked="true"],
+  [aria-pressed="true"],
+  .selected,
+  .is-selected
+) {
+  background-color: var(--rg-bg-user-bubble) !important;
+  border-color: var(--rg-accent-bg) !important;
+  color: var(--rg-text-strong) !important;
+}
+
+/* Audio Overview, Podcast Player, Generated Music & TTS Playback Bar
+   (Fixes bloated 32px radius & tinted Material container in .tour-player-box / .lumi-audio-overview) */
+html[data-rg-enabled="true"] :is(
+  audio-player,
+  generated-music,
+  tts-playback-card,
+  .audio-overview:not(audio-player *),
+  .lumi-audio-overview:not(audio-player *),
+  .tour-player-box:not(audio-player *)
+) {
+  display: block !important;
+  background-color: var(--rg-bg-card) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 14px !important;
+  padding: 12px 16px !important;
+  margin: 12px 0 !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] audio-player :is(
+  .audio-overview,
+  .lumi-audio-overview,
+  .tour-player-box
+) {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  audio-player,
+  .audio-overview,
+  .lumi-audio-overview,
+  .tour-player-box,
+  generated-music
+) :is(
+  button.play-button,
+  button[aria-label*="Play"],
+  button[aria-label*="播放"]
+) {
+  background-color: var(--rg-accent-bg) !important;
+  color: var(--rg-accent-fg) !important;
+  --mat-icon-color: var(--rg-accent-fg) !important;
+  --mdc-icon-button-icon-color: var(--rg-accent-fg) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  audio-player,
+  .audio-overview,
+  .lumi-audio-overview,
+  .tour-player-box,
+  generated-music
+) :is(
+  button.play-button,
+  button[aria-label*="Play"],
+  button[aria-label*="播放"]
+) :is(mat-icon, .google-symbols, svg, span) {
+  color: var(--rg-accent-fg) !important;
+}
+
+html[data-rg-enabled="true"] tts-control-v2 button {
+  border-radius: 8px !important;
+  color: var(--rg-text-secondary) !important;
+  box-shadow: none !important;
+}
+
+/* YouTube, Maps & Travel / Commerce Result Lists */
+html[data-rg-enabled="true"] :is(
+  youtube-block,
+  maps,
+  flight-result-list,
+  hotel-list,
+  product-list,
+  product,
+  offer-grid
+) {
+  display: block !important;
+  background-color: var(--rg-bg-canvas) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 12px !important;
+  margin: 12px 0 !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] :is(
+  map-location-reference,
+  map-location-reference-link-block,
+  product-link
+) {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background-color: var(--rg-bg-card) !important;
+  border: 1px solid var(--rg-border-default) !important;
+  border-radius: 8px !important;
+  padding: 3px 9px !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13px !important;
+  color: var(--rg-text-primary) !important;
+  text-decoration: none !important;
+  box-shadow: none !important;
+}
+
+/* System Notices, Memory Discovery & Inline Tool Disclaimers */
+html[data-rg-enabled="true"] :is(
+  memory-discovery-card,
+  bot-sharing-info-card,
+  tool-disclaimer,
+  take-control-disclaimer,
+  base-feedback-form
+) {
+  display: block !important;
+  background-color: var(--rg-bg-card) !important;
+  border: 1px solid var(--rg-border-subtle) !important;
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+  margin: 10px 0 !important;
+  font-family: var(--rg-font-sans) !important;
+  font-size: 13px !important;
+  line-height: 1.48 !important;
+  color: var(--rg-text-secondary) !important;
+  box-shadow: none !important;
+}
+
 
 /* ==========================================================================
    12. Subtle Neutral Scrollbars

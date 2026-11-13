@@ -10,14 +10,14 @@
 
 **Refined Gemini** replaces Google Gemini's bluish-gray Material surfaces, oversized spacing, cramped/deeply indented lists, and inconsistent dark code shells with a calm, high-contrast reading and writing interface modeled **1:1 on the official ChatGPT Web UI** (`openai/apps-sdk-ui` design tokens).
 
-### Key Improvements (`v1.5.1`)
+### Key Improvements (`v1.6.0`)
 
 | Dimension | Native Gemini Issue | Refined Gemini (1:1 ChatGPT Alignment) |
 | :--- | :--- | :--- |
-| **Canvas, Sidebar & Accent** | Bluish-gray Material tint (`#f0f4f9`), visual clutter, harsh royal-blue links | **Light**: `#FFFFFF` canvas, `#F9F9F9` sidebar, `#ECECEC` active pill<br>**Dark**: `#212121` canvas, `#171717` sidebar, `#2F2F2F` active pill<br>**Brand & Accent**: Preserves colorful top-left Gemini sparkle + ChatGPT **`#0285FF`** circular Send button & switches |
-| **User Message Bubbles** | Shrink-wrapped flex containers wrap short prompts; `content-visibility: auto` can hide Turn 0 | Soft-blue **`#E5F3FF` / `#1A3550`** (`--blue-50`) rounded bubbles sized to `70%` of the full chat column, with anti-collapse visibility safeguards on Turn 0 |
-| **Uniform Typography & Indentation** | Mixed `17px–22px` heading/intro jumps, deep nested list whitespace, forced italic CJK quotes | **100% uniform `16px` (`--rg-font-size`) across headings (`h1`–`h6`), prose, and GenUI intros** (headings distinguished strictly by `600` weight & spacing); **OpenAI `Markdown.module.css`** list indentation with **`0% / 65% / GPT / 125%`** presets |
-| **GenUI Diagrams & Follow-Up Cards** | Unstyled sandboxed diagrams (`<genui-sandbox>` `about:srcdoc` & `SafeContentFrame`) & chunky borderless follow-up blocks | Harmonizes both Angular `<gen-ui-html>` / `<genui-sandbox>` (`about:srcdoc` opaque origin) and cross-origin `SafeContentFrame` (`*.scf.usercontent.goog`) interactive diagrams with ChatGPT Light/Dark palettes & uniform `16px` titles, and redraws follow-up prompts into lightweight `1px`-bordered `12px`-radius cards |
+| **Canvas, Sidebar & Accent** | Bluish-gray Material tint (`#f0f4f9`), visual clutter, harsh royal-blue links | **Light**: `#FFFFFF` canvas, `#F9F9F9` sidebar, `#F7F7F8` card, `#ECECEC` active pill<br>**Dark**: `#212121` canvas, `#171717` sidebar, `#2A2A2A` card, `#2F2F2F` active pill<br>**Brand & Accent**: Preserves colorful top-left Gemini sparkle + ChatGPT **`#0285FF`** circular Send button & primary CTA pills |
+| **User Bubbles & File Chips** | Shrink-wrapped flex containers wrap short prompts; `content-visibility: auto` can hide Turn 0; asymmetric file preview radii | Soft-blue **`#E5F3FF` / `#1A3550`** (`--blue-50`) rounded bubbles (`70%` column cap) with crisp `1px`-bordered file/email attachment chips and anti-collapse Turn 0 safeguards |
+| **Uniform Typography & Indentation** | Mixed `17px–28px` heading/widget jumps, deep nested list whitespace, forced italic CJK quotes | **100% uniform `16px` (`--rg-font-size`) across headings (`h1`–`h6`), prose, `.gds-*` scales, and custom widget titles** (`600` weight hierarchy); **OpenAI `Markdown.module.css`** list indentation (`0% / 65% / GPT / 125%`) |
+| **80+ Unified Widgets & Diagrams** | Unstyled sandboxed diagrams (`<genui-sandbox>` / `<svg-code-block>`), Deep Research plans, Canvas chips, Python execution blocks, audio bars & snackbars | **3-Layer Unified Component Management**: Harmonizes `about:srcdoc`, `*.scf.usercontent.goog` & inline SVG diagrams; unifies Canvas entry chips & split panel, Deep Research / Agent plan cards, `.code-execution-block`, Audio Overview, sources carousel, quizzes & toast snackbars—while **strictly preserving user-authored `<web-preview>` app styles** |
 | **Borderless Tables & Code Cards** | Heavy table borders (`173px` min-width), `#141414` black code boxes in Light mode, `46px` headers | Clean `14px` horizontal-rule tables (`0px` flush-left) + unified `#F9F9F9` / `#171717` `12px` code cards (`32px` header, official OpenAI syntax highlighting) |
 | **Solid Bottom Composer** | Scrolling chat text peeks beneath the input box or shifts upward on conversation switch | 100% opaque canvas dock shield + `overflow-y: clip` scroll-lock eliminating text bleed and composer jump |
 
@@ -28,14 +28,14 @@
 Click the **Refined Gemini** toolbar icon to open the clutter-free settings popup. All changes apply **instantly without reloading**:
 
 - **Language (`中 / EN`)**: Instant UI toggle between Simplified Chinese and English (auto-detects browser language by default).
-- **Master Switch**: Toggle styling on/off at any time (reverts both host page and Generative UI sandbox frames cleanly).
+- **Master Switch**: Toggle styling on/off at any time (reverts host page, inline SVGs, and Generative UI sandbox frames cleanly).
 - **Theme (`themeMode`)**: `Auto` / `Light` / `Dark`.
 - **Width (`chatWidth`)**: `768px` (default `48rem` ChatGPT prose width) / `920px` / `1120px` / `90%`.
 - **Font Size (`fontSize`)**: `15px` / `16px` (default, `1.68` line-height) / `17px`.
 - **Indent (`indentScale`)**: `0%` / `65%` / **`GPT` (default)** / `125%`.
 - **Hide AI Avatar (`hideAvatar`)**: Aligns prose, tables, and code along a single clean left baseline.
 - **Compact Sidebar (`compactSidebar`)**: `260px` sidebar width with tight `8px` rounded conversation rows.
-- **Clean View (`cleanView`)**: Hides bottom disclaimer text, IP location footer, and upsell badges while keeping lightweight follow-up cards accessible.
+- **Clean View (`cleanView`)**: Hides bottom disclaimer text, IP location footer, and upsell/discovery banners while keeping lightweight follow-up cards accessible.
 - **`Ctrl / ⌘ + Enter` to Send (`ctrlEnterSend`)**: Plain `Enter` inserts a newline (IME-safe); `Ctrl/⌘ + Enter` submits.
 
 ---
@@ -71,7 +71,7 @@ npm run build
 # Syntax-check all extension & UserScript JavaScript files
 npm run check
 
-# Build store-ready ZIP archive -> dist/refined-gemini-v1.5.1-extension.zip
+# Build store-ready ZIP archive -> dist/refined-gemini-v1.6.0-extension.zip
 npm run pack
 ```
 
