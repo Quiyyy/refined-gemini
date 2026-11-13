@@ -102,11 +102,9 @@ const userScript = `// ==UserScript==
 
   let settings = readSettings();
   const host = String(location.hostname || '').toLowerCase();
-  const isMainHost = host === 'gemini.google.com';
 
-  // --- Generative UI Sandbox Subframe Branch (*.scf.usercontent.goog / *.googleusercontent.com) ---
-  if (!isMainHost) {
-    if (window === window.top) return;
+  // --- Generative UI Sandbox Subframe Branch (about:srcdoc, *.scf.usercontent.goog, *.googleusercontent.com) ---
+  if (window !== window.top) {
     if (host.startsWith('feedback') || host.includes('accounts.google') || host.includes('uservoice')) return;
 
     const isScf = host.endsWith('.scf.usercontent.goog') || host === 'scf.usercontent.goog';
@@ -118,23 +116,41 @@ const userScript = `// ==UserScript==
     };
 
     const LIGHT_MAP = {
-      '#3186ff': '#0285ff', '#1a73e8': '#0285ff', '#4285f4': '#0285ff',
-      '#0b57d0': '#0169cc', '#0e57d0': '#0169cc', '#1967d2': '#0169cc',
+      '#3186ff': '#0285ff', '#1a73e8': '#0285ff', '#4285f4': '#0285ff', '#3b82f6': '#0285ff',
+      '#0b57d0': '#0169cc', '#0e57d0': '#0169cc', '#1967d2': '#0169cc', '#2563eb': '#0169cc',
       '#041e49': '#0d0d0d', '#001d35': '#0d0d0d',
-      '#dcf1ff': '#e5f3ff', '#d3e3fd': '#e5f3ff', '#e8f0fe': '#e5f3ff',
-      '#f2f0f0': '#f7f7f8', '#f4f3f2': '#f7f7f8', '#faf9f9': '#f9f9f9', '#f0f4f9': '#f7f7f8', '#f8f9fa': '#f7f7f8',
+      '#dcf1ff': '#e5f3ff', '#d3e3fd': '#e5f3ff', '#e8f0fe': '#e5f3ff', '#dbeafe': '#e5f3ff', '#eff6ff': '#e5f3ff',
+      '#fdfcfc': '#ffffff', '#f2f0f0': '#f7f7f8', '#f4f3f2': '#f7f7f8', '#f4f3f0': '#f7f7f8', '#f7f6f6': '#f7f7f8',
+      '#faf9f9': '#f9f9f9', '#f0f4f9': '#f7f7f8', '#f8f9fa': '#f7f7f8',
       '#e8eef6': '#f4f4f4', '#dde3e9': '#ececec', '#f1f3f4': '#f4f4f4',
-      '#1f1f1f': '#0d0d0d', '#444746': '#5d5d5d', '#5f6368': '#5d5d5d', '#747775': '#8f8f8f'
+      '#1f1f1f': '#0d0d0d', '#3c4043': '#0d0d0d', '#444746': '#5d5d5d', '#5f6368': '#5d5d5d', '#747775': '#8f8f8f'
     };
     const DARK_MAP = {
-      '#3186ff': '#0285ff', '#1a73e8': '#0285ff', '#4285f4': '#0285ff',
-      '#0b57d0': '#66b5ff', '#0e57d0': '#66b5ff', '#1967d2': '#66b5ff', '#a8c7fa': '#66b5ff',
-      '#dcf1ff': '#1a3550', '#d3e3fd': '#1a3550', '#e8f0fe': '#1a3550', '#0842a0': '#1a3550',
-      '#f2f0f0': '#2a2a2a', '#f4f3f2': '#2a2a2a', '#faf9f9': '#262626', '#f0f4f9': '#2a2a2a',
-      '#f8f9fa': '#262626', '#f1f3f4': '#2f2f2f', '#e8eef6': '#2f2f2f', '#dadce0': '#3c3c3c',
-      '#282a2c': '#2a2a2a', '#1b1b1b': '#212121', '#041e49': '#ececec', '#1f1f1f': '#ececec',
-      '#202124': '#ececec', '#e3e3e3': '#ececec', '#444746': '#b4b4b4', '#5f6368': '#b4b4b4', '#c4c7c5': '#b4b4b4'
+      '#3186ff': '#0285ff', '#1a73e8': '#0285ff', '#4285f4': '#0285ff', '#3b82f6': '#0285ff',
+      '#0b57d0': '#66b5ff', '#0e57d0': '#66b5ff', '#1967d2': '#66b5ff', '#2563eb': '#66b5ff', '#a8c7fa': '#66b5ff', '#93c5fd': '#66b5ff',
+      '#dcf1ff': '#1a3550', '#d3e3fd': '#1a3550', '#e8f0fe': '#1a3550', '#dbeafe': '#1a3550', '#eff6ff': '#1a3550',
+      '#0842a0': '#1a3550', '#192967': '#1a3550', '#1e3a8a': '#1a3550',
+      '#fdfcfc': '#212121', '#0f0f0f': '#212121', '#1b1b1b': '#212121',
+      '#f2f0f0': '#2a2a2a', '#f4f3f2': '#2a2a2a', '#f4f3f0': '#2a2a2a', '#f7f6f6': '#2a2a2a',
+      '#faf9f9': '#262626', '#fafafa': '#262626', '#f0f4f9': '#2a2a2a',
+      '#f8f9fa': '#262626', '#f1f3f4': '#2f2f2f', '#e8eef6': '#2f2f2f', '#dadce0': '#3c3c3c', '#e0e0e0': '#3c3c3c', '#cccccc': '#3c3c3c',
+      '#282a2c': '#2a2a2a', '#041e49': '#ececec', '#1f1f1f': '#ececec', '#111827': '#ececec', '#1f2937': '#ececec', '#374151': '#ececec', '#3c4043': '#ececec',
+      '#202124': '#ececec', '#e3e3e3': '#ececec', '#e6e6e6': '#ececec', '#444746': '#b4b4b4', '#4b5563': '#b4b4b4', '#5f6368': '#b4b4b4', '#6b7280': '#b4b4b4', '#c4c7c5': '#b4b4b4'
     };
+
+    function transformCss(cssText, theme) {
+      const map = theme === 'dark' ? DARK_MAP : LIGHT_MAP;
+      let out = cssText
+        .replace(/#[0-9a-fA-F]{6}\\b/g, (h) => map[h.toLowerCase()] || h)
+        .replace(/rgba?\\(\\s*(?:49\\s*,\\s*134\\s*,\\s*255|26\\s*,\\s*115\\s*,\\s*232|66\\s*,\\s*133\\s*,\\s*244)(\\s*(?:,\\s*[^)]+)?)\\)/gi, 'rgba(2, 133, 255$1)')
+        .replace(/font-size\\s*:\\s*(?:1[789]|2[0-8])(?:\\.\\d+)?px\\b/gi, 'font-size: var(--rg-font-size, 16px)')
+        .replace(/font-size\\s*:\\s*1\\.(?:0[5-9]|[1-8]\\d*)(?:rem|em)\\b/gi, 'font-size: var(--rg-font-size, 16px)')
+        .replace(/border-radius\\s*:\\s*(?:1[6-9]|2\\d|3[0-2])(?:\\.\\d+)?px\\b/gi, 'border-radius: 12px');
+      if (theme === 'dark') {
+        out = out.replace(/(background(?:-color)?\\s*:\\s*)#(?:ffffff|fff)\\b/gi, '$1#262626');
+      }
+      return out;
+    }
 
     function injectSandboxStyle() {
       if (document.getElementById('refined-gemini-sandbox-style')) return;
@@ -145,49 +161,121 @@ const userScript = `// ==UserScript==
       (document.head || document.documentElement).appendChild(st);
     }
 
+    let sbMutating = false;
     function applySandbox() {
       const root = document.documentElement;
       if (!root) return;
-      const isGenUi = isScf || Boolean(document.getElementById('app-root') || document.querySelector('.bot-response, script[data-sandbox-runtime]'));
-      if (!sbState.enabled || !isGenUi) {
-        root.removeAttribute('data-rg-sandbox');
-        root.removeAttribute('data-rg-theme');
-        return;
-      }
-      injectSandboxStyle();
-      const theme = (sbState.themeMode === 'light' || sbState.themeMode === 'dark')
-        ? sbState.themeMode
-        : (sbState.parentTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-      root.setAttribute('data-rg-sandbox', 'true');
-      root.setAttribute('data-rg-theme', theme);
-      root.style.setProperty('--rg-font-size', sbState.fontSize || '16px');
-      const map = theme === 'dark' ? DARK_MAP : LIGHT_MAP;
-      for (const s of document.querySelectorAll('style:not([data-rg-own-style])')) {
-        const cur = s.textContent || '';
-        if (s.__rgOrig === undefined || (s.__rgOut !== undefined && s.__rgOut !== cur)) s.__rgOrig = cur;
-        let next = s.__rgOrig
-          .replace(/#[0-9a-fA-F]{6}\\b/g, (h) => map[h.toLowerCase()] || h)
-          .replace(/font-size\\s*:\\s*(?:1[789]|2[0-4])(?:\\.\\d+)?px\\b/gi, 'font-size: var(--rg-font-size, 16px)');
-        if (theme === 'dark') {
-          next = next.replace(/(background(?:-color)?\\s*:\\s*)#(?:ffffff|fff)\\b/gi, '$1#212121');
+      const isGenUi = isScf || Boolean(
+        document.getElementById('app-root') ||
+        document.getElementById('genui-host-injected-css') ||
+        document.querySelector('.bot-response, script[data-sandbox-runtime]') ||
+        (location.protocol === 'about:' && typeof window.genuiStreamingActive !== 'undefined')
+      );
+      sbMutating = true;
+      try {
+        if (!sbState.enabled || !isGenUi) {
+          if (root.hasAttribute('data-rg-sandbox')) root.removeAttribute('data-rg-sandbox');
+          if (root.hasAttribute('data-rg-theme')) root.removeAttribute('data-rg-theme');
+          if (root.style.getPropertyValue('--rg-font-size')) root.style.removeProperty('--rg-font-size');
+          for (const s of document.querySelectorAll('style:not([data-rg-own-style])')) {
+            if (s.__rgOrig !== undefined && s.textContent !== s.__rgOrig) s.textContent = s.__rgOrig;
+            s.__rgOut = undefined;
+          }
+          if (document.body) {
+            for (const el of document.body.querySelectorAll('[data-rg-orig-style]')) {
+              el.setAttribute('style', el.getAttribute('data-rg-orig-style') || '');
+              el.removeAttribute('data-rg-orig-style');
+              el.__rgLastStyle = undefined;
+            }
+          }
+          for (const el of document.querySelectorAll('svg [data-rg-orig-fill], svg [data-rg-orig-stroke]')) {
+            for (const attr of ['fill', 'stroke']) {
+              const bAttr = 'data-rg-orig-' + attr;
+              if (el.hasAttribute(bAttr)) {
+                el.setAttribute(attr, el.getAttribute(bAttr) || '');
+                el.removeAttribute(bAttr);
+              }
+              el[attr === 'fill' ? '__rgLastFill' : '__rgLastStroke'] = undefined;
+            }
+          }
+          for (const blk of document.querySelectorAll('.rg-sb-card-surface')) {
+            blk.classList.remove('rg-sb-card-surface');
+          }
+          if (typeof window.sendHeight === 'function') window.sendHeight();
+          return;
         }
-        if (cur !== next) s.textContent = next;
-        s.__rgOut = next;
-      }
-      for (const el of document.querySelectorAll('svg [fill], svg [stroke]')) {
-        for (const attr of ['fill', 'stroke']) {
-          if (!el.hasAttribute(attr)) continue;
-          const bAttr = 'data-rg-orig-' + attr;
-          const val = (el.getAttribute(attr) || '').trim();
-          const orig = el.hasAttribute(bAttr) ? (el.getAttribute(bAttr) || val) : val;
-          const mapped = (theme === 'dark' && attr === 'fill' && /^#(?:ffffff|fff)$/i.test(orig))
-            ? '#212121'
-            : map[orig.toLowerCase()];
-          if (mapped && val.toLowerCase() !== mapped) {
-            if (!el.hasAttribute(bAttr)) el.setAttribute(bAttr, val);
-            el.setAttribute(attr, mapped);
+        injectSandboxStyle();
+        const theme = (sbState.themeMode === 'light' || sbState.themeMode === 'dark')
+          ? sbState.themeMode
+          : (sbState.parentTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+        const fontSize = sbState.fontSize || '16px';
+        if (root.getAttribute('data-rg-sandbox') !== 'true') root.setAttribute('data-rg-sandbox', 'true');
+        if (root.getAttribute('data-rg-theme') !== theme) root.setAttribute('data-rg-theme', theme);
+        if (root.style.getPropertyValue('--rg-font-size') !== fontSize) root.style.setProperty('--rg-font-size', fontSize);
+        const map = theme === 'dark' ? DARK_MAP : LIGHT_MAP;
+        for (const s of document.querySelectorAll('style:not([data-rg-own-style])')) {
+          const cur = s.textContent || '';
+          if (s.__rgOrig === undefined || (s.__rgOut !== undefined && s.__rgOut !== cur)) s.__rgOrig = cur;
+          const next = transformCss(s.__rgOrig, theme);
+          if (cur !== next) s.textContent = next;
+          s.__rgOut = next;
+        }
+        if (document.body) {
+          for (const el of document.body.querySelectorAll('[style]')) {
+            const bAttr = 'data-rg-orig-style';
+            const cur = el.getAttribute('style') || '';
+            if (el.__rgLastStyle !== undefined && cur !== el.__rgLastStyle) el.setAttribute(bAttr, cur);
+            else if (!el.hasAttribute(bAttr)) el.setAttribute(bAttr, cur);
+            const next = transformCss(el.getAttribute(bAttr) || cur, theme);
+            if (cur !== next) el.setAttribute('style', next);
+            el.__rgLastStyle = next;
           }
         }
+        for (const el of document.querySelectorAll('svg [fill], svg [stroke]')) {
+          const tag = (el.tagName || '').toLowerCase();
+          const isText = tag === 'text' || tag === 'tspan';
+          for (const attr of ['fill', 'stroke']) {
+            if (!el.hasAttribute(attr)) continue;
+            const bAttr = 'data-rg-orig-' + attr;
+            const lProp = attr === 'fill' ? '__rgLastFill' : '__rgLastStroke';
+            const val = (el.getAttribute(attr) || '').trim();
+            if (el[lProp] !== undefined && val !== el[lProp]) el.setAttribute(bAttr, val);
+            const orig = el.hasAttribute(bAttr) ? (el.getAttribute(bAttr) || val) : val;
+            let mapped = map[orig.toLowerCase()];
+            if (!mapped && theme === 'dark') {
+              if (attr === 'fill' && /^#(?:ffffff|fff)$/i.test(orig) && !isText) mapped = '#262626';
+              else if ((isText || attr === 'stroke') && /^#(?:000000|000)$/i.test(orig)) mapped = '#ececec';
+            }
+            if (mapped && val.toLowerCase() !== mapped) {
+              if (!el.hasAttribute(bAttr)) el.setAttribute(bAttr, orig);
+              el.setAttribute(attr, mapped);
+              el[lProp] = mapped;
+            } else {
+              el[lProp] = val;
+            }
+          }
+        }
+        const appRoot = document.getElementById('app-root');
+        if (appRoot) {
+          for (const blk of appRoot.querySelectorAll('div, section, aside, header')) {
+            if (blk.classList.contains('rg-sb-card-surface') || blk.id === 'app-root') continue;
+            const cs = window.getComputedStyle(blk);
+            if (
+              parseFloat(cs.borderTopWidth || '0') === 0 &&
+              parseFloat(cs.borderTopLeftRadius || '0') >= 8 &&
+              (cs.backgroundColor === 'rgb(247, 247, 248)' ||
+                cs.backgroundColor === 'rgb(242, 240, 240)' ||
+                cs.backgroundColor === 'rgb(42, 42, 42)')
+            ) {
+              blk.classList.add('rg-sb-card-surface');
+            }
+          }
+        }
+        if (typeof window.sendHeight === 'function') window.sendHeight();
+      } finally {
+        queueMicrotask(() => {
+          sbMutating = false;
+        });
       }
     }
 
@@ -201,13 +289,33 @@ const userScript = `// ==UserScript==
       applySandbox();
     });
 
-    if (document.documentElement) applySandbox();
+    let sbRaf = false;
+    const startSbObs = () => {
+      if (!document.documentElement) return;
+      applySandbox();
+      try { window.parent.postMessage({ type: 'RG_SANDBOX_READY' }, '*'); } catch (_) {}
+      new MutationObserver(() => {
+        if (sbMutating || sbRaf) return;
+        sbRaf = true;
+        requestAnimationFrame(() => { sbRaf = false; applySandbox(); });
+      }).observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['fill', 'stroke', 'style', 'class']
+      });
+    };
+
+    if (document.documentElement) startSbObs();
     document.addEventListener('DOMContentLoaded', () => {
+      startSbObs();
       applySandbox();
       try { window.parent.postMessage({ type: 'RG_SANDBOX_READY' }, '*'); } catch (_) {}
     });
     return;
   }
+
+  if (host !== 'gemini.google.com') return;
 
   // --- Main Host Branch (gemini.google.com) ---
   function injectStyle() {
@@ -233,6 +341,7 @@ const userScript = `// ==UserScript==
     return settings.themeMode === 'auto' ? (detectNativeDark() ? 'dark' : 'light') : settings.themeMode;
   }
 
+  const boundFrames = new WeakSet();
   function broadcastSandbox() {
     const payload = {
       type: 'RG_SANDBOX_SYNC',
@@ -242,12 +351,18 @@ const userScript = `// ==UserScript==
       fontSize: settings.fontSize || '16px'
     };
     const frames = new Set(document.querySelectorAll('iframe'));
-    for (const scf of document.querySelectorAll('safe-content-frame')) {
+    for (const scf of document.querySelectorAll('safe-content-frame, sandbox-frame')) {
       if (scf.shadowRoot) {
         for (const f of scf.shadowRoot.querySelectorAll('iframe')) frames.add(f);
       }
     }
     for (const f of frames) {
+      if (!boundFrames.has(f)) {
+        boundFrames.add(f);
+        f.addEventListener('load', () => {
+          try { f.contentWindow && f.contentWindow.postMessage(payload, '*'); } catch (_) {}
+        });
+      }
       try { f.contentWindow && f.contentWindow.postMessage(payload, '*'); } catch (_) {}
     }
   }

@@ -10,14 +10,14 @@
 
 **Refined Gemini** replaces Google Gemini's bluish-gray Material surfaces, oversized spacing, cramped/deeply indented lists, and inconsistent dark code shells with a calm, high-contrast reading and writing interface modeled **1:1 on the official ChatGPT Web UI** (`openai/apps-sdk-ui` design tokens).
 
-### Key Improvements (`v1.5.0`)
+### Key Improvements (`v1.5.1`)
 
 | Dimension | Native Gemini Issue | Refined Gemini (1:1 ChatGPT Alignment) |
 | :--- | :--- | :--- |
 | **Canvas, Sidebar & Accent** | Bluish-gray Material tint (`#f0f4f9`), visual clutter, harsh royal-blue links | **Light**: `#FFFFFF` canvas, `#F9F9F9` sidebar, `#ECECEC` active pill<br>**Dark**: `#212121` canvas, `#171717` sidebar, `#2F2F2F` active pill<br>**Brand & Accent**: Preserves colorful top-left Gemini sparkle + ChatGPT **`#0285FF`** circular Send button & switches |
 | **User Message Bubbles** | Shrink-wrapped flex containers wrap short prompts; `content-visibility: auto` can hide Turn 0 | Soft-blue **`#E5F3FF` / `#1A3550`** (`--blue-50`) rounded bubbles sized to `70%` of the full chat column, with anti-collapse visibility safeguards on Turn 0 |
 | **Uniform Typography & Indentation** | Mixed `17px–22px` heading/intro jumps, deep nested list whitespace, forced italic CJK quotes | **100% uniform `16px` (`--rg-font-size`) across headings (`h1`–`h6`), prose, and GenUI intros** (headings distinguished strictly by `600` weight & spacing); **OpenAI `Markdown.module.css`** list indentation with **`0% / 65% / GPT / 125%`** presets |
-| **GenUI Diagrams & Follow-Up Cards** | Unstyled sandboxed flowcharts (`#3186ff` / `#f2f0f0`) & chunky borderless follow-up blocks | Harmonizes cross-origin `SafeContentFrame` interactive diagrams (`*.scf.usercontent.goog`) with ChatGPT Light/Dark palettes & uniform `16px` titles, and redraws follow-up prompts into lightweight `1px`-bordered `12px`-radius cards |
+| **GenUI Diagrams & Follow-Up Cards** | Unstyled sandboxed diagrams (`<genui-sandbox>` `about:srcdoc` & `SafeContentFrame`) & chunky borderless follow-up blocks | Harmonizes both Angular `<gen-ui-html>` / `<genui-sandbox>` (`about:srcdoc` opaque origin) and cross-origin `SafeContentFrame` (`*.scf.usercontent.goog`) interactive diagrams with ChatGPT Light/Dark palettes & uniform `16px` titles, and redraws follow-up prompts into lightweight `1px`-bordered `12px`-radius cards |
 | **Borderless Tables & Code Cards** | Heavy table borders (`173px` min-width), `#141414` black code boxes in Light mode, `46px` headers | Clean `14px` horizontal-rule tables (`0px` flush-left) + unified `#F9F9F9` / `#171717` `12px` code cards (`32px` header, official OpenAI syntax highlighting) |
 | **Solid Bottom Composer** | Scrolling chat text peeks beneath the input box or shifts upward on conversation switch | 100% opaque canvas dock shield + `overflow-y: clip` scroll-lock eliminating text bleed and composer jump |
 
@@ -71,7 +71,7 @@ npm run build
 # Syntax-check all extension & UserScript JavaScript files
 npm run check
 
-# Build store-ready ZIP archive -> dist/refined-gemini-v1.5.0-extension.zip
+# Build store-ready ZIP archive -> dist/refined-gemini-v1.5.1-extension.zip
 npm run pack
 ```
 

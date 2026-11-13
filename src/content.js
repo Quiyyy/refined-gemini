@@ -139,12 +139,12 @@
     };
   }
 
-  function broadcastToSandboxFrames() {
-    if (!document.documentElement) return;
-    const payload = getSandboxSyncPayload();
+  const boundFrames = new WeakSet();
+
+  function collectSandboxFrames() {
     const frames = new Set(document.querySelectorAll('iframe'));
-    const scfHosts = document.querySelectorAll('safe-content-frame');
-    for (const hostEl of scfHosts) {
+    const shadowHosts = document.querySelectorAll('safe-content-frame, sandbox-frame');
+    for (const hostEl of shadowHosts) {
       if (hostEl.shadowRoot) {
         for (const innerFrame of hostEl.shadowRoot.querySelectorAll('iframe')) {
           frames.add(innerFrame);
@@ -152,6 +152,24 @@
       }
     }
     for (const frame of frames) {
+      if (!boundFrames.has(frame)) {
+        boundFrames.add(frame);
+        frame.addEventListener('load', () => {
+          try {
+            if (frame.contentWindow) {
+              frame.contentWindow.postMessage(getSandboxSyncPayload(), '*');
+            }
+          } catch (_) {}
+        });
+      }
+    }
+    return frames;
+  }
+
+  function broadcastToSandboxFrames() {
+    if (!document.documentElement) return;
+    const payload = getSandboxSyncPayload();
+    for (const frame of collectSandboxFrames()) {
       try {
         if (frame.contentWindow) {
           frame.contentWindow.postMessage(payload, '*');
@@ -408,6 +426,49 @@
       } catch (_) {}
       broadcastToSandboxFrames();
     });
+
+    let frameScanPending = false;
+    const scheduleFrameSync = () => {
+      if (frameScanPending) return;
+      frameScanPending = true;
+      requestAnimationFrame(() => {
+        frameScanPending = false;
+        broadcastToSandboxFrames();
+      });
+    };
+
+    const attachFrameObserver = () => {
+      if (!document.body) return;
+      broadcastToSandboxFrames();
+      const frameObserver = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          for (const node of m.addedNodes) {
+            if (node.nodeType !== Node.ELEMENT_NODE) continue;
+            const el = /** @type {Element} */ (node);
+            const tag = el.tagName;
+            if (
+              tag === 'IFRAME' ||
+              tag === 'GEN-UI-HTML' ||
+              tag === 'GENUI-SANDBOX' ||
+              tag === 'SANDBOX-FRAME' ||
+              tag === 'SAFE-CONTENT-FRAME' ||
+              (el.querySelector &&
+                el.querySelector('iframe, genui-sandbox, gen-ui-html, sandbox-frame, safe-content-frame'))
+            ) {
+              scheduleFrameSync();
+              return;
+            }
+          }
+        }
+      });
+      frameObserver.observe(document.body, { childList: true, subtree: true });
+    };
+
+    if (document.body) {
+      attachFrameObserver();
+    } else {
+      document.addEventListener('DOMContentLoaded', attachFrameObserver, { once: true });
+    }
   }
 
   // 1. Apply cached configuration synchronously at document_start

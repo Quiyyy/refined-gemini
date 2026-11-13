@@ -2575,24 +2575,81 @@ html[data-rg-enabled="true"] :is(
   border-color: var(--rg-border-focus) !important;
 }
 
-/* 11.2 Generative UI Interactive Widget Frame & Stepper */
-html[data-rg-enabled="true"] [data-testid="gen-ui-html-node"] {
+/* 11.2 Generative UI Interactive Widget Frame & Stepper (Angular BardChatUi & React Islands) */
+html[data-rg-enabled="true"] :is(
+  gen-ui-html,
+  [data-testid="gen-ui-html-node"],
+  .rrc-card.shell-style-luminous:has(genui-sandbox),
+  .svg-preview:has(genui-sandbox, sandbox-frame)
+) {
+  display: block !important;
   background-color: var(--rg-bg-canvas) !important;
   border: 1px solid var(--rg-border-code) !important;
   border-radius: 14px !important;
-  padding: 14px 16px !important;
-  margin: 12px 0 !important;
+  padding: 16px 18px !important;
+  margin: 14px 0 !important;
   box-sizing: border-box !important;
   box-shadow: none !important;
+  overflow: hidden !important;
 }
 
-html[data-rg-enabled="true"] safe-content-frame,
-html[data-rg-enabled="true"] safe-content-frame::part(shim-iframe),
-html[data-rg-enabled="true"] [data-testid="gen-ui-html-node"] iframe {
+html[data-rg-enabled="true"] :is(
+  genui-sandbox,
+  genui-sandbox .genui-sandbox-container,
+  [data-test-id="genui-sandbox-container"],
+  sandbox-frame,
+  safe-content-frame,
+  safe-content-frame::part(shim-iframe),
+  genui-sandbox iframe,
+  sandbox-frame iframe,
+  [data-testid="gen-ui-html-node"] iframe
+) {
   border: none !important;
   background: transparent !important;
   width: 100% !important;
+  min-height: 0 !important;
   display: block !important;
+}
+
+/* Direct non-iframe fallback inside <gen-ui-html> (.gen-ui-html-container) */
+html[data-rg-enabled="true"] gen-ui-html .gen-ui-html-container,
+html[data-rg-enabled="true"] gen-ui-html .gen-ui-html-container :is(p, li, td, th, div, span):not(code):not(pre):not(mat-icon):not(.google-symbols) {
+  font-family: var(--rg-font-sans) !important;
+  font-size: var(--rg-font-size, 16px) !important;
+  color: var(--rg-text-primary) !important;
+}
+
+html[data-rg-enabled="true"] gen-ui-html .gen-ui-html-container :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--rg-font-sans) !important;
+  font-size: var(--rg-font-size, 16px) !important;
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  color: var(--rg-text-strong) !important;
+}
+
+html[data-rg-enabled="true"] gen-ui-html .gen-ui-html-container .card {
+  background-color: var(--rg-bg-sidebar) !important;
+  border: 1px solid var(--rg-border-subtle) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] gen-ui-html .gen-ui-html-container .pro-tip {
+  background-color: var(--rg-bg-user-bubble) !important;
+  color: var(--rg-text-primary) !important;
+  border-left: 3px solid var(--rg-accent) !important;
+  border-radius: 6px 12px 12px 6px !important;
+}
+
+html[data-rg-enabled="true"] gen-ui-html .gen-ui-html-container table {
+  background-color: transparent !important;
+  border-radius: 0 !important;
+}
+
+html[data-rg-enabled="true"] gen-ui-html .gen-ui-html-container table th {
+  background-color: transparent !important;
+  color: var(--rg-text-strong) !important;
+  border-bottom: 1px solid var(--rg-border-default) !important;
 }
 
 html[data-rg-enabled="true"] button[data-test-id="stepper-expand-all-button"] {

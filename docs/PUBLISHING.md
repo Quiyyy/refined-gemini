@@ -27,13 +27,13 @@ npm run pack
 ```
 
 This generates:
-- **Extension Store Package**: `dist/refined-gemini-v1.5.0-extension.zip`
+- **Extension Store Package**: `dist/refined-gemini-v1.5.1-extension.zip`
 - **300×300 Store Logo**: `docs/assets/store-logo-300.png`
 
 ### Step 3: Upload Package & Configure Properties
 
 1. In Partner Center, navigate to **Microsoft Edge -> Overview -> Create new extension**.
-2. Under **Packages**, upload `dist/refined-gemini-v1.5.0-extension.zip`. Partner Center automatically detects `English` (default) and `Chinese (Simplified)` from `_locales/`.
+2. Under **Packages**, upload `dist/refined-gemini-v1.5.1-extension.zip`. Partner Center automatically detects `English` (default) and `Chinese (Simplified)` from `_locales/`.
 3. Under **Availability**, select **Public** and enable all markets.
 4. Under **Properties**:
    - **Category**: `Productivity`
@@ -58,7 +58,7 @@ This generates:
 
   • Clean Surfaces & Accents: Crisp white (#FFFFFF) and charcoal (#212121) canvases paired with soft-blue user bubbles (#E5F3FF) and ChatGPT #0285FF accent controls.
   • Uniform Typography & Configurable Indentation: Consistent 16px prose/heading scale (distinguished by semibold weight & spacing) and OpenAI Markdown list hierarchy with 0% / 65% / GPT / 125% presets.
-  • Interactive Diagrams & Follow-Up Cards: Harmonizes embedded Generative UI flowcharts and redraws follow-up prompts into lightweight thin-bordered cards.
+  • Interactive Diagrams & Follow-Up Cards: Harmonizes embedded Generative UI diagrams (<genui-sandbox> about:srcdoc & SafeContentFrame) and redraws follow-up prompts into lightweight thin-bordered cards.
   • Compact Code Cards & Borderless Tables: Unified rounded code blocks with OpenAI syntax highlighting and clean horizontal-rule tables without fake scrollbars.
   • Streamlined Bilingual Popup (EN / 中文): Instant live controls for column width (768px–90%), font size (15–17px), hiding AI avatars, compact sidebar, clean view, and Ctrl/Cmd + Enter to send.
   • Privacy First: Runs 100% locally in your browser with zero data collection and zero network requests. Open-source under MIT.
@@ -72,8 +72,8 @@ Paste the following into **Publish -> Notes for certification** (typical review 
 Single Purpose: Customizes the visual appearance, typography, and keyboard shortcut (Ctrl+Enter) of Google Gemini Web (https://gemini.google.com/*) locally in the user's browser.
 Permissions Justification:
 - "storage": Used solely to persist local UI preferences (theme, column width, font size, indentation scale, and UI language) via chrome.storage.sync.
-- Host "https://gemini.google.com/*": Injects core CSS/JS on Google Gemini web pages to apply ChatGPT-aligned styling and optional Ctrl+Enter send behavior.
-- Subframe hosts "https://*.scf.usercontent.goog/*" and "https://*.googleusercontent.com/*" (all_frames, subframe-only guard `window !== window.top`): Google Gemini renders interactive Generative UI diagrams/flowcharts inside isolated SafeContentFrame iframes hosted on `*.scf.usercontent.goog` / `*.googleusercontent.com`. Injecting `sandbox.css` + `sandbox.js` into these embedded subframes keeps interactive diagrams synchronized with the user's selected Light/Dark theme and font size. Top-level tabs and auth/feedback frames are explicitly ignored.
+- Host "https://gemini.google.com/*": Injects core CSS/JS on Google Gemini web pages (plus match_origin_as_fallback for Gemini's embedded <genui-sandbox> about:srcdoc diagram iframes) to apply ChatGPT-aligned styling and optional Ctrl+Enter send behavior.
+- Subframe hosts "https://*.scf.usercontent.goog/*" and "https://*.googleusercontent.com/*" (all_frames, subframe-only guard `window !== window.top`): Google Gemini renders interactive Generative UI diagrams/flowcharts inside isolated SafeContentFrame iframes hosted on `*.scf.usercontent.goog` / `*.googleusercontent.com` as well as opaque `about:srcdoc` iframes. Injecting `sandbox.css` + `sandbox.js` into these embedded subframes keeps interactive diagrams synchronized with the user's selected Light/Dark theme and font size. Top-level tabs and auth/feedback frames are explicitly ignored.
 No user data is collected or transmitted externally. No login credentials are required to test—open https://gemini.google.com/app and click the extension toolbar icon to test all real-time toggles.
 ```
 

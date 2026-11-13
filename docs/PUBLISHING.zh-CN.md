@@ -27,13 +27,13 @@ npm run pack
 ```
 
 构建完成后，将自动生成：
-- **商店上传包**：`dist/refined-gemini-v1.5.0-extension.zip`
+- **商店上传包**：`dist/refined-gemini-v1.5.1-extension.zip`
 - **300×300 商店徽标**：`docs/assets/store-logo-300.png`（已自动预生成）
 
 ### 第 3 步：创建新扩展并上传包
 
 1. 在 Partner Center 左侧菜单点击 **Microsoft Edge -> Overview -> Create new extension**。
-2. 在 **Packages** 页面拖入 `dist/refined-gemini-v1.5.0-extension.zip` 上传，系统会自动解析 `_locales/en`（默认语言）与 `_locales/zh_CN`（简体中文）。
+2. 在 **Packages** 页面拖入 `dist/refined-gemini-v1.5.1-extension.zip` 上传，系统会自动解析 `_locales/en`（默认语言）与 `_locales/zh_CN`（简体中文）。
 
 ### 第 4 步：填写属性与隐私信息（Properties & Availability）
 
@@ -61,7 +61,7 @@ npm run pack
 
   • 纯净画布与强调色：浅色纯白 (#FFFFFF) / 深色深灰 (#212121) 画布，搭配浅蓝用户消息气泡 (#E5F3FF) 与 #0285FF 圆形发送按钮。
   • 全局统一字号与可调缩进：各级标题与正文严格统一字号（靠加粗与段间距区分），列表默认 1:1 对齐 ChatGPT 层级并支持 0% / 65% / 标准 GPT / 125% 实时切换。
-  • 交互式流程图与追问建议卡片：深入 SafeContentFrame 沙盒同步重绘交互式流程图（浅/深色自动联动），并将底部追问建议重绘为轻量细框卡片。
+  • 交互式流程图与追问建议卡片：全链路接管 <genui-sandbox> (about:srcdoc) 与 SafeContentFrame 沙盒交互拓扑/流程图（浅/深色自动联动、步骤切换实时跟随），并将底部追问建议重绘为轻量细框卡片。
   • 紧凑代码块与无竖框表格：统一柔和圆角代码卡片（OpenAI 官方语法高亮色板）与极简横线表格，消除假横向滚动条。
   • 零认知负担双语面板：支持中 / EN 一键切换，提供列宽（768px~90%）、字号（15~17px）、隐藏 AI 头像、紧凑侧边栏、纯净模式与 Ctrl+Enter 发送开关，所有修改实时生效。
   • 100% 本地运行：零数据收集、零外部网络请求，MIT 协议开源透明。
@@ -75,7 +75,7 @@ npm run pack
 
   • Clean Surfaces & Accents: Crisp white (#FFFFFF) and charcoal (#212121) canvases paired with soft-blue user bubbles (#E5F3FF) and ChatGPT #0285FF accent controls.
   • Uniform Typography & Configurable Indentation: Consistent 16px prose/heading scale (distinguished by semibold weight & spacing) and OpenAI Markdown list hierarchy with 0% / 65% / GPT / 125% presets.
-  • Interactive Diagrams & Follow-Up Cards: Harmonizes embedded Generative UI flowcharts and redraws follow-up prompts into lightweight thin-bordered cards.
+  • Interactive Diagrams & Follow-Up Cards: Harmonizes embedded Generative UI diagrams (<genui-sandbox> about:srcdoc & SafeContentFrame) and redraws follow-up prompts into lightweight thin-bordered cards.
   • Compact Code Cards & Borderless Tables: Unified rounded code blocks with OpenAI syntax highlighting and clean horizontal-rule tables without fake scrollbars.
   • Streamlined Bilingual Popup (EN / 中文): Instant live controls for column width (768px–90%), font size (15–17px), hiding AI avatars, compact sidebar, clean view, and Ctrl/Cmd + Enter to send.
   • Privacy First: Runs 100% locally in your browser with zero data collection and zero network requests. Open-source under MIT.
@@ -92,8 +92,8 @@ npm run pack
 Single Purpose: Customizes the visual appearance, typography, and keyboard shortcut (Ctrl+Enter) of Google Gemini Web (https://gemini.google.com/*) locally in the user's browser.
 Permissions Justification:
 - "storage": Used solely to persist local UI preferences (theme, column width, font size, indentation scale, and UI language) via chrome.storage.sync.
-- Host "https://gemini.google.com/*": Injects core CSS/JS on Google Gemini web pages to apply ChatGPT-aligned styling and optional Ctrl+Enter send behavior.
-- Subframe hosts "https://*.scf.usercontent.goog/*" and "https://*.googleusercontent.com/*" (all_frames, subframe-only guard `window !== window.top`): Google Gemini renders interactive Generative UI diagrams/flowcharts inside isolated SafeContentFrame iframes hosted on `*.scf.usercontent.goog` / `*.googleusercontent.com`. Injecting `sandbox.css` + `sandbox.js` into these embedded subframes keeps interactive diagrams synchronized with the user's selected Light/Dark theme and font size. Top-level tabs and auth/feedback frames are explicitly ignored.
+- Host "https://gemini.google.com/*": Injects core CSS/JS on Google Gemini web pages (plus match_origin_as_fallback for Gemini's embedded <genui-sandbox> about:srcdoc diagram iframes) to apply ChatGPT-aligned styling and optional Ctrl+Enter send behavior.
+- Subframe hosts "https://*.scf.usercontent.goog/*" and "https://*.googleusercontent.com/*" (all_frames, subframe-only guard `window !== window.top`): Google Gemini renders interactive Generative UI diagrams/flowcharts inside isolated SafeContentFrame iframes hosted on `*.scf.usercontent.goog` / `*.googleusercontent.com` as well as opaque `about:srcdoc` iframes. Injecting `sandbox.css` + `sandbox.js` into these embedded subframes keeps interactive diagrams synchronized with the user's selected Light/Dark theme and font size. Top-level tabs and auth/feedback frames are explicitly ignored.
 No user data is collected or transmitted externally. No login credentials are required to test—open https://gemini.google.com/app and click the extension toolbar icon to test all real-time toggles.
 ```
 

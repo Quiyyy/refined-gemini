@@ -1,6 +1,6 @@
 {
   "name": "refined-gemini",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Align Google Gemini Web UI 1:1 with ChatGPT Web typography, color surfaces, and clean layout (Manifest V3 Extension & UserScript).",
   "type": "module",
   "license": "MIT",

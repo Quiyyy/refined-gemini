@@ -1,12 +1,16 @@
 /**
- * Refined Gemini — Generative UI Sandbox Stylesheet (SafeContentFrame)
+ * Refined Gemini — Generative UI Sandbox Stylesheet
+ * (Covers Angular <genui-sandbox> about:srcdoc frames, <sandbox-frame>,
+ *  and React Islands <safe-content-frame> *.scf.usercontent.goog frames)
  *
- * Scoped strictly under html[data-rg-sandbox="true"] so non-GenUI subframes
- * (such as feedback or auth frames) are never affected, and toggling the
+ * Scoped strictly under html[data-rg-sandbox="true"] so top-level pages and
+ * non-GenUI subframes (feedback/auth) are never affected, and toggling the
  * Master Switch in Popup restores native rendering immediately.
  */
 
 html[data-rg-sandbox="true"] {
+  color-scheme: light !important;
+
   --rg-font-sans: ui-sans-serif, -apple-system, system-ui, BlinkMacSystemFont,
     "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI",
     "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
@@ -17,7 +21,8 @@ html[data-rg-sandbox="true"] {
 
   /* ChatGPT Light Palette */
   --rg-sb-canvas: #ffffff;
-  --rg-sb-card: #f9f9f9;
+  --rg-sb-elevated: #ffffff;
+  --rg-sb-card: #f7f7f8;
   --rg-sb-hover: rgba(13, 13, 13, 0.05);
   --rg-sb-active: #ececec;
   --rg-sb-border-subtle: rgba(13, 13, 13, 0.08);
@@ -31,33 +36,56 @@ html[data-rg-sandbox="true"] {
   --rg-sb-accent-soft: #e5f3ff;
   --rg-sb-accent-border: rgba(2, 133, 255, 0.32);
 
-  /* Remap Gemini GenUiHtmlNodeView & svgDocument host variables */
+  /* Remap canonical Luminous (Cgk) Layer-1 & Layer-2 tokens + SafeContentFrame tokens */
   --font-family: var(--rg-font-sans) !important;
+  --font: var(--rg-font-sans) !important;
+  --font-sans: var(--rg-font-sans) !important;
+  --font-mono: var(--rg-font-mono) !important;
+  --font-size-base: var(--rg-font-size, 16px) !important;
+  --font-size-lg: var(--rg-font-size, 16px) !important;
+  --font-size-xl: var(--rg-font-size, 16px) !important;
+  --font-size-2xl: var(--rg-font-size, 16px) !important;
+
   --bg: var(--rg-sb-canvas) !important;
   --bg-primary: var(--rg-sb-canvas) !important;
-  --bg-card: var(--rg-sb-card) !important;
   --bg-secondary: var(--rg-sb-card) !important;
+  --bg-card: var(--rg-sb-elevated) !important;
+  --background-elevated: var(--rg-sb-elevated) !important;
+  --bg-elevated: var(--rg-sb-elevated) !important;
+  --chat-bubble-user: var(--rg-sb-accent-soft) !important;
+
   --border: var(--rg-sb-border) !important;
   --border-color: var(--rg-sb-border) !important;
+  --border-strong: var(--rg-sb-border-strong) !important;
   --grid: var(--rg-sb-border) !important;
+
   --text-primary: var(--rg-sb-text) !important;
   --text-secondary: var(--rg-sb-text-secondary) !important;
   --text-tertiary: var(--rg-sb-text-muted) !important;
+
   --accent: var(--rg-sb-accent) !important;
   --accent-color: var(--rg-sb-accent) !important;
+  --accent-primary: var(--rg-sb-accent) !important;
+  --accent-primary-hover: var(--rg-sb-accent-strong) !important;
   --accent-container: var(--rg-sb-accent-soft) !important;
   --accent-secondary: var(--rg-sb-accent-soft) !important;
   --info-bg: var(--rg-sb-accent-soft) !important;
   --info-text: var(--rg-sb-accent-strong) !important;
+  --info-color: var(--rg-sb-accent) !important;
+
+  --border-radius-m: 10px !important;
   --border-radius-l: 12px !important;
   --border-radius-xl: 12px !important;
   --border-radius-xxl: 14px !important;
 }
 
 html[data-rg-sandbox="true"][data-rg-theme="dark"] {
+  color-scheme: dark !important;
+
   /* ChatGPT Dark Palette */
   --rg-sb-canvas: #212121;
-  --rg-sb-card: #171717;
+  --rg-sb-elevated: #262626;
+  --rg-sb-card: #2a2a2a;
   --rg-sb-hover: rgba(255, 255, 255, 0.07);
   --rg-sb-active: #2f2f2f;
   --rg-sb-border-subtle: rgba(255, 255, 255, 0.09);
@@ -72,7 +100,7 @@ html[data-rg-sandbox="true"][data-rg-theme="dark"] {
   --rg-sb-accent-border: rgba(102, 181, 255, 0.35);
 }
 
-/* Keep transparent iframe body so SafeContentFrame ResizeObserver measures exact height */
+/* Keep transparent iframe body so genui-resize / ResizeObserver measures exact height */
 html[data-rg-sandbox="true"],
 html[data-rg-sandbox="true"] body {
   background: transparent !important;
@@ -117,8 +145,20 @@ html[data-rg-sandbox="true"] :is(code, pre, kbd, samp) {
   font-family: var(--rg-font-mono) !important;
 }
 
-/* Cap widget headings to the uniform body font-size (16px default, distinguished by 600 weight) */
-html[data-rg-sandbox="true"] body :is(h1, h2, h3, h4, h5, h6) {
+/* Cap widget headings & step/section titles to uniform body font-size (16px default, 600 weight) */
+html[data-rg-sandbox="true"] body :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  [class*="step-title"]:not(svg *),
+  [class*="banner-title"]:not(svg *),
+  [class*="detail-title"]:not(svg *),
+  [class*="card-title"]:not(svg *),
+  [class*="section-title"]:not(svg *)
+) {
   font-size: var(--rg-font-size, 16px) !important;
   font-weight: 600 !important;
   line-height: 1.48 !important;
@@ -126,15 +166,17 @@ html[data-rg-sandbox="true"] body :is(h1, h2, h3, h4, h5, h6) {
   color: var(--rg-sb-text) !important;
 }
 
-/* Flatten redundant outer border when the host page already frames [data-testid="gen-ui-html-node"] */
+/* Flatten redundant outer border when host <gen-ui-html> / [data-testid="gen-ui-html-node"] already frames the widget */
 html[data-rg-sandbox="true"] #app-root.bot-response > .interactive-container:only-child {
   background: transparent !important;
   border: none !important;
   padding: 0 !important;
   margin: 0 !important;
+  box-shadow: none !important;
 }
 
-/* Clean ChatGPT 1px hairline cards inside GenUI widgets (replaces 24px borderless warm-gray blobs) */
+/* Clean ChatGPT 1px hairline cards & step callout banners inside GenUI widgets
+   (replaces borderless 20px–24px #f2f0f0 Material warm-gray blobs) */
 html[data-rg-sandbox="true"] :is(
   .card,
   .stat,
@@ -144,6 +186,13 @@ html[data-rg-sandbox="true"] :is(
   interactive-widget,
   chat-bubble,
   .bot-response [data-type="chat-bubble"],
+  .bot-response [data-type="recipe"],
+  [class*="step-banner"]:not(svg *),
+  [class*="step-callout"]:not(svg *),
+  [class*="step-info"]:not(svg *),
+  [class*="step-card"]:not(svg *),
+  [class*="step-box"]:not(svg *),
+  [class*="callout"]:not(svg *),
   .rg-sb-card-surface
 ) {
   background-color: var(--rg-sb-card) !important;
@@ -153,7 +202,7 @@ html[data-rg-sandbox="true"] :is(
 }
 
 /* Interactive stepper/filter pills & reply chips (ChatGPT crisp pill controls) */
-html[data-rg-sandbox="true"] :is(button, reply-chip, reply-option) {
+html[data-rg-sandbox="true"] :is(button, reply-chip, reply-option, [data-type="tab-button"]) {
   box-shadow: none !important;
   transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease !important;
 }
@@ -207,4 +256,3 @@ html[data-rg-sandbox="true"] ::-webkit-scrollbar-thumb {
   background-color: var(--rg-sb-border-strong);
   border-radius: 999px;
 }
-
