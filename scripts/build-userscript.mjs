@@ -116,6 +116,16 @@ const userScript = `// ==UserScript==
     return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
   }
 
+  function resetOuterChatScroll() {
+    if (!document.body) return;
+    const containers = document.querySelectorAll('.chat-container');
+    for (const el of containers) {
+      if (el.scrollTop !== 0 && el.querySelector('infinite-scroller.chat-history')) {
+        el.scrollTop = 0;
+      }
+    }
+  }
+
   function apply() {
     injectStyle();
     const root = document.documentElement;
@@ -140,6 +150,7 @@ const userScript = `// ==UserScript==
     root.style.setProperty('--rg-chat-max-width', settings.chatWidth);
     root.style.setProperty('--rg-font-size', settings.fontSize);
     root.style.setProperty('--rg-indent-scale', indentScale);
+    resetOuterChatScroll();
   }
 
   function isPromptEditorElement(target) {

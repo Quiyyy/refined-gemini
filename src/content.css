@@ -1379,13 +1379,33 @@ html[data-rg-enabled="true"] :is(
   gap: 0 !important;
 }
 
-/* Reset extra inter-turn wrapper margins/paddings so turns flow at ChatGPT's crisp ~20px gap */
-html[data-rg-enabled="true"] :is(
-  infinite-scroller.chat-history,
-  #chat-history,
-  .chat-history,
-  chat-window-content
-) > :has(.conversation-container) {
+/* Lock outer `.chat-container` with `overflow-y: clip` (instead of Gemini's `overflow-y: hidden`)
+   so programmatic `scrollIntoView()` during SPA conversation switches can NEVER scroll `.chat-container`
+   or shift `input-container` upward! */
+html[data-rg-enabled="true"] .chat-container:has(infinite-scroller.chat-history) {
+  overflow-y: clip !important;
+}
+
+/* Top breathing room above the first message in active conversations (1:1 ChatGPT Web:
+   clears the fixed 56px top bar and aligns the first turn horizontally with sidebar nav) */
+html[data-rg-enabled="true"] infinite-scroller.chat-history:has(.conversation-container) {
+  padding-top: 68px !important;
+}
+
+@media screen and (max-width: 767.98px) {
+  html[data-rg-enabled="true"] infinite-scroller.chat-history:has(.conversation-container) {
+    padding-top: 56px !important;
+  }
+}
+
+/* Signed-out layout already offsets `.content-wrapper` by ~70px below the signed-out bar */
+html[data-rg-enabled="true"] chat-app:has(.signed-out-buttons) infinite-scroller.chat-history:has(.conversation-container) {
+  padding-top: 20px !important;
+}
+
+/* Reset extra inter-turn wrapper margins/paddings ONLY on turn wrappers inside `infinite-scroller`
+   (never match `infinite-scroller` itself, which holds the top conversation breathing room!) */
+html[data-rg-enabled="true"] infinite-scroller.chat-history > :not(infinite-scroller):not(.conversation-container):has(.conversation-container) {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
   padding-top: 0 !important;
@@ -1984,7 +2004,7 @@ html[data-rg-enabled="true"] input-container::after {
   left: 0 !important;
   right: 0 !important;
   top: 0 !important;
-  bottom: -48px !important;
+  bottom: 0 !important;
   background-color: var(--rg-bg-canvas) !important;
   z-index: -1 !important;
   pointer-events: none !important;
@@ -2219,6 +2239,8 @@ html[data-rg-enabled="true"] sign-in-nudge .gem-banner-container {
 html[data-rg-enabled="true"][data-rg-clean-view="true"] :is(
   hallucination-disclaimer,
   .hallucination-disclaimer,
+  condensed-tos-disclaimer,
+  .condensed-tos-disclaimer,
   zero-state-disclaimers,
   .human-review-disclosure-container,
   .capabilities-disclaimer,

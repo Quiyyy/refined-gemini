@@ -6,7 +6,7 @@
 
 ---
 
-## 一、 核心改进概览（`v1.4.0`）
+## 一、 核心改进概览（`v1.4.1`）
 
 以 OpenAI 官方开源组件库（`openai/apps-sdk-ui`）的设计 Token 与排版规范为唯一基准，彻底解决原生 Gemini 网页端的阅读与交互痛点：
 
@@ -69,7 +69,7 @@ npm run build
 # 检查所有扩展与油猴脚本 JS 语法
 npm run check
 
-# 一键打包符合 Edge / Chrome 扩展商店规范的纯净上传包 -> dist/refined-gemini-v1.4.0-extension.zip
+# 一键打包符合 Edge / Chrome 扩展商店规范的纯净上传包 -> dist/refined-gemini-v1.4.1-extension.zip
 npm run pack
 ```
 

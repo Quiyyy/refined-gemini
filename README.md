@@ -10,7 +10,7 @@
 
 **Refined Gemini** replaces Google Gemini's bluish-gray Material surfaces, oversized spacing, cramped/deeply indented lists, and inconsistent dark code shells with a calm, high-contrast reading and writing interface modeled **1:1 on the official ChatGPT Web UI** (`openai/apps-sdk-ui` design tokens).
 
-### Key Improvements (`v1.4.0`)
+### Key Improvements (`v1.4.1`)
 
 | Dimension | Native Gemini Issue | Refined Gemini (1:1 ChatGPT Alignment) |
 | :--- | :--- | :--- |
@@ -71,7 +71,7 @@ npm run build
 # Syntax-check all extension & UserScript JavaScript files
 npm run check
 
-# Build store-ready ZIP archive -> dist/refined-gemini-v1.4.0-extension.zip
+# Build store-ready ZIP archive -> dist/refined-gemini-v1.4.1-extension.zip
 npm run pack
 ```
 

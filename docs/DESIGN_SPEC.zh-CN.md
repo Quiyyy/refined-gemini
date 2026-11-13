@@ -1,4 +1,4 @@
-# Refined Gemini — 1:1 对齐 ChatGPT 网页端设计规范（`v1.4.0`）
+# Refined Gemini — 1:1 对齐 ChatGPT 网页端设计规范（`v1.4.1`）
 
 [English](./DESIGN_SPEC.md) · **简体中文**
 

@@ -1,4 +1,4 @@
-# Refined Gemini — 1:1 ChatGPT Web UI Design Specification (`v1.4.0`)
+# Refined Gemini — 1:1 ChatGPT Web UI Design Specification (`v1.4.1`)
 
 **English** · [简体中文](./DESIGN_SPEC.zh-CN.md)
 

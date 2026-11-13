@@ -109,6 +109,20 @@
   }
 
   /**
+   * Ensure non-scrolling outer `.chat-container` never retains a stale programmatic `scrollTop`
+   * across SPA conversation switches.
+   */
+  function resetOuterChatScroll() {
+    if (!document.body) return;
+    const containers = document.querySelectorAll('.chat-container');
+    for (const el of containers) {
+      if (el.scrollTop !== 0 && el.querySelector('infinite-scroller.chat-history')) {
+        el.scrollTop = 0;
+      }
+    }
+  }
+
+  /**
    * Apply all settings as root attributes and CSS custom properties on <html>.
    */
   function applySettings(nextSettings) {
@@ -139,6 +153,7 @@
     root.style.setProperty('--rg-chat-max-width', currentSettings.chatWidth || DEFAULTS.chatWidth);
     root.style.setProperty('--rg-font-size', currentSettings.fontSize || DEFAULTS.fontSize);
     root.style.setProperty('--rg-indent-scale', indentScale);
+    resetOuterChatScroll();
   }
 
   /**
@@ -326,12 +341,28 @@
     }
   }
 
+  function setupScrollGuard() {
+    window.addEventListener('popstate', () => requestAnimationFrame(resetOuterChatScroll), { passive: true });
+    window.addEventListener(
+      'click',
+      (e) => {
+        if (!currentSettings.enabled || !(e.target instanceof Element)) return;
+        if (e.target.closest('bard-sidenav, conversations-list, [data-test-id="conversation"], [data-test-id="new-chat-button"]')) {
+          requestAnimationFrame(resetOuterChatScroll);
+          setTimeout(resetOuterChatScroll, 180);
+        }
+      },
+      { passive: true }
+    );
+  }
+
   // 1. Apply cached configuration synchronously at document_start
   loadCachedSettings();
   applySettings(currentSettings);
 
-  // 2. Attach observers & keyboard handler
+  // 2. Attach observers, scroll guard & keyboard handler
   setupThemeObservers();
+  setupScrollGuard();
   setupCtrlEnterHandler();
 
   // 3. Hydrate from chrome.storage.sync
