@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 /**
- * Builds userscript/refined-gemini.user.js directly from src/content.css & src/sandbox.css,
- * producing a Greasy Fork & ScriptCat compliant bilingual UserScript with
- * 100% visual & interactive parity (including Generative UI sandbox frames)
- * with the Manifest V3 browser extension.
+ * Builds userscript/refined-gemini.user.js by bundling the *exact* extension runtime
+ * sources (src/defaults.js, src/content.js, src/sandbox.js, src/popup/*) behind a tiny
+ * GM_* backed `chrome` shim. The UserScript therefore has 100% behavioral parity with
+ * the Manifest V3 extension — including the full settings panel (rendered in a
+ * Shadow DOM), the Alt+Shift+G quick toggle, Ctrl/⌘+Enter, layout health checks and
+ * Generative UI sandbox harmonization — with zero duplicated logic to drift.
+ *
+ * Gemini enforces Trusted Types, so the popup markup is pre-compiled here into a JSON
+ * element tree and materialized with createElement() at runtime (no innerHTML).
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,21 +16,125 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
-const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
-const cssContent = fs.readFileSync(path.join(ROOT, 'src/content.css'), 'utf8');
-const sandboxCssContent = fs.readFileSync(path.join(ROOT, 'src/sandbox.css'), 'utf8');
-const outDir = path.join(ROOT, 'userscript');
-fs.mkdirSync(outDir, { recursive: true });
+const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 
-const userScript = `// ==UserScript==
+const pkg = JSON.parse(read('package.json'));
+const sources = {
+  defaults: read('src/defaults.js'),
+  content: read('src/content.js'),
+  sandbox: read('src/sandbox.js'),
+  contentCss: read('src/content.css'),
+  sandboxCss: read('src/sandbox.css'),
+  popupHtml: read('src/popup/popup.html'),
+  popupCss: read('src/popup/popup.css'),
+  popupJs: read('src/popup/popup.js')
+};
+
+// ---------------------------------------------------------------------------
+// Minimal, dependency-free HTML -> JSON tree compiler for the (well-formed) popup.
+// ---------------------------------------------------------------------------
+const VOID_TAGS = new Set(['input', 'br', 'img', 'meta', 'link', 'hr']);
+
+function decodeEntities(s) {
+  return s
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&');
+}
+
+function parseHtml(src) {
+  const root = { t: '#root', c: [] };
+  const stack = [root];
+  const re = /<!--[\s\S]*?-->|<\/([a-zA-Z][\w-]*)\s*>|<([a-zA-Z][\w-]*)((?:\s+[^\s=>/]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?)*)\s*(\/?)>|([^<]+)/g;
+  let m;
+  while ((m = re.exec(src))) {
+    const top = stack[stack.length - 1];
+    if (m[0].startsWith('<!--')) continue;
+    if (m[1]) {
+      const tag = m[1].toLowerCase();
+      for (let i = stack.length - 1; i > 0; i--) {
+        if (stack[i].t === tag) {
+          stack.length = i;
+          break;
+        }
+      }
+      continue;
+    }
+    if (m[2]) {
+      const tag = m[2].toLowerCase();
+      const attrs = {};
+      const attrRe = /([^\s=>/]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
+      let a;
+      while ((a = attrRe.exec(m[3] || ''))) {
+        attrs[a[1]] = decodeEntities(a[2] ?? a[3] ?? a[4] ?? '');
+      }
+      const node = { t: tag, a: attrs, c: [] };
+      top.c.push(node);
+      if (!m[4] && !VOID_TAGS.has(tag)) stack.push(node);
+      continue;
+    }
+    if (m[5] !== undefined) {
+      const text = decodeEntities(m[5]);
+      if (/^\s+$/.test(text)) {
+        top.c.push(' ');
+      } else {
+        top.c.push(text.replace(/\s+/g, ' '));
+      }
+    }
+  }
+  return root;
+}
+
+function findById(node, id) {
+  if (!node || typeof node === 'string') return null;
+  if (node.a && node.a.id === id) return node;
+  for (const child of node.c || []) {
+    const hit = findById(child, id);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+const popupTree = findById(parseHtml(sources.popupHtml), 'rgPopup');
+if (!popupTree) throw new Error('popup.html: #rgPopup root not found');
+
+// Popup stylesheet adapted for the Shadow DOM panel host
+const PANEL_CSS = `${sources.popupCss}
+:host {
+  all: initial;
+  position: fixed;
+  top: 64px;
+  right: 16px;
+  z-index: 2147483001;
+  display: block;
+}
+:host([hidden]) { display: none; }
+.popup-shell {
+  width: 320px;
+  max-height: calc(100vh - 88px);
+  overflow-y: auto;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16), 0 2px 8px rgba(0, 0, 0, 0.06);
+  animation: rg-panel-in 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes rg-panel-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+`;
+
+const banner = `// ==UserScript==
 // @name               Refined Gemini — 1:1 ChatGPT Web UI Alignment
 // @name:zh-CN         Refined Gemini — 1:1 对齐 ChatGPT 网页端界面
 // @name:zh-TW         Refined Gemini — 1:1 對齊 ChatGPT 網頁端介面
 // @namespace          https://github.com/Quiyyy/refined-gemini
 // @version            ${pkg.version}
-// @description        Align Google Gemini Web UI 1:1 with ChatGPT: uniform typography, clean white/dark surfaces, soft-blue user bubbles, #0285FF accents, and unified management of all 80+ Gemini widgets & diagrams.
-// @description:zh-CN  1:1 对齐 ChatGPT 网页端视觉与排版：全局统一字号、纯白/深灰画布、浅蓝用户气泡与 #0285FF 强调色、80+ 原生组件卡片与交互式图表同源管理。
-// @description:zh-TW  1:1 對齊 ChatGPT 網頁端視覺與排版：全域統一字級、純白/深灰畫布、淺藍用戶氣泡與 #0285FF 強調色、80+ 原生組件卡片與互動式圖表同源管理。
+// @description        Align Google Gemini Web UI 1:1 with ChatGPT: uniform typography, clean white/dark surfaces, soft-blue bubbles, #0285FF accents, unified widgets & diagrams, in-page settings panel and Alt+Shift+G quick toggle.
+// @description:zh-CN  1:1 对齐 ChatGPT 网页端视觉与排版：统一字号、纯白/深灰画布、浅蓝气泡与 #0285FF 强调色、80+ 组件与图表同源管理，附页内设置面板与 Alt+Shift+G 快速开关。
+// @description:zh-TW  1:1 對齊 ChatGPT 網頁端視覺與排版：統一字級、純白/深灰畫布、淺藍氣泡與 #0285FF 強調色、80+ 組件與圖表同源管理，附頁內設定面板與 Alt+Shift+G 快速開關。
 // @author             Quiyyy
 // @license            MIT
 // @homepageURL        https://github.com/Quiyyy/refined-gemini
@@ -38,666 +147,266 @@ const userScript = `// ==UserScript==
 // @grant              GM_getValue
 // @grant              GM_setValue
 // @grant              GM_registerMenuCommand
+// @grant              GM_unregisterMenuCommand
+// @grant              GM_addValueChangeListener
 // ==/UserScript==
+//
+// AUTO-GENERATED by scripts/build-userscript.mjs from src/* — do not edit by hand.
+`;
 
+const userScript = `${banner}
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'refined_gemini_settings_v1';
-  const DEFAULTS = {
-    enabled: true,
-    uiLang: 'auto',         // 'auto' | 'zh' | 'en'
-    themeMode: 'auto',      // 'auto' | 'light' | 'dark'
-    chatWidth: '800px',     // '800px' (768px prose) | '920px' | '1120px' | '90%'
-    fontSize: '16px',       // '15px' | '16px' | '17px'
-    indentScale: '1',       // '0' | '0.65' | '1' (GPT default) | '1.25'
-    hideAvatar: true,
-    compactSidebar: true,
-    cleanView: true,
-    ctrlEnterSend: false
-  };
+  const RG_VERSION = ${JSON.stringify(pkg.version)};
 
-  const VALID_INDENT_SCALES = new Set(['0', '0.65', '1', '1.25']);
-  const VALID_LANGS = new Set(['auto', 'zh', 'en']);
-  const CSS = ${JSON.stringify(cssContent)};
-  const SANDBOX_CSS = ${JSON.stringify(sandboxCssContent)};
+  // ---------------------------------------------------------------- src/defaults.js
+${sources.defaults}
 
-  const LIGHT_MAP = {
-    '#3186ff': '#0285ff', '#1a73e8': '#0285ff', '#4285f4': '#0285ff', '#3b82f6': '#0285ff',
-    '#0b57d0': '#0169cc', '#0e57d0': '#0169cc', '#1967d2': '#0169cc', '#174ea6': '#0169cc', '#2563eb': '#0169cc',
-    '#041e49': '#0d0d0d', '#001d35': '#0d0d0d',
-    '#dcf1ff': '#e5f3ff', '#d3e3fd': '#e5f3ff', '#e8f0fe': '#e5f3ff', '#d2e3fc': '#e5f3ff', '#dbeafe': '#e5f3ff', '#eff6ff': '#e5f3ff',
-    '#9dd2ff': '#99ceff', '#a8c7fa': '#99ceff',
-    '#fdfcfc': '#ffffff', '#f2f0f0': '#f7f7f8', '#f4f3f2': '#f7f7f8', '#f4f3f0': '#f7f7f8', '#f7f6f6': '#f7f7f8',
-    '#faf9f9': '#f9f9f9', '#f0f4f9': '#f7f7f8', '#f8f9fa': '#f7f7f8',
-    '#e8eef6': '#f4f4f4', '#dde3e9': '#ececec', '#f1f3f4': '#f4f4f4',
-    '#1f1f1f': '#0d0d0d', '#3c4043': '#0d0d0d', '#444746': '#5d5d5d', '#5f6368': '#5d5d5d', '#747775': '#8f8f8f'
-  };
-  const DARK_MAP = {
-    '#3186ff': '#0285ff', '#1a73e8': '#0285ff', '#4285f4': '#0285ff', '#3b82f6': '#0285ff',
-    '#0b57d0': '#66b5ff', '#0e57d0': '#66b5ff', '#1967d2': '#66b5ff', '#174ea6': '#66b5ff', '#2563eb': '#66b5ff', '#a8c7fa': '#66b5ff', '#a7c7fa': '#66b5ff', '#8ab4f8': '#66b5ff', '#93c5fd': '#66b5ff',
-    '#dcf1ff': '#1a3550', '#d3e3fd': '#1a3550', '#e8f0fe': '#1a3550', '#d2e3fc': '#1a3550', '#dbeafe': '#1a3550', '#eff6ff': '#1a3550',
-    '#0842a0': '#1a3550', '#0842a1': '#1a3550', '#192967': '#1a3550', '#1e3a8a': '#1a3550',
-    '#fdfcfc': '#212121', '#0f0f0f': '#212121', '#1b1b1b': '#212121',
-    '#f2f0f0': '#2a2a2a', '#f4f3f2': '#2a2a2a', '#f4f3f0': '#2a2a2a', '#f7f6f6': '#2a2a2a',
-    '#faf9f9': '#262626', '#fafafa': '#262626', '#f0f4f9': '#2a2a2a',
-    '#f8f9fa': '#262626', '#f1f3f4': '#2f2f2f', '#e8eef6': '#2f2f2f', '#dde3e9': '#383838', '#dadce0': '#3c3c3c', '#e0e0e0': '#3c3c3c', '#cccccc': '#3c3c3c',
-    '#282a2c': '#2a2a2a', '#202021': '#171717', '#2a2b2c': '#2f2f2f',
-    '#041e49': '#ececec', '#001d35': '#ececec', '#1f1f1f': '#ececec', '#111827': '#ececec', '#1f2937': '#ececec', '#374151': '#ececec', '#3c4043': '#ececec',
-    '#202124': '#ececec', '#e3e3e3': '#ececec', '#e6e6e6': '#ececec', '#444746': '#b4b4b4', '#4b5563': '#b4b4b4', '#5f6368': '#b4b4b4', '#6b7280': '#b4b4b4', '#c4c7c5': '#b4b4b4', '#747775': '#8e8ea0'
-  };
+  const RG = globalThis.REFINED_GEMINI;
+  const STORAGE_KEY = RG.STORAGE_KEY;
+  const IS_TOP = window === window.top;
+  const HOST = String(location.hostname || '').toLowerCase();
 
-  function isUserPreviewEl(frame) {
-    let cur = frame;
-    while (cur && cur.nodeType === 1) {
-      if (
-        typeof cur.matches === 'function' &&
-        cur.matches('web-preview, [data-testid*="web-preview"], immersive-panel:not(:has(deep-research-immersive-panel))')
-      ) {
-        return true;
-      }
-      const root = typeof cur.getRootNode === 'function' ? cur.getRootNode() : null;
-      cur = cur.parentElement || (root && root.host ? root.host : null);
-    }
-    return false;
-  }
-
-  function normalize(obj) {
-    const merged = { ...DEFAULTS, ...(obj || {}) };
-    if (merged.chatWidth === '768px') merged.chatWidth = '800px';
-    if (!VALID_INDENT_SCALES.has(String(merged.indentScale))) {
-      merged.indentScale = '1';
-    } else {
-      merged.indentScale = String(merged.indentScale);
-    }
-    if (!VALID_LANGS.has(String(merged.uiLang))) {
-      merged.uiLang = 'auto';
-    }
-    return merged;
-  }
-
-  function resolveLang(uiLang) {
-    if (uiLang === 'zh' || uiLang === 'en') return uiLang;
-    return String(navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
-  }
-
-  function readSettings() {
-    try {
-      if (typeof GM_getValue === 'function') {
-        const saved = GM_getValue(STORAGE_KEY, null);
-        if (saved && typeof saved === 'object') return normalize(saved);
-      }
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return normalize(JSON.parse(raw));
-    } catch (_) {}
-    return { ...DEFAULTS };
-  }
-
-  function saveSettings(next) {
-    try {
-      if (typeof GM_setValue === 'function') GM_setValue(STORAGE_KEY, next);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    } catch (_) {}
-  }
-
-  let settings = readSettings();
-  const host = String(location.hostname || '').toLowerCase();
-
-  // --- Generative UI Sandbox Subframe Branch (about:srcdoc, *.scf.usercontent.goog, *.googleusercontent.com) ---
-  if (window !== window.top) {
-    if (host.startsWith('feedback') || host.includes('accounts.google') || host.includes('uservoice')) return;
-
-    const isScf = host.endsWith('.scf.usercontent.goog') || host === 'scf.usercontent.goog';
-    let sbState = {
-      enabled: Boolean(settings.enabled),
-      isUserPreview: false,
-      themeMode: settings.themeMode || 'auto',
-      parentTheme: null,
-      fontSize: settings.fontSize || '16px'
-    };
-
-    function transformCss(cssText, theme) {
-      const map = theme === 'dark' ? DARK_MAP : LIGHT_MAP;
-      let out = cssText
-        .replace(/#[0-9a-fA-F]{6}\\b/g, (h) => map[h.toLowerCase()] || h)
-        .replace(/rgba?\\(\\s*(?:49\\s*,\\s*134\\s*,\\s*255|26\\s*,\\s*115\\s*,\\s*232|66\\s*,\\s*133\\s*,\\s*244)(\\s*(?:,\\s*[^)]+)?)\\)/gi, 'rgba(2, 133, 255$1)')
-        .replace(/font-size\\s*:\\s*(?:1[789]|2[0-8])(?:\\.\\d+)?px\\b/gi, 'font-size: var(--rg-font-size, 16px)')
-        .replace(/font-size\\s*:\\s*1\\.(?:0[5-9]|[1-8]\\d*)(?:rem|em)\\b/gi, 'font-size: var(--rg-font-size, 16px)')
-        .replace(/border-radius\\s*:\\s*(?:1[6-9]|2\\d|3[0-2])(?:\\.\\d+)?px\\b/gi, 'border-radius: 12px');
-      if (theme === 'dark') {
-        out = out.replace(/(background(?:-color)?\\s*:\\s*)#(?:ffffff|fff)\\b/gi, '$1#262626');
-      }
-      return out;
-    }
-
-    function injectSandboxStyle() {
-      if (document.getElementById('refined-gemini-sandbox-style')) return;
-      const st = document.createElement('style');
-      st.id = 'refined-gemini-sandbox-style';
-      st.setAttribute('data-rg-own-style', 'true');
-      st.textContent = SANDBOX_CSS;
-      (document.head || document.documentElement).appendChild(st);
-    }
-
-    let sbMutating = false;
-    function applySandbox() {
-      const root = document.documentElement;
-      if (!root) return;
-      let userPreview = sbState.isUserPreview;
-      if (!userPreview) {
-        try { userPreview = Boolean(window.frameElement && isUserPreviewEl(window.frameElement)); } catch (_) {}
-      }
-      let frameIsGenUi = false;
+  // ---------------------------------------------------------------- GM-backed chrome shim
+  function createChromeShim() {
+    const listeners = new Set();
+    const readStore = () => {
       try {
-        frameIsGenUi = Boolean(
-          window.frameElement &&
-          (window.frameElement.getAttribute('title') === 'Model Generated UI Container' ||
-            window.frameElement.closest('genui-sandbox, gen-ui-html, sandbox-frame, generative-ui-frame, mcp-tool-ui-frame, deep-zoom, mini-app, vega-lite-chart, google-chart, [data-testid="gen-ui-html-node"]'))
-        );
+        const v = typeof GM_getValue === 'function' ? GM_getValue(STORAGE_KEY, null) : null;
+        if (v && typeof v === 'object') return { ...v };
+        if (typeof v === 'string') return JSON.parse(v) || {};
       } catch (_) {}
-      const isGenUi = !userPreview && (isScf || frameIsGenUi || Boolean(
-        document.getElementById('app-root') ||
-        document.getElementById('genui-host-injected-css') ||
-        document.querySelector('.bot-response, script[data-sandbox-runtime], .vega-embed, .google-visualization-container, svg.marks') ||
-        (location.protocol === 'about:' && typeof window.genuiStreamingActive !== 'undefined')
-      ));
-      sbMutating = true;
-      try {
-        if (!sbState.enabled || !isGenUi) {
-          if (root.hasAttribute('data-rg-sandbox')) root.removeAttribute('data-rg-sandbox');
-          if (root.hasAttribute('data-rg-theme')) root.removeAttribute('data-rg-theme');
-          if (root.style.getPropertyValue('--rg-font-size')) root.style.removeProperty('--rg-font-size');
-          for (const s of document.querySelectorAll('style:not([data-rg-own-style])')) {
-            if (s.__rgOrig !== undefined && s.textContent !== s.__rgOrig) s.textContent = s.__rgOrig;
-            s.__rgOut = undefined;
-          }
-          if (document.body) {
-            for (const el of document.body.querySelectorAll('[data-rg-orig-style]')) {
-              el.setAttribute('style', el.getAttribute('data-rg-orig-style') || '');
-              el.removeAttribute('data-rg-orig-style');
-              el.__rgLastStyle = undefined;
-            }
-          }
-          for (const el of document.querySelectorAll('svg [data-rg-orig-fill], svg [data-rg-orig-stroke]')) {
-            for (const attr of ['fill', 'stroke']) {
-              const bAttr = 'data-rg-orig-' + attr;
-              if (el.hasAttribute(bAttr)) {
-                el.setAttribute(attr, el.getAttribute(bAttr) || '');
-                el.removeAttribute(bAttr);
-              }
-              el[attr === 'fill' ? '__rgLastFill' : '__rgLastStroke'] = undefined;
-            }
-          }
-          for (const blk of document.querySelectorAll('.rg-sb-card-surface')) {
-            blk.classList.remove('rg-sb-card-surface');
-          }
-          if (typeof window.sendHeight === 'function') window.sendHeight();
-          return;
-        }
-        injectSandboxStyle();
-        const theme = (sbState.themeMode === 'light' || sbState.themeMode === 'dark')
-          ? sbState.themeMode
-          : (sbState.parentTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-        const fontSize = sbState.fontSize || '16px';
-        if (root.getAttribute('data-rg-sandbox') !== 'true') root.setAttribute('data-rg-sandbox', 'true');
-        if (root.getAttribute('data-rg-theme') !== theme) root.setAttribute('data-rg-theme', theme);
-        if (root.style.getPropertyValue('--rg-font-size') !== fontSize) root.style.setProperty('--rg-font-size', fontSize);
-        const map = theme === 'dark' ? DARK_MAP : LIGHT_MAP;
-        for (const s of document.querySelectorAll('style:not([data-rg-own-style])')) {
-          const cur = s.textContent || '';
-          if (s.__rgOrig === undefined || (s.__rgOut !== undefined && s.__rgOut !== cur)) s.__rgOrig = cur;
-          const next = transformCss(s.__rgOrig, theme);
-          if (cur !== next) s.textContent = next;
-          s.__rgOut = next;
-        }
-        if (document.body) {
-          for (const el of document.body.querySelectorAll('[style]')) {
-            const bAttr = 'data-rg-orig-style';
-            const cur = el.getAttribute('style') || '';
-            if (el.__rgLastStyle !== undefined && cur !== el.__rgLastStyle) el.setAttribute(bAttr, cur);
-            else if (!el.hasAttribute(bAttr)) el.setAttribute(bAttr, cur);
-            const next = transformCss(el.getAttribute(bAttr) || cur, theme);
-            if (cur !== next) el.setAttribute('style', next);
-            el.__rgLastStyle = next;
-          }
-        }
-        for (const el of document.querySelectorAll('svg [fill], svg [stroke]')) {
-          const tag = (el.tagName || '').toLowerCase();
-          const isText = tag === 'text' || tag === 'tspan';
-          for (const attr of ['fill', 'stroke']) {
-            if (!el.hasAttribute(attr)) continue;
-            const bAttr = 'data-rg-orig-' + attr;
-            const lProp = attr === 'fill' ? '__rgLastFill' : '__rgLastStroke';
-            const val = (el.getAttribute(attr) || '').trim();
-            if (el[lProp] !== undefined && val !== el[lProp]) el.setAttribute(bAttr, val);
-            const orig = el.hasAttribute(bAttr) ? (el.getAttribute(bAttr) || val) : val;
-            let mapped = map[orig.toLowerCase()];
-            if (!mapped && theme === 'dark') {
-              if (attr === 'fill' && /^#(?:ffffff|fff)$/i.test(orig) && !isText) mapped = '#262626';
-              else if ((isText || attr === 'stroke') && /^#(?:000000|000)$/i.test(orig)) mapped = '#ececec';
-            }
-            if (mapped && val.toLowerCase() !== mapped) {
-              if (!el.hasAttribute(bAttr)) el.setAttribute(bAttr, orig);
-              el.setAttribute(attr, mapped);
-              el[lProp] = mapped;
-            } else {
-              el[lProp] = val;
-            }
-          }
-        }
-        const appRoot = document.getElementById('app-root');
-        if (appRoot) {
-          for (const blk of appRoot.querySelectorAll('div, section, aside, header')) {
-            if (blk.classList.contains('rg-sb-card-surface') || blk.id === 'app-root') continue;
-            const cs = window.getComputedStyle(blk);
-            if (
-              parseFloat(cs.borderTopWidth || '0') === 0 &&
-              parseFloat(cs.borderTopLeftRadius || '0') >= 8 &&
-              (cs.backgroundColor === 'rgb(247, 247, 248)' ||
-                cs.backgroundColor === 'rgb(242, 240, 240)' ||
-                cs.backgroundColor === 'rgb(42, 42, 42)')
-            ) {
-              blk.classList.add('rg-sb-card-surface');
-            }
-          }
-        }
-        if (typeof window.sendHeight === 'function') window.sendHeight();
-      } finally {
-        queueMicrotask(() => {
-          sbMutating = false;
-        });
+      return {};
+    };
+    const diff = (prev, next) => {
+      const changes = {};
+      for (const key of Object.keys(RG.DEFAULTS)) {
+        if (prev[key] !== next[key]) changes[key] = { oldValue: prev[key], newValue: next[key] };
       }
-    }
-
-    window.addEventListener('message', (e) => {
-      const d = e && e.data;
-      if (!d || d.type !== 'RG_SANDBOX_SYNC') return;
-      if (typeof d.isUserPreview === 'boolean') sbState.isUserPreview = d.isUserPreview;
-      if (typeof d.enabled === 'boolean') sbState.enabled = d.enabled;
-      if (d.theme === 'light' || d.theme === 'dark') sbState.parentTheme = d.theme;
-      if (typeof d.themeMode === 'string') sbState.themeMode = d.themeMode;
-      if (typeof d.fontSize === 'string') sbState.fontSize = d.fontSize;
-      applySandbox();
-    });
-
-    let sbRaf = false;
-    const startSbObs = () => {
-      if (!document.documentElement) return;
-      applySandbox();
-      try { window.parent.postMessage({ type: 'RG_SANDBOX_READY' }, '*'); } catch (_) {}
-      new MutationObserver(() => {
-        if (sbMutating || sbRaf) return;
-        sbRaf = true;
-        requestAnimationFrame(() => { sbRaf = false; applySandbox(); });
-      }).observe(document.documentElement, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['fill', 'stroke', 'style', 'class']
+      return changes;
+    };
+    const emit = (changes) => {
+      if (!Object.keys(changes).length) return;
+      listeners.forEach((fn) => {
+        try {
+          fn(changes, 'sync');
+        } catch (_) {}
       });
     };
+    if (typeof GM_addValueChangeListener === 'function') {
+      // Cross-tab sync: another Gemini tab changed settings
+      GM_addValueChangeListener(STORAGE_KEY, (_name, oldVal, newVal, remote) => {
+        if (remote) emit(diff(oldVal || {}, newVal || {}));
+      });
+    }
+    return {
+      storage: {
+        sync: {
+          get(defaults, cb) {
+            const data = { ...(defaults || {}), ...readStore() };
+            setTimeout(() => cb && cb(data), 0);
+          },
+          set(patch, cb) {
+            const prev = readStore();
+            const next = { ...prev, ...(patch || {}) };
+            try {
+              if (typeof GM_setValue === 'function') GM_setValue(STORAGE_KEY, next);
+            } catch (_) {}
+            emit(diff(prev, next));
+            if (cb) setTimeout(cb, 0);
+          },
+          clear(cb) {
+            const prev = readStore();
+            try {
+              if (typeof GM_setValue === 'function') GM_setValue(STORAGE_KEY, {});
+            } catch (_) {}
+            emit(diff(prev, {}));
+            if (cb) setTimeout(cb, 0);
+          }
+        },
+        onChanged: {
+          addListener(fn) {
+            listeners.add(fn);
+          }
+        }
+      },
+      runtime: {
+        lastError: undefined,
+        getManifest: () => ({ version: RG_VERSION }),
+        onMessage: { addListener() {} }
+      }
+    };
+  }
 
-    if (document.documentElement) startSbObs();
-    document.addEventListener('DOMContentLoaded', () => {
-      startSbObs();
-      applySandbox();
-      try { window.parent.postMessage({ type: 'RG_SANDBOX_READY' }, '*'); } catch (_) {}
+  const chromeShim = createChromeShim();
+
+  function injectStyle(id, css) {
+    const attach = () => {
+      if (document.getElementById(id)) return true;
+      const parent = document.head || document.documentElement;
+      if (!parent) return false;
+      const style = document.createElement('style');
+      style.id = id;
+      style.setAttribute('data-rg-own-style', '');
+      style.textContent = css;
+      parent.appendChild(style);
+      return true;
+    };
+    if (!attach()) {
+      const mo = new MutationObserver(() => {
+        if (attach()) mo.disconnect();
+      });
+      mo.observe(document, { childList: true, subtree: true });
+    }
+  }
+
+  // Some managers run document-start scripts before <html> exists; defer until it does.
+  function whenRoot(run) {
+    if (document.documentElement) return run();
+    const mo = new MutationObserver(() => {
+      if (!document.documentElement) return;
+      mo.disconnect();
+      run();
     });
+    mo.observe(document, { childList: true });
+  }
+
+  // ---------------------------------------------------------------- Generative UI sandbox subframes
+  if (!IS_TOP) {
+    if (HOST.startsWith('feedback') || HOST.includes('accounts.google') || HOST.includes('uservoice')) return;
+    injectStyle('refined-gemini-sandbox-style', ${JSON.stringify(sources.sandboxCss)});
+    whenRoot(() => (function (chrome) {
+      // ------------------------------------------------------------ src/sandbox.js
+${sources.sandbox}
+    })(chromeShim));
     return;
   }
 
-  if (host !== 'gemini.google.com') return;
+  if (HOST !== 'gemini.google.com') return;
 
-  // --- Main Host Branch (gemini.google.com) ---
-  function injectStyle() {
-    if (document.getElementById('refined-gemini-style')) return;
-    const style = document.createElement('style');
-    style.id = 'refined-gemini-style';
-    style.textContent = CSS;
-    (document.head || document.documentElement).appendChild(style);
+  // ---------------------------------------------------------------- Main Gemini page
+  injectStyle('refined-gemini-style', ${JSON.stringify(sources.contentCss)});
+
+  whenRoot(() => (function (chrome) {
+    // -------------------------------------------------------------- src/content.js
+${sources.content}
+  })(chromeShim));
+
+  // ---------------------------------------------------------------- In-page settings panel
+  const POPUP_TREE = ${JSON.stringify(popupTree)};
+  const PANEL_CSS = ${JSON.stringify(PANEL_CSS)};
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+
+  function build(node, inSvg) {
+    if (typeof node === 'string') return document.createTextNode(node);
+    const svg = inSvg || node.t === 'svg';
+    const el = svg ? document.createElementNS(SVG_NS, node.t) : document.createElement(node.t);
+    for (const [k, v] of Object.entries(node.a || {})) el.setAttribute(k, v);
+    for (const child of node.c || []) el.appendChild(build(child, svg));
+    return el;
   }
 
-  function detectNativeDark() {
-    const body = document.body;
-    const docEl = document.documentElement;
-    if (body) {
-      if (body.classList.contains('dark-theme') || body.getAttribute('data-theme') === 'dark') return true;
-      if (body.classList.contains('light-theme') || body.getAttribute('data-theme') === 'light') return false;
+  function runPopup(chrome) {
+    // ------------------------------------------------------------ src/popup/popup.js
+${sources.popupJs}
+  }
+
+  let panelHost = null;
+  let popupHost = null;
+
+  function onOutsidePointer(e) {
+    if (panelHost && !panelHost.hidden && !e.composedPath().includes(panelHost)) closePanel();
+  }
+
+  function onPanelKey(e) {
+    if (e.key === 'Escape' && panelHost && !panelHost.hidden) {
+      e.stopPropagation();
+      closePanel();
     }
-    if (docEl && (docEl.classList.contains('dark') || docEl.classList.contains('dark-theme'))) return true;
-    return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
   }
 
-  function resolveTheme() {
-    return settings.themeMode === 'auto' ? (detectNativeDark() ? 'dark' : 'light') : settings.themeMode;
-  }
-
-  let isInlineSvgMutating = false;
-  function harmonizeInlineDiagrams() {
+  function openPanel() {
     if (!document.body) return;
-    const enabled = Boolean(settings.enabled);
-    const theme = resolveTheme();
-    const map = theme === 'dark' ? DARK_MAP : LIGHT_MAP;
-    isInlineSvgMutating = true;
-    try {
-      const svgs = document.body.querySelectorAll(
-        ':is(svg-code-block, .svg-preview, vega-lite-chart, google-chart, deep-zoom, gen-ui-html):not(web-preview *) svg'
-      );
-      for (const svg of svgs) {
-        if (svg.closest('web-preview')) continue;
-        for (const el of svg.querySelectorAll('[fill], [stroke]')) {
-          const tag = (el.tagName || '').toLowerCase();
-          const isText = tag === 'text' || tag === 'tspan';
-          for (const attr of ['fill', 'stroke']) {
-            if (!el.hasAttribute(attr)) continue;
-            const bAttr = 'data-rg-orig-' + attr;
-            const lProp = attr === 'fill' ? '__rgLastFill' : '__rgLastStroke';
-            const val = (el.getAttribute(attr) || '').trim();
-            if (!enabled) {
-              if (el.hasAttribute(bAttr)) {
-                el.setAttribute(attr, el.getAttribute(bAttr) || val);
-                el.removeAttribute(bAttr);
-              }
-              el[lProp] = undefined;
-              continue;
-            }
-            if (el[lProp] !== undefined && val !== el[lProp]) el.setAttribute(bAttr, val);
-            const orig = el.hasAttribute(bAttr) ? (el.getAttribute(bAttr) || val) : val;
-            let mapped = map[orig.toLowerCase()];
-            if (!mapped && theme === 'dark') {
-              if (attr === 'fill' && /^#(?:ffffff|fff)$/i.test(orig) && !isText) mapped = '#262626';
-              else if ((isText || attr === 'stroke') && /^#(?:000000|000)$/i.test(orig)) mapped = '#ececec';
-            }
-            if (mapped && val.toLowerCase() !== mapped) {
-              if (!el.hasAttribute(bAttr)) el.setAttribute(bAttr, orig);
-              el.setAttribute(attr, mapped);
-              el[lProp] = mapped;
-            } else {
-              el[lProp] = val;
-            }
-          }
-        }
-      }
-    } finally {
-      queueMicrotask(() => {
-        isInlineSvgMutating = false;
+    if (!panelHost) {
+      panelHost = document.createElement('div');
+      panelHost.id = 'refined-gemini-panel';
+      const shadow = panelHost.attachShadow({ mode: 'open' });
+      const style = document.createElement('style');
+      style.textContent = PANEL_CSS;
+      shadow.appendChild(style);
+      const shell = build(POPUP_TREE, false);
+      shell.setAttribute('role', 'dialog');
+      shell.setAttribute('aria-label', 'Refined Gemini');
+      shadow.appendChild(shell);
+      document.body.appendChild(panelHost);
+      popupHost = { root: shadow, hostEl: panelHost, page: globalThis.__RG_PAGE__ };
+      globalThis.__RG_POPUP_HOST__ = popupHost;
+      runPopup(chromeShim);
+    }
+    panelHost.hidden = false;
+    if (popupHost && typeof popupHost.refresh === 'function') popupHost.refresh();
+    setTimeout(() => {
+      document.addEventListener('pointerdown', onOutsidePointer, true);
+      document.addEventListener('keydown', onPanelKey, true);
+      const first = panelHost.shadowRoot.getElementById('toggleEnabled');
+      if (first) first.focus({ preventScroll: true });
+    }, 0);
+  }
+
+  function closePanel() {
+    if (!panelHost) return;
+    panelHost.hidden = true;
+    document.removeEventListener('pointerdown', onOutsidePointer, true);
+    document.removeEventListener('keydown', onPanelKey, true);
+  }
+
+  function togglePanel() {
+    if (panelHost && !panelHost.hidden) closePanel();
+    else openPanel();
+  }
+
+  // ---------------------------------------------------------------- Userscript manager menu
+  const MENU_TEXT = {
+    zh: { panel: '⚙️ 打开设置面板', toggle: '⏯ 开启 / 暂停美化（Alt+Shift+G）' },
+    en: { panel: '⚙️ Open settings panel', toggle: '⏯ Enable / pause styling (Alt+Shift+G)' }
+  };
+  let menuIds = [];
+  let menuLang = null;
+
+  function registerMenu(lang) {
+    if (typeof GM_registerMenuCommand !== 'function' || lang === menuLang) return;
+    if (typeof GM_unregisterMenuCommand === 'function') {
+      menuIds.forEach((id) => {
+        try {
+          GM_unregisterMenuCommand(id);
+        } catch (_) {}
       });
+    } else if (menuLang) {
+      return; // Cannot relabel without unregister support; keep existing entries
     }
-  }
-
-  const boundFrames = new WeakSet();
-  function buildPayload(userPreview) {
-    return {
-      type: 'RG_SANDBOX_SYNC',
-      enabled: Boolean(settings.enabled) && !userPreview,
-      isUserPreview: Boolean(userPreview),
-      theme: resolveTheme(),
-      themeMode: settings.themeMode || 'auto',
-      fontSize: settings.fontSize || '16px'
-    };
-  }
-
-  function broadcastSandbox() {
-    const frames = new Set(document.querySelectorAll('iframe'));
-    for (const scf of document.querySelectorAll('safe-content-frame, sandbox-frame, generative-ui-frame, mcp-tool-ui-frame, deep-zoom, mini-app, web-preview')) {
-      if (scf.shadowRoot) {
-        for (const f of scf.shadowRoot.querySelectorAll('iframe')) frames.add(f);
-      }
-    }
-    for (const f of frames) {
-      if (!boundFrames.has(f)) {
-        boundFrames.add(f);
-        f.addEventListener('load', () => {
-          try { f.contentWindow && f.contentWindow.postMessage(buildPayload(isUserPreviewEl(f)), '*'); } catch (_) {}
-        });
-      }
-      try { f.contentWindow && f.contentWindow.postMessage(buildPayload(isUserPreviewEl(f)), '*'); } catch (_) {}
-    }
-  }
-
-  function resetOuterChatScroll() {
-    if (!document.body) return;
-    const containers = document.querySelectorAll('.chat-container');
-    for (const el of containers) {
-      if (el.scrollTop !== 0 && el.querySelector('infinite-scroller.chat-history')) {
-        el.scrollTop = 0;
-      }
-    }
-  }
-
-  function apply() {
-    injectStyle();
-    const root = document.documentElement;
-    if (!root) return;
-    if (!settings.enabled) {
-      root.setAttribute('data-rg-enabled', 'false');
-      root.removeAttribute('data-rg-indent');
-      root.style.removeProperty('--rg-chat-max-width');
-      root.style.removeProperty('--rg-font-size');
-      root.style.removeProperty('--rg-indent-scale');
-      harmonizeInlineDiagrams();
-      broadcastSandbox();
-      return;
-    }
-    const theme = resolveTheme();
-    const indentScale = settings.indentScale || DEFAULTS.indentScale;
-    root.setAttribute('data-rg-enabled', 'true');
-    root.setAttribute('data-rg-theme', theme);
-    root.setAttribute('data-rg-indent', indentScale === '0' ? 'none' : 'scaled');
-    root.setAttribute('data-rg-hide-avatar', String(Boolean(settings.hideAvatar)));
-    root.setAttribute('data-rg-compact-sidebar', String(Boolean(settings.compactSidebar)));
-    root.setAttribute('data-rg-clean-view', String(Boolean(settings.cleanView)));
-    root.setAttribute('data-rg-ctrl-enter', String(Boolean(settings.ctrlEnterSend)));
-    root.style.setProperty('--rg-chat-max-width', settings.chatWidth);
-    root.style.setProperty('--rg-font-size', settings.fontSize);
-    root.style.setProperty('--rg-indent-scale', indentScale);
-    resetOuterChatScroll();
-    harmonizeInlineDiagrams();
-    broadcastSandbox();
-  }
-
-  window.addEventListener('message', (e) => {
-    if (e && e.data && e.data.type === 'RG_SANDBOX_READY') broadcastSandbox();
-  });
-
-  window.addEventListener('popstate', () => requestAnimationFrame(resetOuterChatScroll), { passive: true });
-  window.addEventListener(
-    'click',
-    (e) => {
-      if (!settings.enabled || !(e.target instanceof Element)) return;
-      if (
-        e.target.closest(
-          'bard-sidenav, mat-sidenav, side-navigation-content, conversations-list, [data-test-id="conversation"], [data-test-id="new-chat-button"]'
-        )
-      ) {
-        requestAnimationFrame(resetOuterChatScroll);
-        setTimeout(resetOuterChatScroll, 180);
-      }
-    },
-    { passive: true }
-  );
-
-  function isPromptEditorElement(target) {
-    if (!(target instanceof Element)) return false;
-    return Boolean(
-      target.closest(
-        'rich-textarea, .ql-editor, input-area-v2 [contenteditable="true"], .input-area [contenteditable="true"], .query-input textarea'
-      )
-    );
-  }
-
-  function findSendButton() {
-    const selectors = [
-      'input-area-v2 gem-icon-button.send-button:not(.gem-button-disabled):not([aria-disabled="true"]) button:not([disabled]):not([aria-disabled="true"])',
-      'input-area-v2 button.send-button:not([disabled]):not([aria-disabled="true"])',
-      '.input-area gem-icon-button.send-button:not(.gem-button-disabled):not([aria-disabled="true"]) button:not([disabled]):not([aria-disabled="true"])',
-      '.input-area button.send-button:not([disabled]):not([aria-disabled="true"])',
-      '.send-button-container button:not([disabled]):not([aria-disabled="true"])',
-      'button[aria-label*="Send message"]:not([disabled]):not([aria-disabled="true"])',
-      'button[aria-label*="发送"]:not([disabled]):not([aria-disabled="true"])',
-      'button.submit:not([disabled]):not([aria-disabled="true"])'
+    const t = MENU_TEXT[lang] || MENU_TEXT.en;
+    menuIds = [
+      GM_registerMenuCommand(t.panel, () => {
+        if (document.body) openPanel();
+        else document.addEventListener('DOMContentLoaded', openPanel, { once: true });
+      }),
+      GM_registerMenuCommand(t.toggle, () => globalThis.__RG_PAGE__ && globalThis.__RG_PAGE__.toggle())
     ];
-    for (const sel of selectors) {
-      const btn = document.querySelector(sel);
-      if (btn instanceof HTMLElement) return btn;
-    }
-    return null;
+    menuLang = lang;
   }
 
-  const bypassedEvents = new WeakSet();
-  window.addEventListener(
-    'keydown',
-    (event) => {
-      if (!settings.enabled || !settings.ctrlEnterSend) return;
-      if (bypassedEvents.has(event)) return;
-      if (event.key !== 'Enter') return;
-      if (event.isComposing || event.keyCode === 229) return;
-      if (!isPromptEditorElement(event.target)) return;
-
-      const hasSendModifier = event.ctrlKey || event.metaKey;
-      if (hasSendModifier && !event.altKey) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        const sendBtn = findSendButton();
-        if (sendBtn) {
-          sendBtn.click();
-        } else if (event.target instanceof HTMLElement) {
-          const submitEvt = new KeyboardEvent('keydown', {
-            key: 'Enter',
-            code: 'Enter',
-            keyCode: 13,
-            which: 13,
-            bubbles: true,
-            cancelable: true
-          });
-          bypassedEvents.add(submitEvt);
-          event.target.dispatchEvent(submitEvt);
-        }
-        return;
-      }
-
-      if (!event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        const target = event.target;
-        if (target instanceof HTMLTextAreaElement) {
-          const start = target.selectionStart ?? target.value.length;
-          const end = target.selectionEnd ?? target.value.length;
-          target.setRangeText('\\n', start, end, 'end');
-          target.dispatchEvent(new Event('input', { bubbles: true }));
-        } else {
-          document.execCommand('insertParagraph', false);
-        }
-      }
-    },
-    true
-  );
-
-  const obs = new MutationObserver(() => {
-    injectStyle();
-    if (settings.enabled && settings.themeMode === 'auto') apply();
+  chromeShim.storage.sync.get(RG.DEFAULTS, (stored) => registerMenu(RG.resolveLang(RG.normalize(stored).uiLang)));
+  chromeShim.storage.onChanged.addListener((changes) => {
+    if (changes.uiLang) registerMenu(RG.resolveLang(changes.uiLang.newValue));
   });
 
-  function bootstrapRoot() {
-    if (!document.documentElement) {
-      setTimeout(bootstrapRoot, 0);
-      return;
-    }
-    apply();
-    obs.observe(document.documentElement, {
-      attributes: true,
-      childList: true,
-      attributeFilter: ['class', 'data-theme']
-    });
-  }
-
-  bootstrapRoot();
-  document.addEventListener('DOMContentLoaded', () => {
-    apply();
-    if (document.body) {
-      obs.observe(document.body, { attributes: true, attributeFilter: ['class', 'data-theme'] });
-      new MutationObserver(() => {
-        if (isInlineSvgMutating) return;
-        requestAnimationFrame(() => {
-          harmonizeInlineDiagrams();
-          broadcastSandbox();
-        });
-      }).observe(document.body, { childList: true, subtree: true });
-    }
-  });
-
-  if (typeof GM_registerMenuCommand === 'function') {
-    const isZh = resolveLang(settings.uiLang) === 'zh';
-    const L = isZh
-      ? {
-          toggle: '开启 / 暂停美化',
-          theme: '切换外观 (跟随 / 浅色 / 深色)',
-          width: '切换列宽 (768px / 920px / 1120px / 90%)',
-          indent: '切换缩进 (标准GPT / 65% / 0% / 125%)',
-          avatar: '显示 / 隐藏 AI 头像',
-          clean: '开启 / 关闭纯净模式',
-          ctrlEnter: '开启 / 关闭 Ctrl+Enter 发送',
-          lang: 'Language: 切换为 English (需刷新菜单)'
-        }
-      : {
-          toggle: 'Enable / Pause Styling',
-          theme: 'Cycle Theme (Auto / Light / Dark)',
-          width: 'Cycle Width (768px / 920px / 1120px / 90%)',
-          indent: 'Cycle Indent (GPT / 65% / 0% / 125%)',
-          avatar: 'Show / Hide AI Avatar',
-          clean: 'Toggle Clean View',
-          ctrlEnter: 'Toggle Ctrl+Enter to Send',
-          lang: '语言: 切换为中文 (Reload for menu)'
-        };
-
-    GM_registerMenuCommand(L.toggle, () => {
-      settings.enabled = !settings.enabled;
-      saveSettings(settings);
-      apply();
-    });
-    GM_registerMenuCommand(L.theme, () => {
-      const modes = ['auto', 'light', 'dark'];
-      settings.themeMode = modes[(modes.indexOf(settings.themeMode) + 1) % modes.length];
-      saveSettings(settings);
-      apply();
-    });
-    GM_registerMenuCommand(L.width, () => {
-      const widths = ['800px', '920px', '1120px', '90%'];
-      settings.chatWidth = widths[(widths.indexOf(settings.chatWidth) + 1) % widths.length];
-      saveSettings(settings);
-      apply();
-    });
-    GM_registerMenuCommand(L.indent, () => {
-      const scales = ['1', '0.65', '0', '1.25'];
-      const curIdx = scales.indexOf(String(settings.indentScale));
-      settings.indentScale = scales[(curIdx === -1 ? 0 : curIdx + 1) % scales.length];
-      saveSettings(settings);
-      apply();
-    });
-    GM_registerMenuCommand(L.avatar, () => {
-      settings.hideAvatar = !settings.hideAvatar;
-      saveSettings(settings);
-      apply();
-    });
-    GM_registerMenuCommand(L.clean, () => {
-      settings.cleanView = !settings.cleanView;
-      saveSettings(settings);
-      apply();
-    });
-    GM_registerMenuCommand(L.ctrlEnter, () => {
-      settings.ctrlEnterSend = !settings.ctrlEnterSend;
-      saveSettings(settings);
-      apply();
-    });
-    GM_registerMenuCommand(L.lang, () => {
-      settings.uiLang = resolveLang(settings.uiLang) === 'zh' ? 'en' : 'zh';
-      saveSettings(settings);
-      window.location.reload();
-    });
-  }
+  globalThis.__RG_PANEL__ = { open: openPanel, close: closePanel, toggle: togglePanel };
 })();
 `;
 
+const outDir = path.join(ROOT, 'userscript');
+fs.mkdirSync(outDir, { recursive: true });
 const outPath = path.join(outDir, 'refined-gemini.user.js');
 fs.writeFileSync(outPath, userScript);
-console.log(`Generated ${outPath}`);
+console.log(`Generated ${path.relative(ROOT, outPath)} (${(userScript.length / 1024).toFixed(1)} KB)`);

@@ -27,13 +27,13 @@ npm run pack
 ```
 
 This generates:
-- **Extension Store Package**: `dist/refined-gemini-v1.6.1-extension.zip`
+- **Extension Store Package**: `dist/refined-gemini-v1.7.0-extension.zip`
 - **300×300 Store Logo**: `docs/assets/store-logo-300.png`
 
 ### Step 3: Upload Package & Configure Properties
 
 1. In Partner Center, navigate to **Microsoft Edge -> Overview -> Create new extension**.
-2. Under **Packages**, upload `dist/refined-gemini-v1.6.1-extension.zip`. Partner Center automatically detects `English` (default) and `Chinese (Simplified)` from `_locales/`.
+2. Under **Packages**, upload `dist/refined-gemini-v1.7.0-extension.zip`. Partner Center automatically detects `English` (default) and `Chinese (Simplified)` from `_locales/`.
 3. Under **Availability**, select **Public** and enable all markets.
 4. Under **Properties**:
    - **Category**: `Productivity`
@@ -72,6 +72,7 @@ Paste the following into **Publish -> Notes for certification** (typical review 
 Single Purpose: Customizes the visual appearance, typography, and keyboard shortcut (Ctrl+Enter) of Google Gemini Web (https://gemini.google.com/*) locally in the user's browser.
 Permissions Justification:
 - "storage": Used solely to persist local UI preferences (theme, column width, font size, indentation scale, and UI language) via chrome.storage.sync.
+- "activeTab": Used only when the user opens the popup or presses the toggle shortcut, to check whether the current tab is gemini.google.com and to show a local on-page confirmation / style health status. No page content is read or transmitted.
 - Host "https://gemini.google.com/*": Injects core CSS/JS on Google Gemini web pages (plus match_origin_as_fallback for Gemini's embedded <genui-sandbox> about:srcdoc diagram iframes) to apply ChatGPT-aligned styling and optional Ctrl+Enter send behavior.
 - Subframe hosts "https://*.scf.usercontent.goog/*" and "https://*.googleusercontent.com/*" (all_frames, subframe-only guard `window !== window.top`): Google Gemini renders interactive Generative UI diagrams/flowcharts inside isolated SafeContentFrame iframes hosted on `*.scf.usercontent.goog` / `*.googleusercontent.com` as well as opaque `about:srcdoc` iframes. Injecting `sandbox.css` + `sandbox.js` into these embedded subframes keeps interactive diagrams synchronized with the user's selected Light/Dark theme and font size. Top-level tabs and auth/feedback frames are explicitly ignored.
 No user data is collected or transmitted externally. No login credentials are required to test—open https://gemini.google.com/app and click the extension toolbar icon to test all real-time toggles.

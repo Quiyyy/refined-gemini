@@ -3,124 +3,162 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
   <title>Refined Gemini</title>
   <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-  <div class="popup-shell">
-    <!-- Top Header: Brand + Language Switcher + Master Toggle -->
+  <!--
+    The same markup is mounted inside a Shadow DOM panel by the UserScript build
+    (scripts/build-userscript.mjs), so keep every lookup id-based and self-contained.
+  -->
+  <div class="popup-shell" id="rgPopup">
+    <!-- Header: Brand + Live Status + Language + Master Toggle -->
     <header class="header">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
             <path d="M12 3C12.4 7.8 16.2 11.6 21 12C16.2 12.4 12.4 16.2 12 21C11.6 16.2 7.8 12.4 3 12C7.8 11.6 11.6 7.8 12 3Z" fill="currentColor"/>
           </svg>
         </div>
-        <h1 class="brand-title">Refined Gemini</h1>
+        <div class="brand-text">
+          <h1 class="brand-title">Refined Gemini</h1>
+          <p class="brand-status" id="statusText" aria-live="polite">
+            <span class="status-dot" aria-hidden="true"></span><span id="statusLabel">已启用</span>
+          </p>
+        </div>
       </div>
 
       <div class="header-actions">
-        <div class="lang-switch" id="langSwitch" role="group" aria-label="Language">
-          <button type="button" class="lang-btn" data-lang="zh">中</button>
-          <button type="button" class="lang-btn" data-lang="en">EN</button>
+        <div class="lang-switch" id="langSwitch" role="radiogroup" aria-label="Language">
+          <button type="button" class="lang-btn" role="radio" data-lang="zh" lang="zh-CN">中</button>
+          <button type="button" class="lang-btn" role="radio" data-lang="en" lang="en">EN</button>
         </div>
 
         <label class="switch" id="masterSwitchLabel">
-          <input type="checkbox" id="toggleEnabled" checked />
-          <span class="switch-track"><span class="switch-thumb"></span></span>
+          <input type="checkbox" id="toggleEnabled" role="switch" checked />
+          <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
         </label>
       </div>
     </header>
 
+    <!-- Contextual notice (not on Gemini / reload needed / layout drift detected) -->
+    <div class="notice" id="notice" role="status" hidden>
+      <svg class="notice-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+        <path d="M12 7.5v5.5M12 16.2v.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="notice-text" id="noticeText"></span>
+      <button type="button" class="notice-action" id="noticeAction"></button>
+    </div>
+
     <!-- Main Settings Body -->
     <main class="settings-body" id="settingsBody">
-      <!-- Segmented Controls -->
       <section class="group">
         <div class="field-block">
-          <span class="field-label" data-i18n="theme">外观</span>
-          <div class="segmented" role="radiogroup" data-key="themeMode">
-            <button type="button" class="seg-btn active" data-value="auto" data-i18n="themeAuto">跟随</button>
-            <button type="button" class="seg-btn" data-value="light" data-i18n="themeLight">浅色</button>
-            <button type="button" class="seg-btn" data-value="dark" data-i18n="themeDark">深色</button>
+          <span class="field-label" id="lbl-theme" data-i18n="theme">外观</span>
+          <div class="segmented" role="radiogroup" aria-labelledby="lbl-theme" data-key="themeMode">
+            <button type="button" class="seg-btn" role="radio" data-value="auto" data-i18n="themeAuto">自动</button>
+            <button type="button" class="seg-btn" role="radio" data-value="light" data-i18n="themeLight">浅色</button>
+            <button type="button" class="seg-btn" role="radio" data-value="dark" data-i18n="themeDark">深色</button>
           </div>
         </div>
 
         <div class="field-block">
-          <span class="field-label" data-i18n="width">列宽</span>
-          <div class="segmented" role="radiogroup" data-key="chatWidth">
-            <button type="button" class="seg-btn active" data-value="800px">768px</button>
-            <button type="button" class="seg-btn" data-value="920px">920px</button>
-            <button type="button" class="seg-btn" data-value="1120px">1120px</button>
-            <button type="button" class="seg-btn" data-value="90%">90%</button>
+          <span class="field-label" id="lbl-width" data-i18n="width">内容宽度</span>
+          <div class="segmented" role="radiogroup" aria-labelledby="lbl-width" data-key="chatWidth">
+            <button type="button" class="seg-btn" role="radio" data-value="800px" data-i18n="widthStd">标准</button>
+            <button type="button" class="seg-btn" role="radio" data-value="920px" data-i18n="widthWide">宽</button>
+            <button type="button" class="seg-btn" role="radio" data-value="1120px" data-i18n="widthWider">超宽</button>
+            <button type="button" class="seg-btn" role="radio" data-value="90%" data-i18n="widthFluid">自适应</button>
           </div>
         </div>
 
         <div class="field-block">
-          <span class="field-label" data-i18n="fontSize">字号</span>
-          <div class="segmented" role="radiogroup" data-key="fontSize">
-            <button type="button" class="seg-btn" data-value="15px">15px</button>
-            <button type="button" class="seg-btn active" data-value="16px">16px</button>
-            <button type="button" class="seg-btn" data-value="17px">17px</button>
+          <span class="field-label" id="lbl-font" data-i18n="fontSize">字号</span>
+          <div class="segmented" role="radiogroup" aria-labelledby="lbl-font" data-key="fontSize">
+            <button type="button" class="seg-btn" role="radio" data-value="15px" data-i18n="fontSm">小</button>
+            <button type="button" class="seg-btn" role="radio" data-value="16px" data-i18n="fontMd">标准</button>
+            <button type="button" class="seg-btn" role="radio" data-value="17px" data-i18n="fontLg">大</button>
           </div>
         </div>
 
         <div class="field-block">
-          <span class="field-label" data-i18n="indent">缩进</span>
-          <div class="segmented" role="radiogroup" data-key="indentScale">
-            <button type="button" class="seg-btn" data-value="0">0%</button>
-            <button type="button" class="seg-btn" data-value="0.65">65%</button>
-            <button type="button" class="seg-btn active" data-value="1" data-i18n="indentGpt">标准 GPT</button>
-            <button type="button" class="seg-btn" data-value="1.25">125%</button>
+          <span class="field-label" id="lbl-indent" data-i18n="indent">列表缩进</span>
+          <div class="segmented" role="radiogroup" aria-labelledby="lbl-indent" data-key="indentScale">
+            <button type="button" class="seg-btn" role="radio" data-value="0" data-i18n="indentNone">无</button>
+            <button type="button" class="seg-btn" role="radio" data-value="0.65" data-i18n="indentCompact">紧凑</button>
+            <button type="button" class="seg-btn" role="radio" data-value="1" data-i18n="indentStd">标准</button>
+            <button type="button" class="seg-btn" role="radio" data-value="1.25" data-i18n="indentRelaxed">宽松</button>
           </div>
         </div>
       </section>
 
-      <div class="divider"></div>
+      <div class="divider" role="presentation"></div>
 
-      <!-- Boolean Switches -->
       <section class="group switches-list">
-        <label class="row-item" for="toggleHideAvatar">
+        <label class="row-item" data-hint="hideAvatarHint">
           <span class="row-title" data-i18n="hideAvatar">隐藏 AI 头像</span>
           <span class="switch switch-sm">
-            <input type="checkbox" id="toggleHideAvatar" checked />
-            <span class="switch-track"><span class="switch-thumb"></span></span>
+            <input type="checkbox" id="toggleHideAvatar" role="switch" data-key="hideAvatar" />
+            <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
           </span>
         </label>
 
-        <label class="row-item" for="toggleCompactSidebar">
+        <label class="row-item" data-hint="compactSidebarHint">
           <span class="row-title" data-i18n="compactSidebar">紧凑侧边栏</span>
           <span class="switch switch-sm">
-            <input type="checkbox" id="toggleCompactSidebar" checked />
-            <span class="switch-track"><span class="switch-thumb"></span></span>
+            <input type="checkbox" id="toggleCompactSidebar" role="switch" data-key="compactSidebar" />
+            <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
           </span>
         </label>
 
-        <label class="row-item" for="toggleCleanView">
+        <label class="row-item" data-hint="cleanViewHint">
           <span class="row-title" data-i18n="cleanView">纯净模式</span>
           <span class="switch switch-sm">
-            <input type="checkbox" id="toggleCleanView" checked />
-            <span class="switch-track"><span class="switch-thumb"></span></span>
+            <input type="checkbox" id="toggleCleanView" role="switch" data-key="cleanView" />
+            <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
           </span>
         </label>
 
-        <label class="row-item" for="toggleCtrlEnter">
+        <label class="row-item" data-hint="scaledHeadingsHint">
+          <span class="row-title" data-i18n="scaledHeadings">标题分级字号</span>
+          <span class="switch switch-sm">
+            <input type="checkbox" id="toggleScaledHeadings" role="switch" data-key="scaledHeadings" />
+            <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+          </span>
+        </label>
+
+        <label class="row-item" data-hint="ctrlEnterHint">
           <span class="row-title">
-            <kbd id="modKeyLabel">Ctrl</kbd> + <kbd>Enter</kbd>
+            <kbd class="mod-key">Ctrl</kbd><kbd>Enter</kbd>
             <span data-i18n="sendSuffix">发送</span>
           </span>
           <span class="switch switch-sm">
-            <input type="checkbox" id="toggleCtrlEnter" />
-            <span class="switch-track"><span class="switch-thumb"></span></span>
+            <input type="checkbox" id="toggleCtrlEnter" role="switch" data-key="ctrlEnterSend" />
+            <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
           </span>
         </label>
       </section>
     </main>
 
-    <!-- Footer -->
+    <!-- Footer: contextual hint line (falls back to version + shortcut) & reset -->
     <footer class="footer">
-      <span class="version">v1.6.1</span>
+      <p class="footer-hint" id="footerHint" aria-live="polite">
+        <span id="footerDefault">
+          <span class="version" id="versionLabel">v1.7.0</span>
+          <button type="button" class="shortcut-link" id="shortcutLink" hidden></button>
+        </span>
+        <span id="footerHintText" hidden></span>
+      </p>
       <button type="button" id="resetBtn" class="reset-btn" data-i18n="reset">恢复默认</button>
     </footer>
+
+    <!-- Undo toast -->
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+      <span id="toastText"></span>
+      <button type="button" class="toast-action" id="toastAction"></button>
+    </div>
   </div>
 
   <script src="../defaults.js"></script>

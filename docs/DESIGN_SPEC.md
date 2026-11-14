@@ -1,4 +1,4 @@
-# Refined Gemini — 1:1 ChatGPT Web UI Design Specification (`v1.6.1`)
+# Refined Gemini — 1:1 ChatGPT Web UI Design Specification (`v1.7.0`)
 
 **English** · [简体中文](./DESIGN_SPEC.zh-CN.md)
 
@@ -23,17 +23,21 @@ All tokens are derived from OpenAI's official design system (`variables-primitiv
 
 ---
 
-## 2. Minimalist Bilingual Controls (`中文 / EN`)
+## 2. Bilingual Controls & Interaction (`中文 / EN`, `v1.7.0`)
 
-To keep cognitive load near zero, all verbose explanatory subtitles were removed from the Popup in `v1.4.0`:
+The popup stays free of permanent explanatory text; context is revealed only on demand (hover / keyboard focus shows a one-line hint in the footer). Option labels are semantic rather than raw values:
 
 1. **Language (`uiLang`)**: `中` / `EN` (defaults to `auto` based on `navigator.language`).
-2. **Master Toggle (`enabled`)**: Instant live toggle without page reload.
+2. **Master Toggle (`enabled`)**: Instant live toggle without page reload; global shortcut **`Alt+Shift+G`** (in-page toast + `OFF` toolbar badge while paused).
 3. **Theme (`themeMode`)**: `Auto` / `Light` / `Dark`.
-4. **Width (`chatWidth`)**: `768px` (default) / `920px` / `1120px` / `90%`.
-5. **Font Size (`fontSize`)**: `15px` / `16px` (default) / `17px`.
-6. **Indent (`indentScale`)**: `0%` / `65%` / `GPT` (default) / `125%`.
-7. **Switches**: `Hide AI Avatar`, `Compact Sidebar`, `Clean View`, and `Ctrl/⌘ + Enter to Send`.
+4. **Content Width (`chatWidth`)**: `Standard` 768px (default) / `Wide` 920px / `Wider` 1120px / `Fluid` 90%.
+5. **Font Size (`fontSize`)**: `Small` 15px / `Default` 16px / `Large` 17px.
+6. **List Indent (`indentScale`)**: `None` 0% / `Compact` 65% / `Default` GPT / `Relaxed` 125%.
+7. **Switches**: `Hide AI Avatar`, `Compact Sidebar`, `Clean View`, `Scaled Headings` (opt-in `H1–H3` = `1.5 / 1.25 / 1.125em`), and `Ctrl/⌘ + Enter to Send` (adds `· Ctrl+Enter to send` to the composer placeholder).
+8. **Notices**: Non-Gemini tab → "Open Gemini"; tab opened before install/update → "Reload"; local DOM health check failure → prefilled issue report.
+9. **Reset**: Restores defaults with a 5-second **Undo** toast.
+
+**Interaction tokens**: 4px spacing grid, `12px` minimum text, `2px #0285FF` `:focus-visible` ring (inset inside the composer & code cards), ARIA radio groups with roving tabindex, `prefers-reduced-motion` respected. The pending state uses a `12px` ChatGPT-style pulsing dot aligned to the prose left edge instead of the Lottie sparkle. Block rhythm: tables `8px / 16px`, code cards `12px` above / `16px` below.
 
 > [!TIP]
 > **Icon & Math Font Isolation**: Global typography rules explicitly preserve `mat-icon`, `.google-symbols`, `Material Symbols Outlined`, and `KaTeX` font families so UI ligature icons and mathematical formulas never break.

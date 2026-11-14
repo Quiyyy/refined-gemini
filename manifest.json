@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extName__",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "default_locale": "en",
   "description": "__MSG_extDescription__",
   "homepage_url": "https://github.com/Quiyyy/refined-gemini",
@@ -21,8 +21,21 @@
       "128": "icons/icon128.png"
     }
   },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "commands": {
+    "toggle-styling": {
+      "suggested_key": {
+        "default": "Alt+Shift+G",
+        "mac": "Alt+Shift+G"
+      },
+      "description": "__MSG_cmdToggle__"
+    }
+  },
   "permissions": [
-    "storage"
+    "storage",
+    "activeTab"
   ],
   "content_scripts": [
     {

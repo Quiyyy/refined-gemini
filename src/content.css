@@ -4095,3 +4095,205 @@ html[data-rg-enabled="true"] ::-webkit-scrollbar-thumb:hover {
   background-color: var(--rg-scrollbar-thumb-hover) !important;
 }
 
+/* ==========================================================================
+   13. Interaction & Accessibility Layer (v1.7)
+   ========================================================================== */
+
+html[data-rg-enabled="true"] {
+  --rg-focus-ring: #0285ff;
+}
+
+html[data-rg-enabled="true"][data-rg-theme="dark"] {
+  --rg-focus-ring: #66b5ff;
+}
+
+/* 13.1 Keyboard focus rings — every restyled control stays visibly focusable for
+   keyboard users while mouse clicks remain ring-free (`:focus-visible` heuristics).
+   Text inputs are excluded: the composer signals focus via its capsule border. */
+html[data-rg-enabled="true"] :is(
+  button,
+  a[href],
+  summary,
+  mat-chip,
+  [role="button"],
+  [role="link"],
+  [role="tab"],
+  [role="menuitem"],
+  [role="menuitemradio"],
+  [role="option"],
+  [role="switch"],
+  [role="checkbox"],
+  [role="radio"],
+  [tabindex="0"]:not([contenteditable]):not(infinite-scroller):not(.chat-history)
+):focus-visible {
+  outline: 2px solid var(--rg-focus-ring) !important;
+  outline-offset: 2px !important;
+}
+
+/* Clipped containers (composer, chips, cards) would cut an outer ring: draw it inset */
+html[data-rg-enabled="true"] :is(input-area-v2, .input-area, code-block, .code-block-decoration, mat-chip-set) :is(button, [role="button"]):focus-visible {
+  outline-offset: -2px !important;
+}
+
+/* 13.2 Optional heading scale (`scaledHeadings`): gentle h1–h3 progression for long
+   answers & Deep Research reports. Default `uniform` keeps the v1.5 16px weight-only scale. */
+html[data-rg-enabled="true"][data-rg-heading-scale="scaled"] :is(
+  .markdown,
+  .markdown-main-panel,
+  .md-content,
+  message-content,
+  model-response,
+  response-container,
+  article.x1pxov78
+) h1 {
+  font-size: calc(var(--rg-font-size, 16px) * 1.5) !important;
+  line-height: 1.33 !important;
+  letter-spacing: -0.01em !important;
+}
+
+html[data-rg-enabled="true"][data-rg-heading-scale="scaled"] :is(
+  .markdown,
+  .markdown-main-panel,
+  .md-content,
+  message-content,
+  model-response,
+  response-container,
+  article.x1pxov78
+) h2 {
+  font-size: calc(var(--rg-font-size, 16px) * 1.25) !important;
+  line-height: 1.4 !important;
+}
+
+html[data-rg-enabled="true"][data-rg-heading-scale="scaled"] :is(
+  .markdown,
+  .markdown-main-panel,
+  .md-content,
+  message-content,
+  model-response,
+  response-container,
+  article.x1pxov78
+) h3 {
+  font-size: calc(var(--rg-font-size, 16px) * 1.125) !important;
+  line-height: 1.45 !important;
+}
+
+/* 13.3 Pending reply indicator: replace Gemini's tiny 3-dot Lottie (which sat 30px
+   right of the prose baseline once the avatar gutter is gone) with ChatGPT's single
+   breathing dot, aligned to the exact left text edge. */
+html[data-rg-enabled="true"] thinking-dots-animation .thinking-dots-animation {
+  position: relative !important;
+  width: 24px !important;
+  height: 24px !important;
+}
+
+html[data-rg-enabled="true"] thinking-dots-animation .thinking-dots-animation > svg {
+  visibility: hidden !important;
+}
+
+html[data-rg-enabled="true"] thinking-dots-animation .thinking-dots-animation::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 6px !important;
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  background-color: var(--rg-text-primary) !important;
+  animation: rg-pending-pulse 1.5s ease-in-out infinite !important;
+}
+
+html[data-rg-enabled="true"][data-rg-hide-avatar="true"] thinking-dots-animation {
+  margin-left: 0 !important;
+  margin-inline-start: 0 !important;
+}
+
+@keyframes rg-pending-pulse {
+  0%,
+  100% {
+    transform: scale(0.82);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 13.4 Ctrl/⌘ + Enter discoverability: append a localized hint to the empty composer
+   placeholder (`--rg-send-hint` is set by content.js from the UI language). */
+html[data-rg-enabled="true"][data-rg-ctrl-enter="true"] rich-textarea .ql-editor.ql-blank[data-placeholder]::before {
+  content: attr(data-placeholder) var(--rg-send-hint, "") !important;
+}
+
+/* 13.5 Block rhythm: restore the table card's 0.5rem / 1rem margins (previously
+   zeroed by the higher-specificity wrapper reset, gluing following text to the last
+   row) and drop Gemini's native 40px gap above code cards (code-block owns spacing). */
+html[data-rg-enabled="true"][data-rg-theme] :is(.markdown, .markdown-main-panel) table-block {
+  margin: 0.5rem 0 1rem 0 !important;
+}
+
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel) > response-element:has(> code-block) {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* 13.6 Reduced motion: keep our own micro-animations calm */
+@media (prefers-reduced-motion: reduce) {
+  html[data-rg-enabled="true"] thinking-dots-animation .thinking-dots-animation::before {
+    animation: none !important;
+    opacity: 0.8 !important;
+  }
+}
+
+/* ==========================================================================
+   14. Quick-Toggle Toast (intentionally NOT gated on data-rg-enabled so it stays
+       legible right after switching back to native Gemini)
+   ========================================================================== */
+
+#rg-toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  z-index: 2147483000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(560px, calc(100vw - 32px));
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #0d0d0d;
+  color: #ffffff;
+  font: 500 13px/1.4 ui-sans-serif, -apple-system, system-ui, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -8px);
+  transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+#rg-toast[data-theme="dark"] {
+  background: #ececec;
+  color: #0d0d0d;
+}
+
+#rg-toast.rg-toast-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+#rg-toast .rg-toast-detail {
+  opacity: 0.6;
+  font-weight: 400;
+}
+
+#rg-toast .rg-toast-detail::before {
+  content: "·";
+  margin-right: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #rg-toast {
+    transition: none;
+  }
+}
+

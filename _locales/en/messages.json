@@ -10,5 +10,9 @@
   "actionTitle": {
     "message": "Refined Gemini Settings",
     "description": "Toolbar button tooltip"
+  },
+  "cmdToggle": {
+    "message": "Toggle Refined Gemini styling on / off",
+    "description": "Keyboard shortcut description"
   }
 }

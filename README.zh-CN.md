@@ -6,7 +6,7 @@
 
 ---
 
-## 一、 核心改进概览（`v1.6.1`）
+## 一、 核心改进概览
 
 以 OpenAI 官方开源组件库（`openai/apps-sdk-ui`）的设计 Token 与排版规范为唯一基准，彻底解决原生 Gemini 网页端的阅读与交互痛点：
 
@@ -21,24 +21,39 @@
 
 ---
 
-## 二、 极简双语设置面板（`中 / EN`）
+## 二、 `v1.7.0` 交互与细节升级
 
-点击浏览器工具栏的 **Refined Gemini** 图标即可打开无冗余文字说明的精简设置面板，所有选项**实时生效，无需刷新页面**：
+- **`Alt+Shift+G` 一键对比**：随时在原生 Gemini 与 Refined Gemini 之间切换，页面顶部弹出确认提示，暂停时工具栏图标显示 `OFF` 角标（可在 `chrome://extensions/shortcuts` 自定义；油猴脚本同样支持）。
+- **设置面板重新设计**：顶部实时状态行；选项改用语义化标签（`标准 / 宽 / 超宽 / 自适应`，不再直接显示像素值）；悬停或聚焦时底栏显示该项说明；完整键盘操作（ARIA 单选组 + 方向键 + 可见焦点环）；**恢复默认支持 5 秒内撤销**。
+- **情境化提示**：当前标签页不是 Gemini、页面在安装/更新前打开需要刷新，或本地健康检查发现 Gemini DOM 结构变化时，面板会给出对应提示与一键操作（预填信息的问题反馈，数据不离开浏览器）。
+- **ChatGPT 风格等待指示**：用与正文基线对齐的柔和脉冲圆点替换 Gemini 彩色 Lottie 动画。
+- **块级节奏修正**：表格、代码块上下统一 `12–16px` 间距（原生代码块上方叠加 `40px` 空白、表格上方为 `0px`）。
+- **可选标题分级字号**（`scaledHeadings`）：`H1–H3` 为 `1.5 / 1.25 / 1.125` 倍，便于浏览长回答；默认关闭，保持统一 16px 设计。
+- **`Ctrl+Enter` 可发现性**：开启后输入框占位符末尾提示 `· Ctrl+Enter 发送`（macOS 显示 `⌘+Enter`）。
+- **无障碍**：Gemini 原生控件统一 `#0285FF` `:focus-visible` 焦点环，并适配 `prefers-reduced-motion`。
+- **油猴脚本功能对齐**：脚本内置与扩展完全相同的设置面板（Shadow DOM 页内浮层，从脚本管理器菜单打开），多标签页设置实时同步。
+
+---
+
+## 三、 双语设置面板（`中 / EN`）
+
+点击浏览器工具栏的 **Refined Gemini** 图标（或油猴菜单中的 **⚙️ 打开设置面板**）即可打开设置面板，所有选项**实时生效，无需刷新页面**：
 
 - **界面语言（`中 / EN`）**：支持一键切换简体中文与英文界面（首次默认自动跟随浏览器语言）。
-- **总开关**：随时一键开启或暂停美化（主页面、行内 SVG 与沙盒交互式图表同步无损还原）。
-- **外观（`themeMode`）**：`跟随` / `浅色` / `深色`。
-- **列宽（`chatWidth`）**：`768px`（默认，1:1 对齐 ChatGPT `48rem` 正文列宽）/ `920px` / `1120px` / `90%`。
-- **字号（`fontSize`）**：`15px` / `16px`（默认，行高 `1.68`）/ `17px`。
-- **缩进（`indentScale`）**：`0%` / `65%` / **`标准 GPT`（默认）** / `125%`。
+- **总开关**：随时一键开启或暂停美化（主页面、行内 SVG 与沙盒交互式图表同步无损还原），快捷键 `Alt+Shift+G`。
+- **外观（`themeMode`）**：`自动` / `浅色` / `深色`。
+- **内容宽度（`chatWidth`）**：`标准`（768px，默认，1:1 对齐 ChatGPT `48rem` 正文列宽）/ `宽`（920px）/ `超宽`（1120px）/ `自适应`（90%）。
+- **字号（`fontSize`）**：`小` 15px / `标准` 16px（默认，行高 `1.68`）/ `大` 17px。
+- **列表缩进（`indentScale`）**：`无` / `紧凑`（65%）/ **`标准`**（ChatGPT，默认）/ `宽松`（125%）。
 - **隐藏 AI 头像（`hideAvatar`）**：正文、表格与代码块沿同一左基准线直排。
 - **紧凑侧边栏（`compactSidebar`）**：`260px` 侧栏宽度配紧凑圆角会话行。
 - **纯净模式（`cleanView`）**：隐藏底部免责声明、IP 定位栏与升级推广/发现卡片，同时保留轻量细框追问建议卡片。
+- **标题分级字号（`scaledHeadings`）**：`H1–H3` 递进放大（默认关闭）。
 - **`Ctrl / ⌘ + Enter` 发送（`ctrlEnterSend`）**：单按 `Enter` 仅换行（兼容中文输入法候选上屏），防长 Prompt 误触发送。
 
 ---
 
-## 三、 安装方式
+## 四、 安装方式
 
 ### 方式 A：Chrome / Edge / Brave / Arc 开发者模式加载
 
@@ -58,7 +73,7 @@
 
 ---
 
-## 四、 本地构建与商店打包
+## 五、 本地构建与商店打包
 
 本项目**零第三方依赖**（仅使用 Node.js 18+ 内置标准库）：
 
@@ -69,13 +84,13 @@ npm run build
 # 检查所有扩展与油猴脚本 JS 语法
 npm run check
 
-# 一键打包符合 Edge / Chrome 扩展商店规范的纯净上传包 -> dist/refined-gemini-v1.6.1-extension.zip
+# 一键打包符合 Edge / Chrome 扩展商店规范的纯净上传包 -> dist/refined-gemini-v1.7.0-extension.zip
 npm run pack
 ```
 
 ---
 
-## 五、 项目目录结构
+## 六、 项目目录结构
 
 ```text
 refined-gemini/
@@ -84,17 +99,18 @@ refined-gemini/
 ├── _locales/                     # WebExtension 标准多语言包 (en, zh_CN)
 ├── icons/                        # SVG 矢量源文件与超采样抗锯齿图标 (16/32/48/128px)
 ├── src/
-│   ├── defaults.js               # 默认配置项单一数据源 (Single Source of Truth)
+│   ├── defaults.js               # 默认值、选项集合与校验的单一数据源 (Single Source of Truth)
+│   ├── background.js             # Service Worker：Alt+Shift+G 快捷开关与 OFF 角标
 │   ├── content.css               # 1:1 ChatGPT 视觉与排版核心样式表
-│   ├── content.js                # 首屏零闪烁缓存、沙盒跨帧同步与 Ctrl+Enter 发送
+│   ├── content.js                # 首屏零闪烁缓存、沙盒跨帧同步、Ctrl+Enter、提示条与健康检查
 │   ├── sandbox.css               # Generative UI 沙盒交互式图表对齐样式表
 │   ├── sandbox.js                # 沙盒内 SVG / CSS 色板动态同源映射与无损还原脚本
-│   └── popup/                    # 精简无冗余说明的中英双语 Popup 控制面板
+│   └── popup/                    # 中英双语设置面板（同时复用为油猴脚本页内面板）
 ├── userscript/
 │   └── refined-gemini.user.js    # 符合 Greasy Fork / ScriptCat 规范的双语油猴脚本
 ├── scripts/
 │   ├── generate-icons.mjs        # 零依赖 PNG 图标与 300x300 商店徽标生成脚本
-│   ├── build-userscript.mjs      # 从主页面与沙盒 CSS 自动同步构建油猴脚本
+│   ├── build-userscript.mjs      # 将 src/* 与设置面板（Shadow DOM）打包为油猴脚本
 │   └── pack-extension.mjs        # 一键生成商店上传专用 ZIP 压缩包
 └── docs/
     ├── DESIGN_SPEC.zh-CN.md      # 视觉与排版设计规范（中文 / English）
@@ -103,11 +119,12 @@ refined-gemini/
     └── preview.html              # 本地零依赖交互式对比预览沙盒
 ```
 
-## 六、 相关文档
+## 七、 相关文档
 
 - **上架发布指南（Edge 插件商店 & 油猴脚本市场）**：[简体中文](./docs/PUBLISHING.zh-CN.md) · [English](./docs/PUBLISHING.md)
 - **视觉与排版设计规范**：[简体中文](./docs/DESIGN_SPEC.zh-CN.md) · [English](./docs/DESIGN_SPEC.md)
 - **隐私政策声明**：[PRIVACY.md](./docs/PRIVACY.md)
+- **更新日志**：[CHANGELOG.md](./CHANGELOG.md)
 
 ## License
 

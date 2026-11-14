@@ -10,5 +10,9 @@
   "actionTitle": {
     "message": "Refined Gemini 设置",
     "description": "工具栏按钮悬停提示"
+  },
+  "cmdToggle": {
+    "message": "开启 / 暂停 Refined Gemini 美化",
+    "description": "快捷键说明"
   }
 }

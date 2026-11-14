@@ -6,42 +6,35 @@
  *   2. Real-time sync with chrome.storage.sync and Popup messages (instant live preview).
  *   3. Accurate Light/Dark theme resolution (auto-detecting Gemini's active theme or forcing light/dark).
  *   4. Optional IME-safe Ctrl / Cmd + Enter to send (plain Enter inserts a line break).
+ *   5. Quick-toggle feedback toast, layout health self-check for the popup, and
+ *      (UserScript only) an in-page Alt+Shift+G toggle shortcut.
+ *
+ * The same file is bundled verbatim into the UserScript, where `chrome` is a
+ * GM_* backed shim (see scripts/build-userscript.mjs).
  */
 (function () {
   'use strict';
 
-  const STORAGE_KEY = globalThis.REFINED_GEMINI_STORAGE_KEY || 'refined_gemini_settings_v1';
-  const DEFAULTS = globalThis.REFINED_GEMINI_DEFAULTS || {
-    enabled: true,
-    uiLang: 'auto',
-    themeMode: 'auto',
-    chatWidth: '800px',
-    fontSize: '16px',
-    indentScale: '1',
-    hideAvatar: true,
-    compactSidebar: true,
-    cleanView: true,
-    ctrlEnterSend: false
-  };
-
-  const VALID_INDENT_SCALES = new Set(['0', '0.65', '1', '1.25']);
-  const VALID_LANGS = new Set(['auto', 'zh', 'en']);
-
-  function normalizeSettings(rawSettings) {
-    const merged = { ...DEFAULTS, ...rawSettings };
-    if (merged.chatWidth === '768px') {
-      merged.chatWidth = '800px';
+  const RG = globalThis.REFINED_GEMINI;
+  const STORAGE_KEY = RG.STORAGE_KEY;
+  const DEFAULTS = RG.DEFAULTS;
+  const normalizeSettings = RG.normalize;
+  const VERSION = (() => {
+    try {
+      return chrome.runtime.getManifest().version;
+    } catch (_) {
+      return RG.VERSION || '';
     }
-    if (!VALID_INDENT_SCALES.has(String(merged.indentScale))) {
-      merged.indentScale = '1';
-    } else {
-      merged.indentScale = String(merged.indentScale);
+  })();
+  // Real extension contexts own `chrome.runtime.id`; the UserScript shim does not.
+  const IS_EXTENSION = (() => {
+    try {
+      return Boolean(chrome.runtime && chrome.runtime.id);
+    } catch (_) {
+      return false;
     }
-    if (!VALID_LANGS.has(String(merged.uiLang))) {
-      merged.uiLang = 'auto';
-    }
-    return merged;
-  }
+  })();
+  const IS_MAC = /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent || '');
 
   let currentSettings = { ...DEFAULTS };
 
@@ -157,17 +150,25 @@
 
   let isInlineSvgMutating = false;
 
-  function harmonizeInlineDiagrams() {
+  function harmonizeInlineDiagrams(force = false) {
     if (!document.body) return;
     const enabled = Boolean(currentSettings.enabled);
     const theme = resolveEffectiveTheme(currentSettings.themeMode);
     const map = theme === 'dark' ? INLINE_SVG_DARK_HEX : INLINE_SVG_LIGHT_HEX;
+    const passKey = `${enabled}|${theme}`;
 
     isInlineSvgMutating = true;
     try {
       const svgs = document.body.querySelectorAll(`${INLINE_DIAGRAM_ROOT_SEL} svg`);
       for (const svg of svgs) {
         if (svg.closest('web-preview')) continue;
+
+        // Incremental pass: skip diagrams already processed for this exact state whose
+        // node count is unchanged (cheap live HTMLCollection length, no attribute walk).
+        const nodeCount = svg.getElementsByTagName('*').length;
+        if (!force && svg.__rgPassKey === passKey && svg.__rgNodeCount === nodeCount) continue;
+        svg.__rgPassKey = passKey;
+        svg.__rgNodeCount = nodeCount;
 
         for (const styleEl of svg.querySelectorAll('style')) {
           const cur = styleEl.textContent || '';
@@ -319,6 +320,32 @@
   }
 
   /**
+   * Minimal in-page strings (toast + composer hint) following the popup UI language.
+   */
+  const PAGE_I18N = {
+    zh: {
+      on: 'Refined Gemini 已开启',
+      off: 'Refined Gemini 已暂停，当前为原生界面',
+      toggleWith: (key) => `${key} 切换`,
+      sendHint: (mod) => `（${mod} + Enter 发送）`
+    },
+    en: {
+      on: 'Refined Gemini is on',
+      off: 'Refined Gemini paused — showing native Gemini',
+      toggleWith: (key) => `${key} to toggle`,
+      sendHint: (mod) => ` · ${mod}+Enter to send`
+    }
+  };
+
+  function pageStrings() {
+    return PAGE_I18N[RG.resolveLang(currentSettings.uiLang)] || PAGE_I18N.en;
+  }
+
+  function getSendHintText() {
+    return pageStrings().sendHint(IS_MAC ? '⌘' : 'Ctrl');
+  }
+
+  /**
    * Apply all settings as root attributes and CSS custom properties on <html>.
    */
   function applySettings(nextSettings) {
@@ -346,7 +373,10 @@
     root.setAttribute('data-rg-hide-avatar', String(Boolean(currentSettings.hideAvatar)));
     root.setAttribute('data-rg-compact-sidebar', String(Boolean(currentSettings.compactSidebar)));
     root.setAttribute('data-rg-clean-view', String(Boolean(currentSettings.cleanView)));
+    root.setAttribute('data-rg-heading-scale', currentSettings.scaledHeadings ? 'scaled' : 'uniform');
     root.setAttribute('data-rg-ctrl-enter', String(Boolean(currentSettings.ctrlEnterSend)));
+    // Localized composer placeholder suffix so the swapped Enter behavior is discoverable
+    root.style.setProperty('--rg-send-hint', JSON.stringify(getSendHintText()));
 
     root.style.setProperty('--rg-chat-max-width', currentSettings.chatWidth || DEFAULTS.chatWidth);
     root.style.setProperty('--rg-font-size', currentSettings.fontSize || DEFAULTS.fontSize);
@@ -532,16 +562,136 @@
 
     if (chrome.runtime && chrome.runtime.onMessage) {
       chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-        if (msg && msg.type === 'RG_APPLY_SETTINGS' && msg.payload) {
+        if (!msg || typeof msg !== 'object') return false;
+        if (msg.type === 'RG_APPLY_SETTINGS' && msg.payload) {
           const merged = { ...DEFAULTS, ...currentSettings, ...msg.payload };
           writeCachedSettings(merged);
           applySettings(merged);
+          sendResponse({ ok: true });
+        } else if (msg.type === 'RG_HEALTH') {
+          sendResponse(getHealthReport());
+        } else if (msg.type === 'RG_TOGGLED') {
+          showToggleToast(Boolean(msg.enabled), msg.shortcut || '');
           sendResponse({ ok: true });
         }
         return false;
       });
     }
   }
+
+  /**
+   * Compact top-center confirmation toast for keyboard / menu toggles.
+   * Styled by `#rg-toast` rules in content.css that intentionally do NOT depend on
+   * `data-rg-enabled`, so the toast stays legible after switching back to native Gemini.
+   */
+  let toastTimer = 0;
+  function showToast(message, detail) {
+    if (!document.body) return;
+    let toast = document.getElementById('rg-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'rg-toast';
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+      document.body.appendChild(toast);
+    }
+    toast.setAttribute('data-theme', resolveEffectiveTheme(currentSettings.themeMode));
+    toast.textContent = '';
+    const main = document.createElement('span');
+    main.textContent = message;
+    toast.appendChild(main);
+    if (detail) {
+      const sub = document.createElement('span');
+      sub.className = 'rg-toast-detail';
+      sub.textContent = detail;
+      toast.appendChild(sub);
+    }
+    toast.classList.remove('rg-toast-visible');
+    // Force reflow so repeated toggles restart the entrance transition
+    void toast.offsetWidth;
+    toast.classList.add('rg-toast-visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('rg-toast-visible'), 2400);
+  }
+
+  function showToggleToast(enabled, shortcut) {
+    const s = pageStrings();
+    showToast(enabled ? s.on : s.off, shortcut ? s.toggleWith(shortcut) : '');
+  }
+
+  /**
+   * Layout health self-check consumed by the popup. Detects when a Gemini release
+   * renames the core hosts our stylesheet targets, so users get an actionable notice
+   * instead of a silently half-styled page.
+   */
+  function getHealthReport() {
+    const root = document.documentElement;
+    const enabled = Boolean(currentSettings.enabled);
+    const path = location.pathname || '/';
+    const expectsComposer = /^\/(app|gem\/|u\/\d+\/(app|gem\/))/.test(path) || path === '/';
+    const issues = [];
+
+    if (enabled) {
+      const tokenLoaded = getComputedStyle(root).getPropertyValue('--rg-bg-canvas').trim() !== '';
+      if (!tokenLoaded) issues.push('stylesheet');
+
+      if (expectsComposer && document.readyState !== 'loading') {
+        const composer = document.querySelector('input-area-v2, .input-area, rich-textarea');
+        if (!composer) {
+          issues.push('composer');
+        } else {
+          const field = document.querySelector('.text-input-field');
+          if (!field || getComputedStyle(field).borderTopLeftRadius !== '26px') issues.push('composer-style');
+        }
+        if (!document.querySelector('chat-window, infinite-scroller.chat-history, .chat-container')) {
+          issues.push('conversation');
+        }
+      }
+      if (!document.querySelector('bard-sidenav, mat-sidenav, side-navigation-content')) issues.push('sidebar');
+    }
+
+    return {
+      ok: issues.length === 0,
+      issues,
+      enabled,
+      theme: resolveEffectiveTheme(currentSettings.themeMode),
+      version: VERSION,
+      path
+    };
+  }
+
+  /**
+   * UserScript only: Alt+Shift+G in-page toggle (the extension uses chrome.commands,
+   * which is user-remappable at chrome://extensions/shortcuts).
+   */
+  function setupInPageToggleShortcut() {
+    if (IS_EXTENSION) return;
+    window.addEventListener(
+      'keydown',
+      (event) => {
+        if (!event.altKey || !event.shiftKey || event.ctrlKey || event.metaKey) return;
+        if (event.code !== 'KeyG' || event.repeat || event.isComposing) return;
+        event.preventDefault();
+        event.stopPropagation();
+        toggleFromPage();
+      },
+      true
+    );
+  }
+
+  function toggleFromPage() {
+    const enabled = !currentSettings.enabled;
+    const next = { ...currentSettings, enabled };
+    writeCachedSettings(next);
+    applySettings(next);
+    try {
+      chrome.storage.sync.set({ enabled });
+    } catch (_) {}
+    showToggleToast(enabled, RG.TOGGLE_SHORTCUT.replace('Alt', IS_MAC ? '⌥' : 'Alt'));
+  }
+
+  // Exposed for the UserScript menu / in-page panel (no-op surface in the extension)
+  globalThis.__RG_PAGE__ = { toggle: toggleFromPage, health: getHealthReport, toast: showToast };
 
   function setupScrollGuard() {
     window.addEventListener('popstate', () => requestAnimationFrame(resetOuterChatScroll), { passive: true });
@@ -653,6 +803,7 @@
   setupScrollGuard();
   setupSandboxHandshake();
   setupCtrlEnterHandler();
+  setupInPageToggleShortcut();
 
   // 3. Hydrate from chrome.storage.sync
   initExtensionStorageSync();

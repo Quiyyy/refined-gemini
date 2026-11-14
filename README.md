@@ -10,7 +10,7 @@
 
 **Refined Gemini** replaces Google Gemini's bluish-gray Material surfaces, oversized spacing, cramped/deeply indented lists, and inconsistent dark code shells with a calm, high-contrast reading and writing interface modeled **1:1 on the official ChatGPT Web UI** (`openai/apps-sdk-ui` design tokens).
 
-### Key Improvements (`v1.6.1`)
+### Key Improvements
 
 | Dimension | Native Gemini Issue | Refined Gemini (1:1 ChatGPT Alignment) |
 | :--- | :--- | :--- |
@@ -23,19 +23,34 @@
 
 ---
 
+### What's New in `v1.7.0` — Interaction & Polish
+
+- **Quick toggle `Alt+Shift+G`**: Flip between native Gemini and Refined Gemini instantly for side-by-side comparison, with an in-page confirmation toast and an `OFF` toolbar badge while paused (customizable at `chrome://extensions/shortcuts`; also works in the UserScript).
+- **Redesigned popup**: Live status line, semantic option labels (`Standard / Wide / Wider / Fluid` instead of raw pixel values), contextual hover/focus hints in the footer, full keyboard support (ARIA radio groups with arrow keys, visible focus rings), and **Reset with 5-second Undo**.
+- **Context-aware notices**: The popup tells you when the current tab isn't Gemini, when a tab was opened before install/update and needs a reload, or when a local health check detects that Gemini's DOM changed (one-click prefilled issue report — no data leaves your browser).
+- **ChatGPT-style pending indicator**: Replaces Gemini's colorful Lottie spinner with a calm pulsing dot aligned to the prose baseline.
+- **Block rhythm fixes**: Consistent `12–16px` spacing around tables and code blocks (native Gemini stacks a `40px` gap above code and `0px` above tables).
+- **Optional scaled headings** (`scaledHeadings`): `H1–H3` at `1.5 / 1.25 / 1.125×` for long answers; off by default to keep the uniform 16px design.
+- **`Ctrl+Enter` discoverability**: When enabled, the composer placeholder shows `· Ctrl+Enter to send` (`⌘+Enter` on macOS).
+- **Accessibility**: Unified `#0285FF` `:focus-visible` rings across Gemini controls and `prefers-reduced-motion` support.
+- **UserScript parity**: The UserScript now ships the exact same popup as an in-page Shadow DOM settings panel (opened from the userscript manager menu), with cross-tab settings sync.
+
+---
+
 ## Streamlined Bilingual Settings (`中文 / EN`)
 
-Click the **Refined Gemini** toolbar icon to open the clutter-free settings popup. All changes apply **instantly without reloading**:
+Click the **Refined Gemini** toolbar icon (or **⚙️ Open settings panel** in your userscript manager menu) to open the settings popup. All changes apply **instantly without reloading**:
 
 - **Language (`中 / EN`)**: Instant UI toggle between Simplified Chinese and English (auto-detects browser language by default).
-- **Master Switch**: Toggle styling on/off at any time (reverts host page, inline SVGs, and Generative UI sandbox frames cleanly).
+- **Master Switch**: Toggle styling on/off at any time (reverts host page, inline SVGs, and Generative UI sandbox frames cleanly). Shortcut: `Alt+Shift+G`.
 - **Theme (`themeMode`)**: `Auto` / `Light` / `Dark`.
-- **Width (`chatWidth`)**: `768px` (default `48rem` ChatGPT prose width) / `920px` / `1120px` / `90%`.
-- **Font Size (`fontSize`)**: `15px` / `16px` (default, `1.68` line-height) / `17px`.
-- **Indent (`indentScale`)**: `0%` / `65%` / **`GPT` (default)** / `125%`.
+- **Content Width (`chatWidth`)**: `Standard` (768px ChatGPT prose width, default) / `Wide` (920px) / `Wider` (1120px) / `Fluid` (90%).
+- **Font Size (`fontSize`)**: `Small` 15px / `Default` 16px (`1.68` line-height) / `Large` 17px.
+- **List Indent (`indentScale`)**: `None` / `Compact` (65%) / **`Default`** (ChatGPT) / `Relaxed` (125%).
 - **Hide AI Avatar (`hideAvatar`)**: Aligns prose, tables, and code along a single clean left baseline.
 - **Compact Sidebar (`compactSidebar`)**: `260px` sidebar width with tight `8px` rounded conversation rows.
 - **Clean View (`cleanView`)**: Hides bottom disclaimer text, IP location footer, and upsell/discovery banners while keeping lightweight follow-up cards accessible.
+- **Scaled Headings (`scaledHeadings`)**: Progressive `H1–H3` sizes for easier scanning (off by default).
 - **`Ctrl / ⌘ + Enter` to Send (`ctrlEnterSend`)**: Plain `Enter` inserts a newline (IME-safe); `Ctrl/⌘ + Enter` submits.
 
 ---
@@ -71,7 +86,7 @@ npm run build
 # Syntax-check all extension & UserScript JavaScript files
 npm run check
 
-# Build store-ready ZIP archive -> dist/refined-gemini-v1.6.1-extension.zip
+# Build store-ready ZIP archive -> dist/refined-gemini-v1.7.0-extension.zip
 npm run pack
 ```
 
@@ -86,17 +101,18 @@ refined-gemini/
 ├── _locales/                     # WebExtension i18n bundles (en, zh_CN)
 ├── icons/                        # Vector SVG & supersampled PNG icons (16/32/48/128px)
 ├── src/
-│   ├── defaults.js               # Single Source of Truth for default settings
+│   ├── defaults.js               # Single Source of Truth: defaults, option sets & normalization
+│   ├── background.js             # Service worker: Alt+Shift+G toggle command & OFF badge
 │   ├── content.css               # 1:1 ChatGPT Web UI alignment stylesheet
-│   ├── content.js                # Zero-FOUC startup cache, sandbox postMessage bridge & Ctrl+Enter
+│   ├── content.js                # Zero-FOUC startup cache, sandbox bridge, Ctrl+Enter, toast & health check
 │   ├── sandbox.css               # Generative UI SafeContentFrame widget alignment stylesheet
 │   ├── sandbox.js                # Reversible SVG/CSS palette & theme sync inside GenUI iframes
-│   └── popup/                    # Streamlined bilingual (中文 / EN) Popup UI
+│   └── popup/                    # Bilingual (中文 / EN) popup — also reused as the UserScript panel
 ├── userscript/
 │   └── refined-gemini.user.js    # Auto-generated Greasy Fork / ScriptCat UserScript
 ├── scripts/
 │   ├── generate-icons.mjs        # Anti-aliased PNG & 300x300 Edge Store logo generator
-│   ├── build-userscript.mjs      # Syncs src/content.css & src/sandbox.css into bilingual UserScript
+│   ├── build-userscript.mjs      # Bundles src/* + popup (Shadow DOM panel) into the UserScript
 │   └── pack-extension.mjs        # Builds clean store ZIP into dist/
 └── docs/
     ├── DESIGN_SPEC.md            # Visual & typographic specification (English / 中文)
@@ -110,6 +126,7 @@ refined-gemini/
 - **Publishing Guide (Edge Add-ons & Tampermonkey Stores)**: [English](./docs/PUBLISHING.md) · [简体中文](./docs/PUBLISHING.zh-CN.md)
 - **Design Specification**: [English](./docs/DESIGN_SPEC.md) · [简体中文](./docs/DESIGN_SPEC.zh-CN.md)
 - **Privacy Policy**: [PRIVACY.md](./docs/PRIVACY.md)
+- **Changelog**: [CHANGELOG.md](./CHANGELOG.md)
 
 ## License
 
