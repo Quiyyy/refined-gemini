@@ -2,6 +2,11 @@
 
 All notable changes to **Refined Gemini** are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.8.5] — 2026-11-16
+
+### Fixed
+- Keep the gap before a newly sent message at 20px while Gemini switches from a pending request to a streaming response. Composer clearance now follows the last conversation container regardless of its HTML tag, preventing a temporary extra 116px gap.
+
 ## [1.8.4] — 2026-11-16
 
 ### Fixed

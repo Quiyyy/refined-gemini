@@ -1876,9 +1876,10 @@ html[data-rg-enabled="true"] chat-window-content .conversation-container {
   box-sizing: border-box !important;
 }
 
-/* Keep ample bottom clearance ONLY on the final conversation turn so scrolled-down text
-   comfortably clears the solid bottom composer dock */
-html[data-rg-enabled="true"] .conversation-container:last-of-type,
+/* Keep composer clearance on the final turn, regardless of its tag. While a
+   request is pending, Gemini appends <pending-request> after completed <div>
+   turns; :last-of-type would incorrectly leave clearance on BOTH of them. */
+html[data-rg-enabled="true"] .conversation-container:not(:has(~ .conversation-container)),
 html[data-rg-enabled="true"] :is(infinite-scroller.chat-history, #chat-history) > :last-child .conversation-container {
   margin-bottom: 0 !important;
   padding-bottom: 136px !important;

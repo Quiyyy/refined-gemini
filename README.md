@@ -93,7 +93,7 @@ npm run build
 # Syntax-check all extension & UserScript JavaScript files
 npm run check
 
-# Build store-ready ZIP archive -> dist/refined-gemini-v1.8.4-extension.zip
+# Build store-ready ZIP archive -> dist/refined-gemini-v1.8.5-extension.zip
 npm run pack
 ```
 
