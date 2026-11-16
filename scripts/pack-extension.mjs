@@ -27,6 +27,7 @@ const EXTENSION_FILES = [
   'src/background.js',
   'src/content.css',
   'src/content.js',
+  'src/model-picker.js',
   'src/sandbox.css',
   'src/sandbox.js',
   'src/popup/popup.html',

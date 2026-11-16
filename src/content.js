@@ -372,6 +372,7 @@
     root.setAttribute('data-rg-compact-sidebar', String(Boolean(currentSettings.compactSidebar)));
     root.setAttribute('data-rg-clean-view', String(Boolean(currentSettings.cleanView)));
     root.setAttribute('data-rg-heading-scale', currentSettings.scaledHeadings ? 'scaled' : 'uniform');
+    root.setAttribute('data-rg-default-high', String(currentSettings.defaultHighThinking));
     root.setAttribute('data-rg-ctrl-enter', String(Boolean(currentSettings.ctrlEnterSend)));
     // Localized composer placeholder suffix so the swapped Enter behavior is discoverable
     root.style.setProperty('--rg-send-hint', JSON.stringify(getSendHintText()));

@@ -22,6 +22,7 @@ const pkg = JSON.parse(read('package.json'));
 const sources = {
   defaults: read('src/defaults.js'),
   content: read('src/content.js'),
+  modelPicker: read('src/model-picker.js'),
   sandbox: read('src/sandbox.js'),
   contentCss: read('src/content.css'),
   sandboxCss: read('src/sandbox.css'),
@@ -291,6 +292,7 @@ ${sources.sandbox}
   whenRoot(() => (function (chrome) {
     // -------------------------------------------------------------- src/content.js
 ${sources.content}
+${sources.modelPicker}
   })(chromeShim));
 
   // ---------------------------------------------------------------- In-page settings panel

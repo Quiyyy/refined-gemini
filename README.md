@@ -23,7 +23,14 @@
 
 ---
 
-### What's New in `v1.7.0` — Interaction & Polish
+### What's New in `v1.8.4` — Model & Thinking Picker
+
+- A lightweight list shows model names alongside Low / Medium / High. One click selects both the model and thinking level, then immediately closes the panel.
+- Tasks show a model-only list when Gemini does not offer thinking levels. Switching between Chat and Tasks keeps the picker working and preserves manual choices.
+- Options come from Gemini's current native menu, without hard-coded model IDs, plan upgrades or automatic prompt submission.
+- New conversations start on High thinking by default (configurable). Existing conversations and manual choices are preserved. High thinking uses more quota.
+
+### `v1.7.0` — Interaction & Polish
 
 - **Quick toggle `Alt+Shift+G`**: Flip between native Gemini and Refined Gemini instantly for side-by-side comparison, with an in-page confirmation toast and an `OFF` toolbar badge while paused (customizable at `chrome://extensions/shortcuts`; also works in the UserScript).
 - **Redesigned popup**: Live status line, semantic option labels (`Standard / Wide / Wider / Fluid` instead of raw pixel values), contextual hover/focus hints in the footer, full keyboard support (ARIA radio groups with arrow keys, visible focus rings), and **Reset with 5-second Undo**.
@@ -86,7 +93,7 @@ npm run build
 # Syntax-check all extension & UserScript JavaScript files
 npm run check
 
-# Build store-ready ZIP archive -> dist/refined-gemini-v1.7.0-extension.zip
+# Build store-ready ZIP archive -> dist/refined-gemini-v1.8.4-extension.zip
 npm run pack
 ```
 

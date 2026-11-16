@@ -2,6 +2,49 @@
 
 All notable changes to **Refined Gemini** are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.8.4] — 2026-11-16
+
+### Fixed
+- Show a compact model-only list when Gemini Tasks does not expose thinking levels, instead of falling back to the original menu.
+- Cancel pending menu reads and selections when switching between Chat and Tasks or navigating to another page, then read the current controls afresh.
+- Preserve each mode's manual thinking selection when returning from another mode; new conversations still default to High where available.
+
+## [1.8.3] — 2026-11-16
+
+### Fixed
+- Support Gemini's narrow-screen gem-button trigger and inline thinking-level expansion, as well as the desktop submenu.
+- Close the custom picker immediately on selection. Let Gemini finish menu teardown before reopening and use native checked states when toolbar text omits thinking strength.
+- Restore default High thinking on new chats, including the new-chat logo link.
+
+### Validation
+- On the signed-in Gemini site, the same content scripts passed 36 desktop and 36 narrow-layout model/level switches with no errors; every custom picker closed synchronously. Measured selection time was 24–221 ms in this run.
+- A manual Low choice remained Low; starting a new conversation selected High. These were isolated page-debugging tests, not a permanent extension installation in the in-app browser.
+
+## [1.8.2] — 2026-11-16
+
+### Fixed
+- Wait for Gemini's model menu to finish closing and the new model to appear before selecting its thinking level.
+- Reacquire rebuilt composer controls, observe text-node updates, and confirm the live model/level before showing a failure notice.
+- Open native menus after the custom choice click finishes, avoiding conflicts with outside-click handlers.
+
+## [1.8.1] — 2026-11-16
+
+### Changed
+- Replaced the model matrix with the selected lightweight list design: model names with subtle version labels, quiet inline thinking choices, a neutral filled selection, and more natural spacing. One-click model/thinking selection and new-chat High defaults are unchanged.
+
+## [1.8.0] — 2026-11-16
+
+### Added
+- A compact model × Low/Medium/High picker: choose both in one click, using Gemini's live model list and native controls without changing subscriptions or sending prompts.
+- New conversations default to High thinking, with an opt-out in settings. Existing conversations, manual selections and active drafts are preserved; an empty autofocused editor gets its focus restored after initialization.
+
+## [1.7.1] — 2026-11-16
+
+### Fixed
+- Feedback links no longer include Gemini conversation paths or browser user-agent strings. Privacy disclosures now explain which diagnostics are sent when the GitHub page opens.
+- The UserScript settings panel can open feedback links without requiring the extension-only tabs API.
+- Inline SVG recoloring is invalidated by actual DOM changes, including equal-size node replacements, fill/stroke updates and stylesheet text changes, rather than node counts.
+
 ## [1.7.0] — 2026-11-14
 
 Interaction, accessibility and polish release. No breaking changes; existing settings are migrated automatically.

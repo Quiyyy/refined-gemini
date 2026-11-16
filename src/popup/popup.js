@@ -51,6 +51,7 @@
       compactSidebar: '紧凑侧边栏',
       cleanView: '纯净模式',
       scaledHeadings: '标题分级字号',
+      defaultHighThinking: '新对话默认高强度',
       sendSuffix: '发送',
       reset: '恢复默认',
       resetDone: '已恢复默认设置',
@@ -66,6 +67,7 @@
         compactSidebarHint: '侧边栏收窄为 260px，会话行更紧凑',
         cleanViewHint: '隐藏底部免责声明、位置信息与推广横幅',
         scaledHeadingsHint: 'H1–H3 递进放大，长回答更易浏览；关闭则与正文同字号',
+        defaultHighThinkingHint: '新对话初始化时选择高思考强度；之后可手动调整。高强度消耗更多额度。',
         ctrlEnterHint: '开启后 Enter 换行，Ctrl/⌘ + Enter 发送（不影响输入法选词）',
         langHint: '切换设置面板与页面提示的语言'
       },
@@ -106,6 +108,7 @@
       compactSidebar: 'Compact sidebar',
       cleanView: 'Clean view',
       scaledHeadings: 'Scaled headings',
+      defaultHighThinking: 'Start new chats on High',
       sendSuffix: 'to send',
       reset: 'Reset',
       resetDone: 'Settings reset to defaults',
@@ -121,6 +124,7 @@
         compactSidebarHint: 'Narrow the sidebar to 260px with tighter conversation rows',
         cleanViewHint: 'Hide footer disclaimers, location info and upsell banners',
         scaledHeadingsHint: 'Larger H1–H3 for easier scanning; off keeps headings at body size',
+        defaultHighThinkingHint: 'Select High when a new chat initializes; manual changes are respected. High uses more quota.',
         ctrlEnterHint: 'Enter inserts a new line; Ctrl/⌘ + Enter sends (IME-safe)',
         langHint: 'Language for this panel and in-page notices'
       },

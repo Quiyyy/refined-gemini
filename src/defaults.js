@@ -18,6 +18,7 @@
     compactSidebar: true,   // Converge sidebar to 260px width & 8px rounded items
     cleanView: true,        // Hide bottom disclaimer, IP footer & upsell/discovery banners (follow-up cards stay visible)
     scaledHeadings: false,  // false = uniform 16px headings (weight-only hierarchy) | true = gentle h1–h3 size scale
+    defaultHighThinking: true, // Prefer high once when a new conversation initializes; manual choices remain editable
     ctrlEnterSend: false    // When enabled, plain Enter inserts newline; Ctrl/Cmd+Enter sends
   });
 
@@ -36,6 +37,7 @@
     'compactSidebar',
     'cleanView',
     'scaledHeadings',
+    'defaultHighThinking',
     'ctrlEnterSend'
   ]);
 
