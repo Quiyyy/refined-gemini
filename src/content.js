@@ -163,12 +163,10 @@
       for (const svg of svgs) {
         if (svg.closest('web-preview')) continue;
 
-        // Incremental pass: skip diagrams already processed for this exact state whose
-        // node count is unchanged (cheap live HTMLCollection length, no attribute walk).
-        const nodeCount = svg.getElementsByTagName('*').length;
-        if (!force && svg.__rgPassKey === passKey && svg.__rgNodeCount === nodeCount) continue;
+        // The mutation observer invalidates this key when the SVG actually changes,
+        // including equal-size replacements, paint attributes and stylesheet text.
+        if (!force && svg.__rgPassKey === passKey) continue;
         svg.__rgPassKey = passKey;
-        svg.__rgNodeCount = nodeCount;
 
         for (const styleEl of svg.querySelectorAll('style')) {
           const cur = styleEl.textContent || '';
@@ -756,7 +754,16 @@
       const frameObserver = new MutationObserver((mutations) => {
         if (isInlineSvgMutating) return;
         for (const m of mutations) {
-          for (const node of m.addedNodes) {
+          const target = m.target.nodeType === Node.ELEMENT_NODE ? m.target : m.target.parentElement;
+          const svg = target && target.closest('svg');
+          if (svg && svg.closest(INLINE_DIAGRAM_ROOT_SEL) && !svg.closest('web-preview')) {
+            // A nested SVG change also invalidates its containing SVGs.
+            for (let current = svg; current; current = current.parentElement && current.parentElement.closest('svg')) {
+              current.__rgPassKey = undefined;
+            }
+            scheduleFrameSync();
+          }
+          for (const node of m.addedNodes || []) {
             if (node.nodeType !== Node.ELEMENT_NODE) continue;
             const el = /** @type {Element} */ (node);
             const tag = el.tagName;
@@ -778,12 +785,19 @@
               (el.querySelector && el.querySelector(DYNAMIC_WIDGET_SEL))
             ) {
               scheduleFrameSync();
-              return;
+              // Continue through the batch so every changed SVG gets invalidated.
+              break;
             }
           }
         }
       });
-      frameObserver.observe(document.body, { childList: true, subtree: true });
+      frameObserver.observe(document.body, {
+        childList: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ['fill', 'stroke'],
+        subtree: true
+      });
     };
 
     if (document.body) {
