@@ -397,6 +397,10 @@
   });
 
   els.noticeAction.addEventListener('click', () => {
+    if (IS_PANEL && tabInfo.kind === 'gemini') {
+      window.open(buildIssueUrl(), '_blank', 'noopener,noreferrer');
+      return;
+    }
     if (!hasChrome || !chrome.tabs) return;
     if (tabInfo.kind === 'other') {
       chrome.tabs.create({ url: GEMINI_URL });
@@ -420,8 +424,6 @@
     const body = [
       '### Environment',
       `- Refined Gemini: v${getVersion()}`,
-      `- Browser: ${navigator.userAgent}`,
-      `- Gemini path: \`${h.path || ''}\``,
       `- Theme: ${h.theme || ''}`,
       '',
       '### Failed checks',

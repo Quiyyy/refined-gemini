@@ -61,7 +61,7 @@ This generates:
   • Interactive Diagrams & Follow-Up Cards: Harmonizes embedded Generative UI diagrams (<genui-sandbox> about:srcdoc & SafeContentFrame) and redraws follow-up prompts into lightweight thin-bordered cards.
   • Compact Code Cards & Borderless Tables: Unified rounded code blocks with OpenAI syntax highlighting and clean horizontal-rule tables without fake scrollbars.
   • Streamlined Bilingual Popup (EN / 中文): Instant live controls for column width (768px–90%), font size (15–17px), hiding AI avatars, compact sidebar, clean view, and Ctrl/Cmd + Enter to send.
-  • Privacy First: Runs 100% locally in your browser with zero data collection and zero network requests. Open-source under MIT.
+  • Privacy First: Styling runs locally without collecting chat content or background analytics. Clicking Report sends the extension version, theme and failed check names to GitHub. Open-source under MIT.
   ```
 
 ### Step 5: Notes for Certification & Submit
@@ -72,10 +72,10 @@ Paste the following into **Publish -> Notes for certification** (typical review 
 Single Purpose: Customizes the visual appearance, typography, and keyboard shortcut (Ctrl+Enter) of Google Gemini Web (https://gemini.google.com/*) locally in the user's browser.
 Permissions Justification:
 - "storage": Used solely to persist local UI preferences (theme, column width, font size, indentation scale, and UI language) via chrome.storage.sync.
-- "activeTab": Used only when the user opens the popup or presses the toggle shortcut, to check whether the current tab is gemini.google.com and to show a local on-page confirmation / style health status. No page content is read or transmitted.
+- "activeTab": Used only when the user opens the popup or presses the toggle shortcut, to check whether the current tab is gemini.google.com and to show a local on-page confirmation / style health status. Page structure and styles are checked locally; conversation text is not collected.
 - Host "https://gemini.google.com/*": Injects core CSS/JS on Google Gemini web pages (plus match_origin_as_fallback for Gemini's embedded <genui-sandbox> about:srcdoc diagram iframes) to apply ChatGPT-aligned styling and optional Ctrl+Enter send behavior.
 - Subframe hosts "https://*.scf.usercontent.goog/*" and "https://*.googleusercontent.com/*" (all_frames, subframe-only guard `window !== window.top`): Google Gemini renders interactive Generative UI diagrams/flowcharts inside isolated SafeContentFrame iframes hosted on `*.scf.usercontent.goog` / `*.googleusercontent.com` as well as opaque `about:srcdoc` iframes. Injecting `sandbox.css` + `sandbox.js` into these embedded subframes keeps interactive diagrams synchronized with the user's selected Light/Dark theme and font size. Top-level tabs and auth/feedback frames are explicitly ignored.
-No user data is collected or transmitted externally. No login credentials are required to test—open https://gemini.google.com/app and click the extension toolbar icon to test all real-time toggles.
+No chat content is collected. Clicking Report navigates to GitHub with extension version, theme and failed check names in the URL; no Gemini path or user-agent string is included. To test, open https://gemini.google.com/app and sign in to Google if required, then open the extension popup.
 ```
 
 ---

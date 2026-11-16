@@ -27,7 +27,7 @@
 
 - **Quick toggle `Alt+Shift+G`**: Flip between native Gemini and Refined Gemini instantly for side-by-side comparison, with an in-page confirmation toast and an `OFF` toolbar badge while paused (customizable at `chrome://extensions/shortcuts`; also works in the UserScript).
 - **Redesigned popup**: Live status line, semantic option labels (`Standard / Wide / Wider / Fluid` instead of raw pixel values), contextual hover/focus hints in the footer, full keyboard support (ARIA radio groups with arrow keys, visible focus rings), and **Reset with 5-second Undo**.
-- **Context-aware notices**: The popup tells you when the current tab isn't Gemini, when a tab was opened before install/update and needs a reload, or when a local health check detects that Gemini's DOM changed (one-click prefilled issue report — no data leaves your browser).
+- **Context-aware notices**: The popup tells you when the current tab isn't Gemini, when a tab needs a reload, or when a local health check detects layout changes. Clicking Report sends only the extension version, selected theme and failed check names to GitHub to prefill an issue; no conversation path or content is included. See [Privacy Policy](./docs/PRIVACY.md).
 - **ChatGPT-style pending indicator**: Replaces Gemini's colorful Lottie spinner with a calm pulsing dot aligned to the prose baseline.
 - **Block rhythm fixes**: Consistent `12–16px` spacing around tables and code blocks (native Gemini stacks a `40px` gap above code and `0px` above tables).
 - **Optional scaled headings** (`scaledHeadings`): `H1–H3` at `1.5 / 1.25 / 1.125×` for long answers; off by default to keep the uniform 16px design.

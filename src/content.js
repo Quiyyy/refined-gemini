@@ -655,8 +655,7 @@
       issues,
       enabled,
       theme: resolveEffectiveTheme(currentSettings.themeMode),
-      version: VERSION,
-      path
+      version: VERSION
     };
   }
 

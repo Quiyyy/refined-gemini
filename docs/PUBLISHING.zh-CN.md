@@ -64,7 +64,7 @@ npm run pack
   • 交互式流程图与追问建议卡片：全链路接管 <genui-sandbox> (about:srcdoc) 与 SafeContentFrame 沙盒交互拓扑/流程图（浅/深色自动联动、步骤切换实时跟随），并将底部追问建议重绘为轻量细框卡片。
   • 紧凑代码块与无竖框表格：统一柔和圆角代码卡片（OpenAI 官方语法高亮色板）与极简横线表格，消除假横向滚动条。
   • 零认知负担双语面板：支持中 / EN 一键切换，提供列宽（768px~90%）、字号（15~17px）、隐藏 AI 头像、紧凑侧边栏、纯净模式与 Ctrl+Enter 发送开关，所有修改实时生效。
-  • 100% 本地运行：零数据收集、零外部网络请求，MIT 协议开源透明。
+  • 100% 本地运行：不收集对话或后台统计；点击反馈会向 GitHub 发送扩展版本、主题和检查项名称。MIT 协议开源透明。
   ```
 - **搜索关键词（Search terms，最多 7 个）**：`gemini`, `chatgpt`, `google gemini`, `gemini ui`, `gemini theme`, `markdown`, `ai chat`
 
@@ -78,7 +78,7 @@ npm run pack
   • Interactive Diagrams & Follow-Up Cards: Harmonizes embedded Generative UI diagrams (<genui-sandbox> about:srcdoc & SafeContentFrame) and redraws follow-up prompts into lightweight thin-bordered cards.
   • Compact Code Cards & Borderless Tables: Unified rounded code blocks with OpenAI syntax highlighting and clean horizontal-rule tables without fake scrollbars.
   • Streamlined Bilingual Popup (EN / 中文): Instant live controls for column width (768px–90%), font size (15–17px), hiding AI avatars, compact sidebar, clean view, and Ctrl/Cmd + Enter to send.
-  • Privacy First: Runs 100% locally in your browser with zero data collection and zero network requests. Open-source under MIT.
+  • Privacy First: Styling runs locally without collecting chat content or background analytics. Clicking Report sends the extension version, theme and failed check names to GitHub. Open-source under MIT.
   ```
 - **图像资源上传**：
   - **Store Logo（商店徽标，`300×300` PNG）**：上传仓库内的 `docs/assets/store-logo-300.png`。
@@ -92,10 +92,10 @@ npm run pack
 Single Purpose: Customizes the visual appearance, typography, and keyboard shortcut (Ctrl+Enter) of Google Gemini Web (https://gemini.google.com/*) locally in the user's browser.
 Permissions Justification:
 - "storage": Used solely to persist local UI preferences (theme, column width, font size, indentation scale, and UI language) via chrome.storage.sync.
-- "activeTab": Used only when the user opens the popup or presses the toggle shortcut, to check whether the current tab is gemini.google.com and to show a local on-page confirmation / style health status. No page content is read or transmitted.
+- "activeTab": Used only when the user opens the popup or presses the toggle shortcut, to check whether the current tab is gemini.google.com and to show a local on-page confirmation / style health status. Page structure and styles are checked locally; conversation text is not collected.
 - Host "https://gemini.google.com/*": Injects core CSS/JS on Google Gemini web pages (plus match_origin_as_fallback for Gemini's embedded <genui-sandbox> about:srcdoc diagram iframes) to apply ChatGPT-aligned styling and optional Ctrl+Enter send behavior.
 - Subframe hosts "https://*.scf.usercontent.goog/*" and "https://*.googleusercontent.com/*" (all_frames, subframe-only guard `window !== window.top`): Google Gemini renders interactive Generative UI diagrams/flowcharts inside isolated SafeContentFrame iframes hosted on `*.scf.usercontent.goog` / `*.googleusercontent.com` as well as opaque `about:srcdoc` iframes. Injecting `sandbox.css` + `sandbox.js` into these embedded subframes keeps interactive diagrams synchronized with the user's selected Light/Dark theme and font size. Top-level tabs and auth/feedback frames are explicitly ignored.
-No user data is collected or transmitted externally. No login credentials are required to test—open https://gemini.google.com/app and click the extension toolbar icon to test all real-time toggles.
+No chat content is collected. Clicking Report navigates to GitHub with extension version, theme and failed check names in the URL; no Gemini path or user-agent string is included. To test, open https://gemini.google.com/app and sign in to Google if required, then open the extension popup.
 ```
 
 > **后续版本更新**：修改代码后递增 `package.json` 与 `manifest.json` 版本号，运行 `npm run pack`，在 Partner Center 点击 **Update package** 上传新 ZIP 提交即可。
