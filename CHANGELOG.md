@@ -2,6 +2,12 @@
 
 All notable changes to **Refined Gemini** are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.8.6] — 2026-11-16
+
+### Changed
+- Restyle inline prompt editing as a single neutral card with compact Cancel and Update actions, following the Codex editor layout.
+- Remove native edit-field indentation and width limits. Keep button labels out of conversation typography overrides for readable primary actions in both themes.
+
 ## [1.8.5] — 2026-11-16
 
 ### Fixed

@@ -91,7 +91,7 @@ npm run build
 # 检查所有扩展与油猴脚本 JS 语法
 npm run check
 
-# 一键打包符合 Edge / Chrome 扩展商店规范的纯净上传包 -> dist/refined-gemini-v1.8.5-extension.zip
+# 一键打包符合 Edge / Chrome 扩展商店规范的纯净上传包 -> dist/refined-gemini-v1.8.6-extension.zip
 npm run pack
 ```
 

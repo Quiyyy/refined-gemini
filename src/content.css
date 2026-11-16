@@ -2018,6 +2018,103 @@ html[data-rg-enabled="true"] [data-testid="user-prompt-bubble"] {
   box-shadow: none !important;
 }
 
+/* Codex-style prompt editor: one neutral surface with actions inside the card. */
+html[data-rg-enabled="true"] user-query div.user-query-container.edit-mode {
+  width: 100% !important;
+  margin-left: auto !important;
+  padding: 14px 14px 12px !important;
+  box-sizing: border-box !important;
+  background: var(--rg-bg-chip) !important;
+  border: 0 !important;
+  border-radius: 20px !important;
+}
+
+html[data-rg-enabled="true"] user-query .query-content.edit-mode {
+  display: block !important;
+  width: 100% !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+html[data-rg-enabled="true"] user-query .edit-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  box-sizing: border-box !important;
+}
+
+html[data-rg-enabled="true"] user-query .edit-form {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] user-query .edit-form .ql-editor {
+  padding: 0 !important;
+  min-height: 44px !important;
+  line-height: 1.55 !important;
+}
+
+html[data-rg-enabled="true"] user-query .edit-button-area {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin: 12px 0 0 !important;
+  padding: 0 !important;
+}
+
+html[data-rg-enabled="true"] user-query .edit-button-area :is(.cancel-button, .update-button) {
+  margin: 0 !important;
+}
+
+html[data-rg-enabled="true"] user-query .edit-button-area button {
+  height: 32px !important;
+  min-height: 32px !important;
+  min-width: 52px !important;
+  padding: 0 12px !important;
+  border: 1px solid var(--rg-border-subtle) !important;
+  border-radius: 12px !important;
+  background: var(--rg-bg-canvas) !important;
+  color: var(--rg-text-primary) !important;
+  font: 500 14px/1 var(--rg-font-sans) !important;
+  box-shadow: none !important;
+}
+
+html[data-rg-enabled="true"] user-query .edit-button-area :is(.cancel-button, .update-button) button :is(.mdc-button__label, .gem-button-content, .gds-body-m) {
+  color: inherit !important;
+  font: inherit !important;
+}
+
+html[data-rg-enabled="true"] user-query .edit-button-area .cancel-button button:hover:not(:disabled) {
+  background: var(--rg-bg-elevated) !important;
+  border-color: var(--rg-border-focus) !important;
+}
+
+html[data-rg-enabled="true"] user-query .edit-button-area .update-button button {
+  background: var(--rg-cta-bg) !important;
+  border-color: transparent !important;
+  color: var(--rg-cta-fg) !important;
+}
+
+html[data-rg-enabled="true"] user-query .edit-button-area .update-button button:hover:not(:disabled) {
+  background: var(--rg-cta-bg-hover) !important;
+}
+
+html[data-rg-enabled="true"] user-query .edit-button-area button:is(:disabled, [aria-disabled="true"]) {
+  background: var(--rg-bg-active) !important;
+  border-color: transparent !important;
+  color: var(--rg-text-muted) !important;
+  cursor: default !important;
+}
+
 /* Reserve right clearance inside `.horizontal-container` ONLY when Gemini renders a long-prompt
    expand/collapse toggle, anchoring the chevron cleanly at top-right without touching text */
 html[data-rg-enabled="true"] .user-query-bubble-with-background:has(.luminous-toggle-container) .horizontal-container {
@@ -3299,7 +3396,7 @@ html[data-rg-enabled="true"] :is(
 ) :is(
   .gds-body-l,
   .gds-body-m
-):not(web-preview *):not(mat-icon):not(.google-symbols):not([class*="icon"]):not(code):not(pre):not(.katex):not(.katex *) {
+):not(web-preview *):not(button *):not(mat-icon):not(.google-symbols):not([class*="icon"]):not(code):not(pre):not(.katex):not(.katex *) {
   font-family: var(--rg-font-sans) !important;
   font-size: var(--rg-font-size, 16px) !important;
   line-height: 1.6 !important;
