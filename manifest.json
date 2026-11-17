@@ -48,7 +48,8 @@
       "js": [
         "src/defaults.js",
         "src/content.js",
-        "src/model-picker.js"
+        "src/model-picker.js",
+        "src/message-history.js"
       ],
       "run_at": "document_start"
     },

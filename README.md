@@ -23,7 +23,13 @@
 
 ---
 
-### What's New in `v1.8.4` — Model & Thinking Picker
+### What's New in `v1.9.0` — Message History Navigation
+
+- A subtle rail on the left of the conversation shows a tick for each loaded turn. Hover or focus a tick to preview its prompt and reply; click to jump without moving the composer.
+- The current reading position is highlighted. Nearby ticks form a smooth wave as the pointer moves along the rail and return to equal lengths on exit. Arrow keys and Home / End navigate the ticks; Enter jumps and Escape dismisses the preview. Long lists scroll.
+- Appears when at least three turns are loaded; hidden below 768px or when the conversation gutter is too narrow. Updates as messages change and follows the extension's master toggle. Older turns appear as Gemini loads them. Excerpts stay in page memory and are never saved or sent elsewhere.
+
+### `v1.8.4` — Model & Thinking Picker
 
 - A lightweight list shows model names alongside Low / Medium / High. One click selects both the model and thinking level, then immediately closes the panel.
 - Tasks show a model-only list when Gemini does not offer thinking levels. Switching between Chat and Tasks keeps the picker working and preserves manual choices.

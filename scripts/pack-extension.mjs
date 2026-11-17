@@ -28,6 +28,7 @@ const EXTENSION_FILES = [
   'src/content.css',
   'src/content.js',
   'src/model-picker.js',
+  'src/message-history.js',
   'src/sandbox.css',
   'src/sandbox.js',
   'src/popup/popup.html',

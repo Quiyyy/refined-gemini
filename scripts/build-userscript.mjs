@@ -23,6 +23,7 @@ const sources = {
   defaults: read('src/defaults.js'),
   content: read('src/content.js'),
   modelPicker: read('src/model-picker.js'),
+  messageHistory: read('src/message-history.js'),
   sandbox: read('src/sandbox.js'),
   contentCss: read('src/content.css'),
   sandboxCss: read('src/sandbox.css'),
@@ -293,6 +294,7 @@ ${sources.sandbox}
     // -------------------------------------------------------------- src/content.js
 ${sources.content}
 ${sources.modelPicker}
+${sources.messageHistory}
   })(chromeShim));
 
   // ---------------------------------------------------------------- In-page settings panel
