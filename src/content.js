@@ -2,7 +2,7 @@
  * Refined Gemini — Content Script
  *
  * Responsibilities:
- *   1. Zero-FOUC startup via synchronous localStorage cache at document_start.
+ *   1. Continue from startup.js, which applies cached visual settings at document_start.
  *   2. Real-time sync with chrome.storage.sync and Popup messages (instant live preview).
  *   3. Accurate Light/Dark theme resolution (auto-detecting Gemini's active theme or forcing light/dark).
  *   4. Optional IME-safe Ctrl / Cmd + Enter to send (plain Enter inserts a line break).
@@ -12,13 +12,11 @@
  * The same file is bundled verbatim into the UserScript, where `chrome` is a
  * GM_* backed shim (see scripts/build-userscript.mjs).
  */
-(function () {
+globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
   'use strict';
 
   const RG = globalThis.REFINED_GEMINI;
-  const STORAGE_KEY = RG.STORAGE_KEY;
   const DEFAULTS = RG.DEFAULTS;
-  const normalizeSettings = RG.normalize;
   const VERSION = (() => {
     try {
       return chrome.runtime.getManifest().version;
@@ -36,70 +34,9 @@
   })();
   const IS_MAC = /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent || '');
 
-  let currentSettings = { ...DEFAULTS };
-
-  /**
-   * Read synchronous cache so document_start applies tokens before first paint.
-   */
-  function loadCachedSettings() {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === 'object') {
-          currentSettings = normalizeSettings(parsed);
-        }
-      }
-    } catch (_) {
-      // Ignore storage access restrictions in sandboxed frames
-    }
-  }
-
-  function writeCachedSettings(settings) {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-    } catch (_) {
-      // Ignore quota or privacy errors
-    }
-  }
-
-  /**
-   * Detect whether native Gemini is currently rendering in dark mode.
-   */
-  function detectNativeDarkTheme() {
-    const docEl = document.documentElement;
-    const body = document.body;
-
-    if (body) {
-      if (body.classList.contains('dark-theme') || body.getAttribute('data-theme') === 'dark') {
-        return true;
-      }
-      if (body.classList.contains('light-theme') || body.getAttribute('data-theme') === 'light') {
-        return false;
-      }
-    }
-
-    if (docEl) {
-      if (docEl.classList.contains('dark') || docEl.classList.contains('dark-theme')) {
-        return true;
-      }
-      if (docEl.classList.contains('light') || docEl.classList.contains('light-theme')) {
-        return false;
-      }
-      const colorScheme = docEl.style.colorScheme || docEl.getAttribute('color-scheme');
-      if (colorScheme === 'dark') return true;
-      if (colorScheme === 'light') return false;
-    }
-
-    // Fallback to OS media query before body classes hydrate
-    return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  }
-
-  function resolveEffectiveTheme(themeMode) {
-    if (themeMode === 'light') return 'light';
-    if (themeMode === 'dark') return 'dark';
-    return detectNativeDarkTheme() ? 'dark' : 'light';
-  }
+  const startup = globalThis.REFINED_GEMINI_STARTUP;
+  let currentSettings = startup.settings;
+  const resolveEffectiveTheme = startup.resolveTheme;
 
   /**
    * Ensure non-scrolling outer `.chat-container` never retains a stale programmatic `scrollTop`
@@ -347,94 +284,19 @@
    * Apply all settings as root attributes and CSS custom properties on <html>.
    */
   function applySettings(nextSettings) {
-    currentSettings = normalizeSettings(nextSettings);
+    currentSettings = startup.apply(nextSettings);
     const root = document.documentElement;
-    if (!root) return;
-
-    if (!currentSettings.enabled) {
-      root.setAttribute('data-rg-enabled', 'false');
-      root.removeAttribute('data-rg-indent');
-      root.style.removeProperty('--rg-chat-max-width');
-      root.style.removeProperty('--rg-font-size');
-      root.style.removeProperty('--rg-indent-scale');
-      harmonizeInlineDiagrams();
-      broadcastToSandboxFrames();
-      return;
-    }
-
-    const effectiveTheme = resolveEffectiveTheme(currentSettings.themeMode);
-    const indentScale = currentSettings.indentScale || DEFAULTS.indentScale;
-
-    root.setAttribute('data-rg-enabled', 'true');
-    root.setAttribute('data-rg-theme', effectiveTheme);
-    root.setAttribute('data-rg-indent', indentScale === '0' ? 'none' : 'scaled');
-    root.setAttribute('data-rg-hide-avatar', String(Boolean(currentSettings.hideAvatar)));
-    root.setAttribute('data-rg-compact-sidebar', String(Boolean(currentSettings.compactSidebar)));
-    root.setAttribute('data-rg-clean-view', String(Boolean(currentSettings.cleanView)));
-    root.setAttribute('data-rg-heading-scale', currentSettings.scaledHeadings ? 'scaled' : 'uniform');
-    root.setAttribute('data-rg-default-high', String(currentSettings.defaultHighThinking));
-    root.setAttribute('data-rg-ctrl-enter', String(Boolean(currentSettings.ctrlEnterSend)));
-    // Localized composer placeholder suffix so the swapped Enter behavior is discoverable
     root.style.setProperty('--rg-send-hint', JSON.stringify(getSendHintText()));
-
-    root.style.setProperty('--rg-chat-max-width', currentSettings.chatWidth || DEFAULTS.chatWidth);
-    root.style.setProperty('--rg-font-size', currentSettings.fontSize || DEFAULTS.fontSize);
-    root.style.setProperty('--rg-indent-scale', indentScale);
     resetOuterChatScroll();
     harmonizeInlineDiagrams();
     broadcastToSandboxFrames();
   }
 
-  /**
-   * Watch class/attribute mutations on <html> and <body> so 'auto' themeMode
-   * updates seamlessly whenever the user switches Gemini's native theme.
-   */
   function setupThemeObservers() {
-    let scheduled = false;
-    const refreshThemeIfAuto = () => {
-      if (!currentSettings.enabled || currentSettings.themeMode !== 'auto') return;
-      if (scheduled) return;
-      scheduled = true;
-      requestAnimationFrame(() => {
-        scheduled = false;
-        const root = document.documentElement;
-        if (!root || !currentSettings.enabled) return;
-        const nextTheme = resolveEffectiveTheme('auto');
-        if (root.getAttribute('data-rg-theme') !== nextTheme) {
-          root.setAttribute('data-rg-theme', nextTheme);
-          harmonizeInlineDiagrams();
-          broadcastToSandboxFrames();
-        }
-      });
-    };
-
-    const attrObserver = new MutationObserver(refreshThemeIfAuto);
-    attrObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class', 'data-theme', 'color-scheme', 'style']
+    startup.onThemeChange(() => {
+      harmonizeInlineDiagrams();
+      broadcastToSandboxFrames();
     });
-
-    const attachBodyObserver = () => {
-      if (!document.body) return;
-      refreshThemeIfAuto();
-      attrObserver.observe(document.body, {
-        attributes: true,
-        attributeFilter: ['class', 'data-theme', 'style']
-      });
-    };
-
-    if (document.body) {
-      attachBodyObserver();
-    } else {
-      document.addEventListener('DOMContentLoaded', attachBodyObserver, { once: true });
-    }
-
-    if (window.matchMedia) {
-      const mql = window.matchMedia('(prefers-color-scheme: dark)');
-      if (typeof mql.addEventListener === 'function') {
-        mql.addEventListener('change', refreshThemeIfAuto);
-      }
-    }
   }
 
   /**
@@ -539,7 +401,6 @@
     chrome.storage.sync.get(DEFAULTS, (stored) => {
       if (chrome.runtime && chrome.runtime.lastError) return;
       const merged = { ...DEFAULTS, ...stored };
-      writeCachedSettings(merged);
       applySettings(merged);
     });
 
@@ -554,7 +415,6 @@
         }
       }
       if (changed) {
-        writeCachedSettings(updated);
         applySettings(updated);
       }
     });
@@ -564,7 +424,6 @@
         if (!msg || typeof msg !== 'object') return false;
         if (msg.type === 'RG_APPLY_SETTINGS' && msg.payload) {
           const merged = { ...DEFAULTS, ...currentSettings, ...msg.payload };
-          writeCachedSettings(merged);
           applySettings(merged);
           sendResponse({ ok: true });
         } else if (msg.type === 'RG_HEALTH') {
@@ -680,7 +539,6 @@
   function toggleFromPage() {
     const enabled = !currentSettings.enabled;
     const next = { ...currentSettings, enabled };
-    writeCachedSettings(next);
     applySettings(next);
     try {
       chrome.storage.sync.set({ enabled });
@@ -809,7 +667,6 @@
   }
 
   // 1. Apply cached configuration synchronously at document_start
-  loadCachedSettings();
   applySettings(currentSettings);
 
   // 2. Attach observers, scroll guard, sandbox handshake & keyboard handler
@@ -821,4 +678,4 @@
 
   // 3. Hydrate from chrome.storage.sync
   initExtensionStorageSync();
-})();
+});

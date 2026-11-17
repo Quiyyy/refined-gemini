@@ -47,6 +47,7 @@
       ],
       "js": [
         "src/defaults.js",
+        "src/startup.js",
         "src/content.js",
         "src/model-picker.js",
         "src/message-history.js"

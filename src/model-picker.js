@@ -1,5 +1,5 @@
 /** One-click model × thinking picker. Uses Gemini's own controls; no private APIs. */
-(function () {
+globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
   'use strict';
 
   const TRIGGER = '[data-test-id="bard-mode-menu-button"]';
@@ -390,4 +390,4 @@
     attributeFilter: ['data-rg-enabled', 'data-rg-default-high', 'aria-label', 'class'] });
   window.addEventListener('popstate', scheduleDefault);
   scheduleDefault();
-})();
+});

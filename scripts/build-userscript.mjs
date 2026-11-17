@@ -21,6 +21,7 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 const pkg = JSON.parse(read('package.json'));
 const sources = {
   defaults: read('src/defaults.js'),
+  startup: read('src/startup.js'),
   content: read('src/content.js'),
   modelPicker: read('src/model-picker.js'),
   messageHistory: read('src/message-history.js'),
@@ -289,6 +290,7 @@ ${sources.sandbox}
 
   // ---------------------------------------------------------------- Main Gemini page
   injectStyle('refined-gemini-style', ${JSON.stringify(sources.contentCss)});
+${sources.startup}
 
   whenRoot(() => (function (chrome) {
     // -------------------------------------------------------------- src/content.js

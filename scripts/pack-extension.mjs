@@ -24,6 +24,7 @@ const EXTENSION_FILES = [
   'icons/icon48.png',
   'icons/icon128.png',
   'src/defaults.js',
+  'src/startup.js',
   'src/background.js',
   'src/content.css',
   'src/content.js',
