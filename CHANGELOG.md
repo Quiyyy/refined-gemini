@@ -2,6 +2,34 @@
 
 All notable changes to **Refined Gemini** are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.9.3] — 2026-11-17
+
+### Fixed
+- Keep the history rail's full hit area inside the gap between the visible sidebar and conversation text, with clearance on both sides. Hide it during drawer movement and restore it only when there is enough room.
+- Prevent Markdown tables from squeezing short CJK row labels into one-character columns. Restore readable cell minimum widths, wrap long inline code and links, and scroll wide tables locally without widening the page.
+- Keep paragraph text inside table cells at the table's font size and line height.
+
+## [1.9.2] — 2026-11-17
+
+### Changed
+- Show the history rail only with at least three loaded turns and enough conversation gutter space; hide the rail and preview below 768px.
+- Add a pointer-following wave across nearby ticks, with equal resting lengths, keyboard focus support and reduced-motion-aware transitions.
+
+## [1.9.1] — 2026-11-17
+
+### Fixed
+- Apply cached visual preferences in a small document-start bootstrap before the main runtime; handle a missing document root and follow native body theme changes before DOMContentLoaded. Remember the last resolved automatic theme to avoid an OS-theme flash while Gemini loads.
+- Skip unchanged visual writes and avoid rebuilding the message index for streamed reply text; find the active turn with a binary search.
+
+### Changed
+- Use uniform history ticks with color-only active highlighting, tighter spacing and a 220px rail cap. Limit previews to two lines each for prompt and reply.
+
+## [1.9.0] — 2026-11-16
+
+### Added
+- A conversation-gutter history rail with prompt/reply previews, click-to-jump navigation, current-turn highlighting and keyboard navigation.
+- Live updates for new, edited and replaced pending turns; long-list scrolling, narrow-screen layout and reduced-motion support. Navigation uses rendered messages only and does not persist or transmit excerpts.
+
 ## [1.8.6] — 2026-11-16
 
 ### Changed

@@ -2238,7 +2238,7 @@ html[data-rg-enabled="true"] .response-container-with-gpi {
 }
 
 /* ==========================================================================
-   7. 1:1 ChatGPT Markdown Tables (Borderless, Flush-Left, Zero Spurious Scroll)
+   7. Readable Markdown Tables (Borderless, with local scrolling when needed)
    ========================================================================== */
 
 html[data-rg-enabled="true"] :is(
@@ -2259,20 +2259,26 @@ html[data-rg-enabled="true"] :is(
   padding: 0 !important;
   margin: 0 !important;
   max-width: 100% !important;
+  min-width: 0 !important;
 }
 
-html[data-rg-enabled="true"] :is(table-block, .markdown > table) {
+html[data-rg-enabled="true"] :is(table-block, .markdown > table, .markdown-main-panel > table) {
   display: block !important;
   margin: 0.6rem 0 1rem 0 !important;
 }
 
-html[data-rg-enabled="true"] table-block .table-content {
+html[data-rg-enabled="true"] :is(table-block .table-content, .markdown > table, .markdown-main-panel > table, .table-wrapper:has(> table), .horizontal-scroll-wrapper:has(> table)) {
   overflow-x: auto !important;
   overflow-y: hidden !important;
+  max-width: 100% !important;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rg-scrollbar-thumb) transparent;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) table {
   width: 100% !important;
+  table-layout: auto !important;
   border-collapse: collapse !important;
   border-spacing: 0 !important;
   background: transparent !important;
@@ -2287,13 +2293,27 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) :
   background: transparent !important;
 }
 
-/* Defeat Gemini's `min-width: 173px` & `17px` cell font-size + `::after` segmented borders */
+/* Preserve a readable minimum instead of squeezing CJK labels to one glyph per line. */
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) :is(th, td) {
-  min-width: 0 !important;
+  min-width: 10em !important;
   max-width: none !important;
   font-size: 14px !important;
   line-height: 1.55 !important;
   letter-spacing: normal !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) :is(th, td) :is(p, li) {
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) :is(th, td) code:not(pre *) {
+  white-space: pre-wrap !important;
+  word-break: normal !important;
+  overflow-wrap: anywhere !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) :is(th, td)::before,
@@ -2310,7 +2330,7 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) t
   border: none !important;
   border-bottom: 1px solid var(--rg-table-head-border) !important;
   padding: 8px 16px 8px 0 !important;
-  vertical-align: bottom !important;
+  vertical-align: top !important;
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) td {
@@ -2328,6 +2348,7 @@ html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) t
 }
 
 html[data-rg-enabled="true"] :is(.markdown, .markdown-main-panel, table-block) :is(th, td):first-child {
+  min-width: 7em !important;
   padding-left: 0 !important;
   padding-inline-start: 0 !important;
 }
