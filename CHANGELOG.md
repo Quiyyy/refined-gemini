@@ -2,6 +2,19 @@
 
 All notable changes to **Refined Gemini** are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.10.6] — 2026-11-19
+
+### Fixed
+- Keep one toolbar appearance snapshot for the entire picker session instead of inserting/removing it on each hover.
+- Suppress native click ripples, focus effects, background/shadow transitions during previews, including the nested mobile trigger button.
+- Remove temporary row dimming while loading model-specific levels, eliminating another hover flash.
+
+## [1.10.5] — 2026-11-19
+
+### Fixed
+- Do not autofocus a model row on pointer opening; retain a restrained focus indicator for keyboard navigation only.
+- Keep the toolbar label and its width visually stable while native controls are used to preview another model's thinking levels, including trigger replacements. Remove the temporary label after restoration or context changes.
+
 ## [1.10.4] — 2026-11-19
 
 ### Changed

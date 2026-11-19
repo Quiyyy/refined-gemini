@@ -13,6 +13,8 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
   let hoverTimer = 0;
   let previewJob = null;
   let hoveredRow = null;
+  let keyboardMode = false;
+  let releaseToolbarPreview = null;
   const modelLevels = new Map();
   let opener = null;
   let busy = false;
@@ -162,6 +164,7 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
         if (!panel) root.removeAttribute('data-rg-picker-open');
       });
     } else root.removeAttribute('data-rg-picker-open');
+    if (!previewJob && !busy) releaseToolbarPreview?.();
     if (restoreFocus) triggerControl(currentTrigger(opener))?.focus({ preventScroll: true });
   }
 
@@ -192,6 +195,7 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
 
   function resetContext() {
     contextVersion++;
+    releaseToolbarPreview?.();
     modelLevels.clear();
     closePanel();
     if (session) {
@@ -360,6 +364,78 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
     }));
   }
 
+  function freezeToolbarAppearance() {
+    if (releaseToolbarPreview) return releaseToolbarPreview;
+    const selector = `${TRIGGER} [data-test-id="logo-pill-label-container"]`;
+    const initial = document.querySelector(selector);
+    if (!initial) return () => {};
+    const template = element('span', 'rg-picker-frozen-label');
+    template.setAttribute('aria-hidden', 'true');
+    template.style.gap = getComputedStyle(initial).columnGap;
+    for (const child of initial.children) {
+      const copy = child.cloneNode(true);
+      const style = getComputedStyle(child);
+      copy.classList.remove('picker-primary-text', 'picker-secondary-text');
+      copy.style.font = style.font;
+      copy.style.color = style.color;
+      for (const el of [copy, ...copy.querySelectorAll('[id], [data-test-id]')]) {
+        el.removeAttribute('id');
+        el.removeAttribute('data-test-id');
+      }
+      template.append(copy);
+    }
+    const width = initial.getBoundingClientRect().width;
+    const initialTrigger = currentTrigger(opener);
+    const appearances = [initialTrigger, triggerControl(initialTrigger)].map(el => {
+      const style = getComputedStyle(el);
+      return { background: style.background, shadow: style.boxShadow };
+    });
+    const triggers = new Set();
+    const frozen = new Set();
+    const attach = () => {
+      for (const label of document.querySelectorAll(selector)) {
+        const trigger = label.closest(TRIGGER);
+        [trigger, triggerControl(trigger)].forEach((control, index) => {
+          if (!control || triggers.has(control)) return;
+          triggers.add(control);
+          control.setAttribute('data-rg-trigger-frozen', 'true');
+          control.style.setProperty('--rg-frozen-trigger-background', appearances[index].background);
+          control.style.setProperty('--rg-frozen-trigger-shadow', appearances[index].shadow);
+        });
+        if (frozen.has(label) && label.querySelector('.rg-picker-frozen-label')) continue;
+        label.querySelector('.rg-picker-frozen-label')?.remove();
+        frozen.add(label);
+        label.style.setProperty('--rg-frozen-label-width', `${width}px`);
+        label.setAttribute('data-rg-label-frozen', 'true');
+        label.append(template.cloneNode(true));
+      }
+    };
+    const observer = new MutationObserver(attach);
+    attach();
+    // Gemini can replace the trigger while switching models. Reapply the same
+    // visual label before paint; native text stays intact for state verification.
+    observer.observe(document.body, { childList: true, subtree: true });
+    let released = false;
+    const release = () => {
+      if (released) return;
+      released = true;
+      observer.disconnect();
+      for (const label of frozen) {
+        label.querySelector('.rg-picker-frozen-label')?.remove();
+        label.removeAttribute('data-rg-label-frozen');
+        label.style.removeProperty('--rg-frozen-label-width');
+      }
+      for (const trigger of triggers) {
+        trigger.removeAttribute('data-rg-trigger-frozen');
+        trigger.style.removeProperty('--rg-frozen-trigger-background');
+        trigger.style.removeProperty('--rg-frozen-trigger-shadow');
+      }
+      if (releaseToolbarPreview === release) releaseToolbarPreview = null;
+    };
+    releaseToolbarPreview = release;
+    return release;
+  }
+
   function previewLevels(model, row, original, originalLevel, focus = false) {
     clearTimeout(hoverTimer);
     hoveredRow = row;
@@ -378,6 +454,7 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
       row.setAttribute('aria-busy', 'true');
       const button = opener;
       const job = (async () => {
+        const releaseLabel = freezeToolbarAppearance();
         let switched = false;
         try {
           // Read this model's actual native controls, then restore the original
@@ -388,7 +465,9 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
           const data = await readData(button);
           if (data) modelLevels.set(model.id, data.levels.map(level => ({ ...level, selected: false })));
         } finally {
-          if (switched && version === contextVersion && enabled()) await applyChoice(button, original.id, originalLevel?.key);
+          try {
+            if (switched && version === contextVersion && enabled()) await applyChoice(button, original.id, originalLevel?.key);
+          } finally { if (!panel || version !== contextVersion) releaseLabel(); }
         }
       })();
       previewJob = job;
@@ -411,6 +490,7 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
     panel = element('div', 'rg-model-picker');
     panel.id = 'rg-model-picker';
     panel.setAttribute('role', 'dialog');
+    panel.setAttribute('data-rg-keyboard', String(keyboardMode));
     panel.setAttribute('aria-label', isChinese() ? '模型选择' : 'Model selection');
     panel.append(element('div', 'rg-picker-head', isChinese() ? '模型' : 'Model'));
     const list = element('div', 'rg-picker-models');
@@ -438,8 +518,8 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
         else { clearTimeout(hoverTimer); hoveredRow = row; closeSubmenu(); }
       });
       row.addEventListener('click', () => {
-        if (model.selected && levels.length) showLevels(row, model, levels, true);
-        else if (expandable) previewLevels(model, row, original, currentLevel, true);
+        if (model.selected && levels.length) showLevels(row, model, levels, keyboardMode);
+        else if (expandable) previewLevels(model, row, original, currentLevel, keyboardMode);
         else select(model.id, null);
       });
       row.addEventListener('keydown', event => {
@@ -455,15 +535,19 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
     panel.addEventListener('pointerleave', () => { clearTimeout(hoverTimer); hoveredRow = null; leaveTimer = setTimeout(closeSubmenu, 180); });
     root.setAttribute('data-rg-picker-open', 'true');
     document.body.append(panel); positionPanel();
-    (list.querySelector('[aria-pressed="true"]:not(:disabled)') || list.querySelector('button:not(:disabled)'))?.focus({ preventScroll: true });
+    if (keyboardMode) (list.querySelector('[aria-pressed="true"]:not(:disabled)') || list.querySelector('button:not(:disabled)'))?.focus({ preventScroll: true });
   }
 
   async function openPanel(button) {
     opener = button;
     const version = contextVersion;
+    // Keep one visual snapshot for the whole menu session, rather than swapping
+    // the label in and out on every hover. Native focus/ripple stays invisible.
+    const releaseLabel = freezeToolbarAppearance();
     try {
       const data = await readData(button);
       if (data && enabled() && version === contextVersion) render(data.models, data.levels);
+      else if (!panel) releaseLabel();
     } catch (error) {
       // Leave the original control usable if Gemini changes its menu structure.
       if (error.name !== 'AbortError' && version === contextVersion && enabled()) {
@@ -471,6 +555,7 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
         button = currentTrigger(button);
         if (button?.isConnected && !findMainMenu(button)) clickNative(button);
       }
+      if (!panel) releaseLabel();
     }
   }
 
@@ -494,9 +579,13 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
   }, true);
 
   document.addEventListener('pointerdown', event => {
+    keyboardMode = false;
+    panel?.setAttribute('data-rg-keyboard', 'false');
     if (panel && !panel.contains(event.target) && !opener?.contains(event.target)) closePanel();
   }, true);
   document.addEventListener('keydown', event => {
+    keyboardMode = true;
+    panel?.setAttribute('data-rg-keyboard', 'true');
     if (!panel) return;
     if (event.key === 'Escape') {
       event.preventDefault();

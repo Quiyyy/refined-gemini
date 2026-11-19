@@ -4481,7 +4481,6 @@ html:is([data-rg-picker-bridge="true"], [data-rg-picker-open="true"]) :is(
 #rg-model-picker .rg-picker-model-name { min-width: 0; overflow-wrap: anywhere; }
 #rg-model-picker .rg-picker-current-level { color: var(--rg-text-secondary); white-space: nowrap; }
 #rg-model-picker .rg-picker-badge { color: var(--rg-text-secondary); background: var(--rg-bg-hover); border-radius: 20px; padding: 0 7px; white-space: nowrap; }
-#rg-model-picker .rg-picker-row[aria-busy="true"] { opacity: .6; }
 #rg-model-picker .rg-picker-check { margin-left: auto; width: 16px; flex-shrink: 0; text-align: center; }
 #rg-model-picker .rg-picker-submenu {
   z-index: 2147483000;
@@ -4493,6 +4492,39 @@ html:is([data-rg-picker-bridge="true"], [data-rg-picker-open="true"]) :is(
 #rg-model-picker .rg-picker-choice { min-height: 30px; padding: 5px 9px; }
 @media (pointer: coarse) {
   #rg-model-picker .rg-picker-row, #rg-model-picker .rg-picker-choice { min-height: 40px; }
+}
+
+/* Hold one stable toolbar appearance for the whole picker session. */
+html[data-rg-enabled="true"] [data-test-id="bard-mode-menu-button"][data-rg-trigger-frozen="true"],
+html[data-rg-enabled="true"] [data-test-id="bard-mode-menu-button"] [data-rg-trigger-frozen="true"] {
+  background: var(--rg-frozen-trigger-background) !important;
+  box-shadow: var(--rg-frozen-trigger-shadow) !important;
+  outline: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+[data-rg-trigger-frozen="true"] :is(
+  .mat-ripple, .mat-mdc-button-persistent-ripple, .mdc-button__ripple,
+  .mat-focus-indicator, .mat-mdc-focus-indicator
+) {
+  opacity: 0 !important;
+  transition: none !important;
+  animation: none !important;
+}
+[data-test-id="bard-mode-menu-button"] [data-rg-label-frozen="true"] {
+  position: relative !important;
+  width: var(--rg-frozen-label-width) !important;
+  min-width: var(--rg-frozen-label-width) !important;
+  max-width: var(--rg-frozen-label-width) !important;
+}
+[data-rg-label-frozen="true"] > :not(.rg-picker-frozen-label) { visibility: hidden !important; }
+.rg-picker-frozen-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 /* Turn history rail: stays in the conversation gutter, never resizes the chat. */
