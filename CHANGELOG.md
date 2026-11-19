@@ -2,6 +2,14 @@
 
 All notable changes to **Refined Gemini** are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.10.4] — 2026-11-19
+
+### Changed
+- Open thinking submenus on model hover. Read unvisited models through native controls, restore the original model/strength before showing choices, and reuse those confirmed options until the picker closes.
+- Queue committed choices behind pending previews, restore selections on cancellation, and discard previews after context changes.
+- Reduce menu text to 13px, main width to 300px, submenu width to 164px and desktop row height to 30px.
+- Remove the unavailable usage footer. Gemini's native Settings > Usage limits page remains available; no undocumented quota RPC or persistent usage polling is added.
+
 ## [1.10.3] — 2026-11-19
 
 ### Fixed

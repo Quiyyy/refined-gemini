@@ -29,9 +29,9 @@
 - The current reading position is highlighted. Nearby ticks form a smooth wave as the pointer moves along the rail and return to equal lengths on exit. Arrow keys and Home / End navigate the ticks; Enter jumps and Escape dismisses the preview. Long lists scroll.
 - Appears when at least three turns are loaded; hidden below 768px or when the conversation gutter is too narrow. Updates as messages change and follows the extension's master toggle. Older turns appear as Gemini loads them. Excerpts stay in page memory and are never saved or sent elsewhere.
 
-### `v1.10.3` — Model & Thinking Picker
+### `v1.10.4` — Model & Thinking Picker
 
-- A compact model list reads the current account’s native menu on every open. Auto stays Auto; versioned model names are preserved without a bundled catalog. An Antigravity-style side submenu lists real thinking levels. Click a model to open its own thinking submenu, then click a strength to apply it. Native usage entries are forwarded when available.
+- A compact model list reads the current account’s native menu on every open. Auto stays Auto; versioned model names are preserved without a bundled catalog. An Antigravity-style side submenu lists real thinking levels. Hovering reads that model’s real levels and restores the original selection before presenting them. Clicking a strength commits the model and strength together.
 - Tasks show a model-only list when Gemini does not offer thinking levels. Switching between Chat and Tasks keeps the picker working and preserves manual choices.
 - Options come from Gemini's current native menu, without hard-coded model IDs, plan upgrades or automatic prompt submission.
 - New conversations start on High thinking by default (configurable). Existing conversations and manual choices are preserved. High thinking uses more quota.
@@ -99,7 +99,7 @@ npm run build
 # Syntax-check all extension & UserScript JavaScript files
 npm run check
 
-# Build store-ready ZIP archive -> dist/refined-gemini-v1.10.3-extension.zip
+# Build store-ready ZIP archive -> dist/refined-gemini-v1.10.4-extension.zip
 npm run pack
 ```
 
