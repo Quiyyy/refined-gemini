@@ -2,6 +2,35 @@
 
 All notable changes to **Refined Gemini** are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.10.3] — 2026-11-19
+
+### Fixed
+- Wait for native menu dismissal before revealing the custom picker; keep native overlays hidden through delayed close animations.
+- Hide the model menu and its tracked thinking submenu while the custom picker owns the UI, including layouts without the old overlay wrapper.
+- Dismiss leftover native menus when closing the custom picker, and remove the custom panel before falling back to the native menu.
+
+## [1.10.2] — 2026-11-19
+
+### Changed
+- Display Low / Medium / High in English in model rows and thinking submenus while preserving native selection keys.
+- Attach side flyouts directly to the main panel, sharing a one-pixel border instead of leaving a gap.
+
+## [1.10.1] — 2026-11-19
+
+### Changed
+- Follow the supplied Antigravity menu layout: inline model/strength labels, checkmarks and chevrons, a vertical thinking flyout, and a bottom View Usage row with its own flyout.
+- Remove the separate thinking section and original-menu footer link. Read each model's real strengths after explicit selection; never switch models on hover or fabricate usage percentages or badges.
+- Keep flyouts inside the viewport, support keyboard entry/return and close immediately on strength selection.
+
+## [1.10.0] — 2026-11-19
+
+### Changed
+- Replace the model-by-strength matrix with a compact model list and a separate current-model thinking control, following the lighter menu styling in Antigravity.
+- Read model IDs, labels, availability and every thinking option from Gemini on each open. Distinguish Auto descriptions from versioned model names; keep new models such as Neon and new strength labels without catalog updates.
+- Do not project the current model's levels onto other models. Preserve native model switching behavior and immediate panel dismissal.
+- Forward native usage entries when available, otherwise clearly state that Gemini has not provided remaining quota. Include an original-menu shortcut.
+- Retain default High for new conversations only when the native High option is available; preserve manual choices and task-mode compatibility.
+
 ## [1.9.3] — 2026-11-17
 
 ### Fixed

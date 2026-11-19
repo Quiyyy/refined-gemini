@@ -1,17 +1,15 @@
-/** One-click model × thinking picker. Uses Gemini's own controls; no private APIs. */
+/** Compact live model picker. Uses Gemini's own choices; no model catalog or private APIs. */
 globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
   'use strict';
 
   const TRIGGER = '[data-test-id="bard-mode-menu-button"]';
   const MODEL = '[role="menuitemradio"][data-mode-id]';
   const THINKING = '[value="thinking_level"]';
-  const LEVELS = [
-    { key: 'low', zh: '低', en: 'Low' },
-    { key: 'medium', zh: '中', en: 'Medium' },
-    { key: 'high', zh: '高', en: 'High' }
-  ];
   const root = document.documentElement;
   let panel = null;
+  let submenu = null;
+  let submenuOwner = null;
+  let leaveTimer = 0;
   let opener = null;
   let busy = false;
   let internalClick = false;
@@ -27,7 +25,19 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
   const enabled = () => root.getAttribute('data-rg-enabled') === 'true';
   const isNewChat = () => /^\/(?:u\/\d+\/)?app\/?$/.test(location.pathname);
   const isChinese = () => /^zh/i.test(document.documentElement.lang || navigator.language);
-  const label = level => isChinese() ? level.zh : level.en;
+  const clean = text => (text || '').replace(/\s+/g, ' ').trim();
+  // Translate presentation only; selection still uses the native option key.
+  const levelLabel = text => ({ '低': 'Low', '中': 'Medium', '高': 'High', low: 'Low', medium: 'Medium', high: 'High' }[clean(text).toLowerCase()] || text);
+  // Older menus put a versioned model in the sublabel; Auto now puts prose there.
+  // Recognize the version format, never a fixed list of model names or IDs.
+  function modelName(el) {
+    const primary = clean(el.querySelector('.label')?.textContent);
+    const secondary = clean(el.querySelector('.sublabel')?.textContent);
+    return /^(?:Gemini\s+)?\d+(?:\.\d+)*\s+\S/i.test(secondary) ? secondary : primary || secondary;
+  }
+  const usagePattern = /usage|quota|remaining|额度|用量|使用量|剩余/i;
+  const usageItems = menu => [...menu.querySelectorAll('[role="menuitem"], a[href], button')]
+    .filter(el => !el.matches(THINKING) && !el.closest(MODEL) && usagePattern.test(clean(el.textContent)));
   const unavailable = el => !el || el.disabled || el.getAttribute('aria-disabled') === 'true';
   const controlledMenu = el => el && document.getElementById(el.getAttribute('aria-controls'));
   const currentTrigger = button => button?.isConnected ? button : document.querySelector(TRIGGER);
@@ -55,8 +65,7 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
     const name = modelName?.replace(/^\d+(?:\.\d+)*\s+/, '').trim().toLowerCase();
     const primary = live?.querySelector('.picker-primary-text')?.textContent.trim().toLowerCase();
     const secondary = live?.querySelector('.picker-secondary-text')?.textContent.trim();
-    const level = LEVELS.find(item => item.key === levelKey);
-    return name && primary === name && (secondary === level.zh || secondary?.toLowerCase() === level.en.toLowerCase());
+    return name && primary === name && secondary?.toLowerCase() === levelKey;
   }
 
   function clickNative(el) {
@@ -118,16 +127,16 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
       return item.isConnected && levelItems(item).length ? item : null;
     };
     if (!getLevels()) clickNative(item);
-    return waitFor(() => {
-      return getLevels();
-    }, signal);
+    const submenu = await waitFor(getLevels, signal);
+    submenu.setAttribute('data-rg-thinking-menu', 'true');
+    return submenu;
   }
 
   function levelItems(menu) {
-    return [...menu.querySelectorAll('[role="menuitemradio"]')].map(el => {
-      const text = (el.querySelector('.label')?.textContent || el.textContent).trim();
-      return { el, level: LEVELS.find(level => text === level.zh || text.toLowerCase() === level.en.toLowerCase()) };
-    }).filter(item => item.level);
+    return [...menu.querySelectorAll('[role="menuitemradio"]:not([data-mode-id])')].map(el => {
+      const text = clean(el.querySelector('.label')?.textContent || el.textContent);
+      return { el, level: { key: text.toLowerCase(), text } };
+    }).filter(item => item.level.text);
   }
 
   function closeNative(button) {
@@ -139,12 +148,21 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
   }
 
   function closePanel(restoreFocus = false) {
+    closeSubmenu();
     panel?.remove();
     panel = null;
+    if (!busy && findMainMenu(opener)) {
+      // A native handler can reopen its menu while our panel owns the UI.
+      // Dismiss that leftover too, without exposing its closing animation.
+      closeNative(opener);
+      void waitFor(() => menuClosed(opener)).catch(() => {}).finally(() => {
+        if (!panel) root.removeAttribute('data-rg-picker-open');
+      });
+    } else root.removeAttribute('data-rg-picker-open');
     if (restoreFocus) triggerControl(currentTrigger(opener))?.focus({ preventScroll: true });
   }
 
-  async function nativeSession(button, action) {
+  async function nativeSession(button, action, leaveOpen = false) {
     if (busy) return;
     busy = true;
     const controller = new AbortController();
@@ -153,11 +171,19 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
     try {
       return await action(await mainMenu(button, controller.signal), controller.signal);
     } finally {
-      if (!controller.signal.aborted) closeNative(button);
-      root.removeAttribute('data-rg-picker-bridge');
-      session = null;
-      busy = false;
-      scheduleDefault();
+      try {
+        if (!controller.signal.aborted && !leaveOpen) {
+          closeNative(button);
+          // Clicking requests dismissal; the overlay may remain mounted through
+          // its close animation. Keep it hidden until native closure is confirmed.
+          await waitFor(() => menuClosed(button), controller.signal);
+        }
+      } finally {
+        root.removeAttribute('data-rg-picker-bridge');
+        session = null;
+        busy = false;
+        scheduleDefault();
+      }
     }
   }
 
@@ -194,18 +220,26 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
         }
         // Tasks currently expose models only. Do not invent thinking controls or
         // attempt to change a strength through a menu that Gemini does not offer.
-        if (!levelKey || unavailable(menu.querySelector(THINKING))) return;
+        if (!levelKey) return;
+        if (unavailable(menu.querySelector(THINKING))) {
+          if (levelKey === '__preferHigh') return;
+          throw new Error('Thinking levels unavailable');
+        }
         const levels = levelItems(await thinkingMenu(menu, signal));
+        if (levelKey === '__preferHigh') {
+          levelKey = levels.find(item => /^(high|高)$/i.test(item.level.text) && !unavailable(item.el))?.level.key;
+          if (!levelKey) return;
+        }
         const target = levels.find(item => item.level.key === levelKey)?.el;
         if (unavailable(target)) throw new Error('Thinking level unavailable');
         const selectedModel = menu.querySelector(`${MODEL}[aria-checked="true"]`);
-        const modelName = selectedModel?.querySelector('.sublabel')?.textContent.trim();
+        const selectedName = selectedModel && modelName(selectedModel);
         if (target.getAttribute('aria-checked') !== 'true') {
           clickNative(target);
           await waitFor(() => menuClosed(button), signal);
           // When Gemini explicitly renders the requested model and strength, that
           // is already confirmation; avoid reopening a menu just to read it again.
-          if (selectedModel?.getAttribute('data-mode-id') === expectedModel && toolbarConfirms(button, modelName, levelKey)) return;
+          if (selectedModel?.getAttribute('data-mode-id') === expectedModel && toolbarConfirms(button, selectedName, levelKey)) return;
           menu = await mainMenu(button, signal);
         }
         const finalLevels = await thinkingMenu(menu, signal);
@@ -225,6 +259,7 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
   }
 
   function positionPanel() {
+    opener = currentTrigger(opener);
     if (!panel || !opener?.isConnected) return closePanel();
     const rect = opener.getBoundingClientRect();
     const width = panel.offsetWidth;
@@ -233,82 +268,234 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
     const top = rect.top >= height + 16 ? rect.top - height - 8 : Math.min(rect.bottom + 8, innerHeight - height - 8);
     panel.style.left = `${left}px`;
     panel.style.top = `${Math.max(8, top)}px`;
+    positionSubmenu();
   }
 
-  function render(models, levels) {
-    const modelOnly = levels.length === 0;
+  function select(modelId, levelKey) {
+    handledContexts.add(contextKey());
+    const button = opener;
+    const version = contextVersion;
+    closePanel(true);
+    queueMicrotask(async () => {
+      if (version !== contextVersion) return;
+      try { await applyChoice(button, modelId, levelKey); }
+      catch (error) { if (error.name !== 'AbortError') showError(); }
+    });
+  }
+
+  function openNative(usageText) {
+    const button = opener;
+    const version = contextVersion;
+    closePanel(true);
+    queueMicrotask(async () => {
+      if (version !== contextVersion) return;
+      try {
+        await nativeSession(button, async menu => {
+          if (usageText) {
+            const item = usageItems(menu).find(el => clean(el.textContent) === usageText);
+            if (item && !unavailable(item)) clickNative(item);
+          }
+        }, true);
+      } catch (error) { if (error.name !== 'AbortError') showError(); }
+    });
+  }
+
+  function closeSubmenu() {
+    clearTimeout(leaveTimer);
+    submenuOwner?.setAttribute('aria-expanded', 'false');
+    submenuOwner?.classList.remove('rg-picker-hover');
+    submenu?.remove();
+    submenu = null;
+    submenuOwner = null;
+  }
+
+  function positionSubmenu() {
+    if (!submenu || !submenuOwner?.isConnected || !panel) return;
+    const bounds = panel.getBoundingClientRect();
+    const row = submenuOwner.getBoundingClientRect();
+    const width = submenu.offsetWidth;
+    // Match the reference's side flyout; flip left if needed. On phones place
+    // the same menu above/below the row, inside the viewport.
+    const right = bounds.right - 1;
+    const left = right + width <= innerWidth - 8 ? right : bounds.left - width + 1;
+    const x = left >= 8 ? left : Math.max(8, innerWidth - width - 8);
+    const y = left >= 8 ? row.top - 4 : (row.top >= submenu.offsetHeight + 8 ? row.top - submenu.offsetHeight : row.bottom);
+    submenu.style.left = x + 'px';
+    submenu.style.top = Math.max(8, Math.min(y, innerHeight - submenu.offsetHeight - 8)) + 'px';
+  }
+
+  function flyout(row, name) {
+    if (submenuOwner === row) return false;
+    closeSubmenu();
+    submenuOwner = row;
+    row.setAttribute('aria-expanded', 'true');
+    row.classList.add('rg-picker-hover');
+    submenu = element('div', 'rg-picker-submenu');
+    submenu.setAttribute('role', 'menu');
+    submenu.setAttribute('aria-label', name);
+    submenu.addEventListener('pointerenter', () => clearTimeout(leaveTimer));
+    panel.append(submenu);
+    return true;
+  }
+
+  function showLevels(row, model, levels, focus = false) {
+    if (!levels.length) return;
+    if (flyout(row, isChinese() ? '思考强度' : 'Thinking level')) {
+      for (const level of levels) {
+        const choice = element('button', 'rg-picker-choice');
+        choice.type = 'button';
+        choice.disabled = level.disabled;
+        choice.setAttribute('role', 'menuitemradio');
+        choice.setAttribute('aria-label', model.name + ' · ' + levelLabel(level.text));
+        choice.setAttribute('aria-checked', String(level.selected));
+        choice.append(element('span', '', levelLabel(level.text)), element('span', 'rg-picker-check', level.selected ? '✓' : ''));
+        choice.addEventListener('click', () => select(model.id, level.key));
+        submenu.append(choice);
+      }
+      positionSubmenu();
+    }
+    if (focus) submenu.querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
+  }
+
+  function showUsage(row, usage, focus = false) {
+    if (flyout(row, isChinese() ? '用量' : 'Usage')) {
+      submenu.classList.add('rg-picker-usage-menu');
+      submenu.append(element('div', 'rg-picker-head', isChinese() ? '用量' : 'Usage'));
+      if (usage.length) {
+        for (const item of usage) {
+          const link = element('button', 'rg-picker-choice', item.text);
+          link.type = 'button';
+          link.disabled = item.disabled;
+          link.addEventListener('click', () => openNative(item.text));
+          submenu.append(link);
+        }
+      } else {
+        submenu.append(element('div', 'rg-picker-quota-note', isChinese() ? 'Gemini 尚未提供用量数据' : 'Gemini has not provided usage data'));
+      }
+      positionSubmenu();
+    }
+    if (focus) submenu.querySelector('button:not(:disabled)')?.focus({ preventScroll: true });
+  }
+
+  async function readData(button) {
+    return nativeSession(button, async (menu, signal) => ({
+      models: [...menu.querySelectorAll(MODEL)].map(el => ({
+        id: el.getAttribute('data-mode-id'), name: modelName(el),
+        selected: el.getAttribute('aria-checked') === 'true',
+        disabled: unavailable(el) || Boolean(el.querySelector('[fonticon="lock"]')),
+        automatic: /^(auto|自动)$/i.test(clean(el.querySelector('.label')?.textContent)),
+        badge: clean(el.querySelector('.badge')?.textContent)
+      })),
+      levels: unavailable(menu.querySelector(THINKING)) ? [] : levelItems(await thinkingMenu(menu, signal)).map(({el, level}) => ({
+        key: level.key, text: level.text, selected: el.getAttribute('aria-checked') === 'true', disabled: unavailable(el)
+      })),
+      usage: usageItems(menu).map(el => ({ text: clean(el.textContent), disabled: unavailable(el) }))
+    }));
+  }
+
+  async function chooseModel(model, row) {
+    if (busy) return;
+    const previousPanel = panel;
+    const version = contextVersion;
+    handledContexts.add(contextKey());
+    closeSubmenu();
+    row.setAttribute('aria-busy', 'true');
+    try {
+      // Gemini exposes strengths for the selected model only. A deliberate click
+      // selects it before reading its real options; hovering NEVER changes models.
+      await applyChoice(opener, model.id, null);
+      if (panel !== previousPanel || version !== contextVersion) return;
+      const data = await readData(opener);
+      if (panel !== previousPanel || version !== contextVersion || !data) return;
+      closePanel();
+      if (!data.levels.length) { triggerControl(currentTrigger(opener))?.focus({ preventScroll: true }); return; }
+      render(data.models, data.levels, data.usage, model.id);
+    } catch (error) {
+      row.removeAttribute('aria-busy');
+      if (error.name !== 'AbortError') { closePanel(); showError(); }
+    }
+  }
+
+  function render(models, levels, usage, expandId) {
     panel = element('div', 'rg-model-picker');
     panel.id = 'rg-model-picker';
     panel.setAttribute('role', 'dialog');
-    panel.classList.toggle('rg-picker-model-only', modelOnly);
-    panel.setAttribute('aria-label', modelOnly ? (isChinese() ? '模型' : 'Model') : (isChinese() ? '模型与思考强度' : 'Model and thinking level'));
-    const head = element('div', 'rg-picker-head');
-    head.append(element('span', '', isChinese() ? '模型' : 'Model'));
-    if (!modelOnly) head.append(element('span', 'rg-picker-strength-label', isChinese() ? '思考强度' : 'Thinking level'));
-    panel.append(head);
+    panel.setAttribute('aria-label', isChinese() ? '模型选择' : 'Model selection');
+    panel.append(element('div', 'rg-picker-head', isChinese() ? '模型' : 'Model'));
+    const list = element('div', 'rg-picker-models');
+    const currentLevel = levels.find(level => level.selected);
+    const task = document.querySelector(modeSelector + '.gem-segmented-button-selected')?.getAttribute('data-value') === '40';
+    let expandRow;
     for (const model of models) {
-      const row = element('div', 'rg-picker-row');
-      row.setAttribute('role', 'group');
+      const row = element('button', 'rg-picker-row');
+      row.type = 'button'; row.disabled = model.disabled;
       row.setAttribute('aria-label', model.name);
-      const modelLabel = element('span', 'rg-picker-model');
-      const versionedName = model.name.match(/^(\d+(?:\.\d+)*)\s+(.+)$/);
-      modelLabel.append(element('span', 'rg-picker-model-name', versionedName ? versionedName[2] : model.name));
-      if (versionedName) modelLabel.append(element('span', 'rg-picker-version', versionedName[1]));
-      row.append(modelLabel);
-      const choices = element('div', 'rg-picker-levels');
-      for (const level of modelOnly ? [null] : LEVELS) {
-        const choice = element('button', 'rg-picker-choice', level ? label(level) : '');
-        choice.type = 'button';
-        choice.disabled = model.disabled || (!modelOnly && !levels.some(item => item.key === level.key));
-        choice.setAttribute('aria-label', modelOnly ? model.name : `${model.name} · ${label(level)}`);
-        choice.setAttribute('aria-pressed', String(model.selected && (modelOnly || levels.some(item => item.key === level.key && item.selected))));
-        if (modelOnly) {
-          choice.append(modelLabel, element('span', 'rg-picker-check', model.selected ? '✓' : ''));
-        }
-        choice.addEventListener('click', event => {
-          event.preventDefault();
-          event.stopPropagation();
-          handledContexts.add(contextKey());
-          const button = opener;
-          const version = contextVersion;
-          closePanel(true);
-          // Finish the custom click before opening Gemini's native overlays, so
-          // its outside-click handlers cannot dismiss a newly opened menu.
-          queueMicrotask(async () => {
-            if (version !== contextVersion) return;
-            try { await applyChoice(button, model.id, level?.key); }
-            catch (error) { if (error.name !== 'AbortError') showError(); }
-          });
-        });
-        (modelOnly ? row : choices).append(choice);
-      }
-      if (!modelOnly) row.append(choices);
-      panel.append(row);
+      row.setAttribute('aria-pressed', String(model.selected));
+      const expandable = !task && !model.automatic && (!model.selected || levels.length > 0);
+      if (expandable) { row.setAttribute('aria-haspopup', 'menu'); row.setAttribute('aria-expanded', 'false'); }
+      row.append(element('span', 'rg-picker-model-name', model.name));
+      if (model.selected && currentLevel) row.append(element('span', 'rg-picker-current-level', levelLabel(currentLevel.text)));
+      if (model.badge) row.append(element('span', 'rg-picker-badge', model.badge));
+      const mark = element('span', 'rg-picker-check', model.selected ? '✓' : expandable ? '›' : '');
+      mark.setAttribute('aria-hidden', 'true'); row.append(mark);
+      row.addEventListener('pointerenter', () => {
+        clearTimeout(leaveTimer);
+        if (model.selected && levels.length) showLevels(row, model, levels);
+        else closeSubmenu();
+      });
+      row.addEventListener('click', () => {
+        if (model.selected && levels.length) showLevels(row, model, levels, true);
+        else if (expandable) void chooseModel(model, row);
+        else select(model.id, null);
+      });
+      row.addEventListener('keydown', event => {
+        if (event.key !== 'ArrowRight' || !expandable) return;
+        event.preventDefault(); event.stopPropagation();
+        if (model.selected) showLevels(row, model, levels, true);
+        else void chooseModel(model, row);
+      });
+      if (model.id === expandId) expandRow = { row, model };
+      list.append(row);
     }
-    document.body.append(panel);
-    positionPanel();
-    (panel.querySelector('[aria-pressed="true"]:not(:disabled)') || panel.querySelector('button:not(:disabled)'))?.focus({ preventScroll: true });
+    panel.append(list);
+    const foot = element('div', 'rg-picker-footer');
+    const usageRow = element('button', 'rg-picker-row rg-picker-usage');
+    usageRow.type = 'button';
+    usageRow.setAttribute('aria-haspopup', 'menu'); usageRow.setAttribute('aria-expanded', 'false');
+    const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    icon.setAttribute('viewBox', '0 0 24 24'); icon.setAttribute('aria-hidden', 'true');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M5 18a9 9 0 1 1 14 0M12 12l5-5M7 18h10');
+    path.setAttribute('fill', 'none'); path.setAttribute('stroke', 'currentColor'); path.setAttribute('stroke-width', '1.6'); path.setAttribute('stroke-linecap', 'round');
+    icon.append(path);
+    usageRow.append(icon, element('span', '', isChinese() ? '查看用量' : 'View Usage'), element('span', 'rg-picker-check', '›'));
+    usageRow.addEventListener('pointerenter', () => { clearTimeout(leaveTimer); showUsage(usageRow, usage); });
+    usageRow.addEventListener('click', () => showUsage(usageRow, usage, true));
+    usageRow.addEventListener('keydown', event => {
+      if (event.key === 'ArrowRight') { event.preventDefault(); event.stopPropagation(); showUsage(usageRow, usage, true); }
+    });
+    foot.append(usageRow); panel.append(foot);
+    panel.addEventListener('pointerenter', () => clearTimeout(leaveTimer));
+    panel.addEventListener('pointerleave', () => { leaveTimer = setTimeout(closeSubmenu, 180); });
+    root.setAttribute('data-rg-picker-open', 'true');
+    document.body.append(panel); positionPanel();
+    (expandRow?.row || list.querySelector('[aria-pressed="true"]:not(:disabled)') || list.querySelector('button:not(:disabled)'))?.focus({ preventScroll: true });
+    if (expandRow) showLevels(expandRow.row, expandRow.model, levels, true);
   }
 
   async function openPanel(button) {
     opener = button;
     const version = contextVersion;
     try {
-      const data = await nativeSession(button, async (menu, signal) => ({
-        models: [...menu.querySelectorAll(MODEL)].map(el => ({
-          id: el.getAttribute('data-mode-id'),
-          name: (el.querySelector('.sublabel')?.textContent || el.querySelector('.label')?.textContent || '').trim(),
-          selected: el.getAttribute('aria-checked') === 'true',
-          disabled: unavailable(el) || Boolean(el.querySelector('[fonticon="lock"]'))
-        })),
-        levels: unavailable(menu.querySelector(THINKING)) ? [] : levelItems(await thinkingMenu(menu, signal)).map(({el, level}) => ({
-          key: level.key, selected: el.getAttribute('aria-checked') === 'true', disabled: unavailable(el)
-        })).filter(level => !level.disabled)
-      }));
-      if (data && enabled() && version === contextVersion) render(data.models, data.levels);
+      const data = await readData(button);
+      if (data && enabled() && version === contextVersion) render(data.models, data.levels, data.usage);
     } catch (error) {
       // Leave the original control usable if Gemini changes its menu structure.
-      if (error.name !== 'AbortError' && version === contextVersion && enabled() && button.isConnected && !findMainMenu(button)) clickNative(button);
+      if (error.name !== 'AbortError' && version === contextVersion && enabled()) {
+        closePanel();
+        button = currentTrigger(button);
+        if (button?.isConnected && !findMainMenu(button)) clickNative(button);
+      }
     }
   }
 
@@ -332,7 +519,7 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
   }, true);
 
   document.addEventListener('pointerdown', event => {
-    if (panel && !busy && !panel.contains(event.target) && !opener?.contains(event.target)) closePanel();
+    if (panel && !panel.contains(event.target) && !opener?.contains(event.target)) closePanel();
   }, true);
   document.addEventListener('keydown', event => {
     if (!panel) return;
@@ -340,13 +527,16 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
       event.preventDefault();
       event.stopImmediatePropagation();
       closePanel(true);
-    } else if (panel.contains(event.target) && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
-      const choices = [...panel.querySelectorAll('button:not(:disabled)')];
-      const columns = panel.classList.contains('rg-picker-model-only') ? 1 : 3;
-      const delta = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -columns, ArrowDown: columns }[event.key];
-      const next = (choices.indexOf(event.target) + delta + choices.length) % choices.length;
-      event.preventDefault();
-      choices[next]?.focus();
+    } else if (panel.contains(event.target)) {
+      if (event.key === 'ArrowLeft' && submenu?.contains(event.target)) {
+        event.preventDefault(); const owner = submenuOwner; closeSubmenu(); owner?.focus({ preventScroll: true }); return;
+      }
+      if (!['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
+      const scope = submenu?.contains(event.target) ? submenu : panel;
+      const choices = [...scope.querySelectorAll('button:not(:disabled)')].filter(el => scope === submenu || !submenu?.contains(el));
+      const current = choices.indexOf(event.target);
+      const next = event.key === 'Home' ? 0 : event.key === 'End' ? choices.length - 1 : (current + (event.key === 'ArrowUp' ? -1 : 1) + choices.length) % choices.length;
+      event.preventDefault(); choices[next]?.focus({ preventScroll: true });
     }
   }, true);
   window.addEventListener('resize', positionPanel, { passive: true });
@@ -378,7 +568,7 @@ globalThis.REFINED_GEMINI_STARTUP.whenRoot(function () {
         return;
       }
       handledContexts.add(contextKey());
-      try { await applyChoice(button, null, 'high'); }
+      try { await applyChoice(button, null, '__preferHigh'); }
       catch (_) { /* Leave Gemini's native choice intact when high is unavailable. */ }
       finally { if (focus?.isConnected && focus !== document.body) focus.focus({ preventScroll: true }); }
     }, 250);
